@@ -1,0 +1,147 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.main {
+  flex: 1;
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+  color: #1e293b;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #2563eb;
+  padding-bottom: 10px;
+}
+
+.status-card {
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-left: 4px solid;
+}
+
+.status-card.success {
+  background: #dcfce7;
+  color: #16a34a;
+  border-left-color: #16a34a;
+}
+
+.status-card.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-left-color: #dc2626;
+}
+
+.status-card.loading {
+  background: #fef3c7;
+  color: #ea580c;
+  border-left-color: #ea580c;
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.tech-item {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.tech-item h3 {
+  color: #2563eb;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.tech-item ul {
+  list-style: none;
+}
+
+.tech-item li {
+  padding: 8px 0;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tech-item li:last-child {
+  border-bottom: none;
+}
+
+.steps {
+  color: #1e293b;
+  margin-left: 20px;
+}
+
+.steps li {
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.footer {
+  background: rgba(0, 0, 0, 0.1);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
+  backdrop-filter: blur(10px);
+}
+
+.footer p {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .tech-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 20px;
+  }
+
+  .main {
+    padding: 20px;
+  }
+}
