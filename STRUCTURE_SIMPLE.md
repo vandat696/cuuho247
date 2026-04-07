@@ -1,6 +1,4 @@
-# 🎯 Cấu Trúc Thư Mục Đơn Giản Cho Sinh Viên
-
-> Phiên bản rút gọn - chỉ những gì cần thiết để bắt đầu code
+# 🎯 Cấu Trúc Thư Mục
 
 ---
 
