@@ -24,6 +24,7 @@ cp .env.example .env
 ```
 
 Chỉnh sửa `.env` với:
+
 - `MONGODB_URL`: Connection string MongoDB
 - `JWT_SECRET`: Secret key bất kỳ
 - `BACKEND_URL`: http://localhost:3000
@@ -36,6 +37,7 @@ cd backend
 npm install
 npm run dev
 ```
+
 ✅ Server chạy: http://localhost:3000
 
 ### 3️⃣ Cài đặt Frontend (Terminal mới)
@@ -45,22 +47,23 @@ cd frontend
 npm install
 npm run dev
 ```
+
 ✅ Client chạy: http://localhost:5173
 
 ---
 
 ## 📦 Tech Stack
 
-| Lớp | Công Nghệ | Phiên Bản |
-|-----|-----------|----------|
-| **Frontend** | React + Vite | 18 + 5 |
-| **Backend** | Express + Node.js | 4.18 |
-| **Database** | MongoDB + Mongoose | Atlas |
-| **Real-time** | Socket.IO | 4.7 |
-| **Maps** | Leaflet | 1.9 |
-| **State** | Zustand | 4.4 |
-| **Auth** | JWT + bcryptjs | - |
-| **Language** | TypeScript | - |
+| Lớp           | Công Nghệ          | Phiên Bản |
+| ------------- | ------------------ | --------- |
+| **Frontend**  | React + Vite       | 18 + 5    |
+| **Backend**   | Express + Node.js  | 4.18      |
+| **Database**  | MongoDB + Mongoose | Atlas     |
+| **Real-time** | Socket.IO          | 4.7       |
+| **Maps**      | Leaflet            | 1.9       |
+| **State**     | Zustand            | 4.4       |
+| **Auth**      | JWT + bcryptjs     | -         |
+| **Language**  | TypeScript         | -         |
 
 ---
 
@@ -117,11 +120,11 @@ cuuho247/
 
 ## 🔐 Roles & Auth
 
-| Role | Mô tả |
-|------|-------|
-| `user` | Người dùng cá nhân |
-| `rescue_company` | Công ty cứu hộ |
-| `admin` | Quản trị viên |
+| Role             | Mô tả              |
+| ---------------- | ------------------ |
+| `user`           | Người dùng cá nhân |
+| `rescue_company` | Công ty cứu hộ     |
+| `admin`          | Quản trị viên      |
 
 **Authentication**: JWT token in `Authorization: Bearer <token>` header
 
@@ -130,6 +133,7 @@ cuuho247/
 ## 📚 Tính Năng Hiện Tại (v0.1.0)
 
 ### 👤 Người Dùng Cá Nhân
+
 - ✅ Đăng ký / Đăng nhập
 - ✅ Tạo yêu cầu cứu hộ với GPS
 - ✅ Xem trạng thái real-time
@@ -138,6 +142,7 @@ cuuho247/
 - ✅ Tham gia cộng đồng (bài viết, bình luận)
 
 ### 🚗 Công Ty Cứu Hộ
+
 - ✅ Đăng ký công ty (chờ duyệt)
 - ✅ Quản lý dịch vụ & giá cả
 - ✅ Nhận yêu cầu real-time
@@ -145,6 +150,7 @@ cuuho247/
 - ✅ Phản hồi đánh giá
 
 ### 👨‍💼 Quản Trị Viên
+
 - ✅ Duyệt công ty cứu hộ
 - ✅ Quản lý người dùng
 - ✅ Kiểm duyệt nội dung
@@ -157,11 +163,13 @@ cuuho247/
 ### Chạy cả 2 services
 
 **Terminal 1 - Backend**:
+
 ```bash
 cd backend && npm run dev
 ```
 
 **Terminal 2 - Frontend**:
+
 ```bash
 cd frontend && npm run dev
 ```
@@ -169,12 +177,14 @@ cd frontend && npm run dev
 ### Debugging
 
 **ESLint + Type Check**:
+
 ```bash
 npm run lint
 npm run type-check
 ```
 
 **Build for Production**:
+
 ```bash
 # Backend
 cd backend && npm run build
@@ -194,19 +204,19 @@ cd frontend && npm run build
 ## 🤝 Collaboration
 
 1. Tạo branch: `git checkout -b feature/your-feature`
-2. Commit format: `[frontend/backend] type(scope): message`
-   - Ví dụ: `[backend] feat(auth): add JWT validation`
-3. Push và tạo Pull Request
-4. Chạy `npm run lint` trước push
+2. Commit message: Tuân thủ [Quy chuẩn Commit Message](./COMMIT_CONVENTION.md)
+   - Ví dụ: `feat(auth): thêm tính năng đăng nhập bằng Google`
+3. Chạy `npm run lint` trước khi push
+4. Push và tạo Pull Request
 
 ---
 
 ## Lịch Sử Tài Liệu
 
-| Ngày | Phiên bản | Người sửa | Nội dung sửa |
-|------|-----------|-----------|--------------|
-| 01/04/2026 | v0.1.0 | Văn Thành Đạt | Khởi tạo tài liệu, mô tả tính năng phiên bản đầu |
-| - | v0.2.0 | Team | Base project setup, configuration files |
+| Ngày       | Phiên bản | Người sửa     | Nội dung sửa                                     |
+| ---------- | --------- | ------------- | ------------------------------------------------ |
+| 01/04/2026 | v0.1.0    | Văn Thành Đạt | Khởi tạo tài liệu, mô tả tính năng phiên bản đầu |
+| -          | v0.2.0    | Team          | Base project setup, configuration files          |
 
 ---
 
@@ -225,6 +235,7 @@ cd frontend && npm run build
 > Ngày: 01/04/2026 · Người sửa: Văn Thành Đạt · Nội dung: Khởi tạo, xây dựng các chức năng cốt lõi cho 3 nhóm người dùng.
 
 **Người dùng cá nhân:**
+
 - Đăng ký và đăng nhập tài khoản
 - Nhập thông tin sự cố và chọn loại dịch vụ
 - Xác định vị trí qua GPS hoặc nhập địa chỉ thủ công (cascade: Tỉnh → Quận/Huyện → Xã/Phường)
@@ -237,6 +248,7 @@ cd frontend && npm run build
 - Đăng và tìm kiếm bài viết hướng dẫn xử lý sự cố cộng đồng
 
 **Công ty cứu hộ:**
+
 - Đăng ký tài khoản doanh nghiệp (chờ Admin duyệt)
 - Quản lý thông tin công ty, danh mục dịch vụ và bảng giá
 - Quản lý danh sách xe cứu hộ (biển số, loại xe, trạng thái tự động)
@@ -247,6 +259,7 @@ cd frontend && npm run build
 - Phản hồi đánh giá của khách hàng
 
 **Quản trị viên:**
+
 - Đăng nhập bằng tài khoản được seed sẵn, giao diện riêng biệt
 - Xác minh và phê duyệt tài khoản công ty cứu hộ
 - Quản lý tài khoản người dùng (khóa/mở khóa)
@@ -254,5 +267,3 @@ cd frontend && npm run build
 - Xem báo cáo và thống kê hoạt động hệ thống
 
 ---
-
-
