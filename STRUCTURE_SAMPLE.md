@@ -96,6 +96,7 @@ backend/
 │   ├── models/
 │   ├── controllers/
 │   ├── services/
+│   ├── repositories/
 │   ├── routes/
 │   ├── middleware/
 │   ├── validators/
@@ -207,21 +208,22 @@ npm install bull                         # Job queue (optional)
 
 ### **Backend Folders - Tổ Chức Theo Layers**
 
-| Folder         | Chức Năng                                | Requirements                   |
-| -------------- | ---------------------------------------- | ------------------------------ |
-| `models/`      | MongoDB schemas                          | All features                   |
-| `controllers/` | Handle HTTP requests                     | All endpoints                  |
-| `services/`    | Business logic                           | All features                   |
-| `routes/`      | API endpoints                            | All endpoints                  |
-| `middleware/`  | Auth, validation, error handling         | All                            |
-| `validators/`  | Input data validation                    | All endpoints                  |
-| `websocket/`   | Real-time chat, notifications, location  | Req 7, 9, 14, 19               |
-| `utils/`       | Helper functions (JWT, password, geo...) | All                            |
-| `constants/`   | Status, roles, enums                     | All                            |
-| `config/`      | Database & Socket.IO setup               | All                            |
-| `jobs/`        | Scheduled tasks                          | Req 17 (timeout), 25 (reports) |
-| `types/`       | TypeScript interfaces                    | All                            |
-| `uploads/`     | Store uploaded images                    | Req 5                          |
+| Folder          | Chức Năng                                                           | Requirements                   |
+| --------------- | ------------------------------------------------------------------- | ------------------------------ |
+| `models/`       | MongoDB schemas                                                     | All features                   |
+| `controllers/`  | Điều phối request/response (req, res). Không xử lý logic phức tạp.  | All endpoints                  |
+| `services/`     | Logic nghiệp vụ (Business Logic), tính toán, gọi service bên thứ 3. | All features                   |
+| `repositories/` | Tương tác trực tiếp với Model/Database (CRUD). Tách biệt query DB.  | All features                   |
+| `routes/`       | API endpoints                                                       | All endpoints                  |
+| `middleware/`   | Auth, validation, error handling                                    | All                            |
+| `validators/`   | Input data validation                                               | All endpoints                  |
+| `websocket/`    | Real-time chat, notifications, location                             | Req 7, 9, 14, 19               |
+| `utils/`        | Helper functions (JWT, password, geo...)                            | All                            |
+| `constants/`    | Status, roles, enums                                                | All                            |
+| `config/`       | Database & Socket.IO setup                                          | All                            |
+| `jobs/`         | Scheduled tasks                                                     | Req 17 (timeout), 25 (reports) |
+| `types/`        | TypeScript interfaces                                               | All                            |
+| `uploads/`      | Store uploaded images                                               | Req 5                          |
 
 ---
 
@@ -255,7 +257,9 @@ backend/src/
 ├── controllers/
 │   └── auth.controller.ts       ← Handle login request
 ├── services/
-│   └── auth.service.ts          ← Business logic
+│   └── auth.service.ts          ← Business logic (tính toán, verify)
+├── repositories/
+│   └── user.repository.ts       ← Query DB (findUserByEmail)
 ├── routes/
 │   └── auth.routes.ts           ← POST /api/auth/login
 └── middleware/
@@ -277,15 +281,19 @@ backend/src/
    ↓ (tới controller)
 4. Backend: requestController.createRequest()
    - Call requestService.createRequest()
-   ↓ (business logic)
-5. Backend: requestService.createRequest()
-   - Save file upload
-   - Save RescueRequest model
-   - Find nearby companies (location.service)
-   - Send notifications via Socket.IO
    ↓
-6. Backend: RescueRequest.create() (model - MongoDB)
-   - Return saved request with ID
+5. Backend: requestService.createRequest() (Business Logic)
+   - Xử lý ảnh (file upload)
+   - Logic tìm kiếm công ty gần nhất
+   - Gọi repository để lưu dữ liệu
+   - Gọi Socket.IO để thông báo
+   ↓
+6. Backend: requestRepository.save() (Data Access)
+   - Tương tác trực tiếp với Mongoose Model
+   - Thực thi lưu vào MongoDB
+   ↓
+7. Backend: RescueRequest.create() (Model - MongoDB)
+   - Lưu trữ thực tế
    ↓
 7. Frontend: Store request ID in state (zustand)
    - Redirect to tracking page
@@ -317,3 +325,35 @@ Events flow:
 ```
 
 ---
+
+## 📡 Data Flow Architecture (Luồng dữ liệu)
+
+Để đảm bảo hệ thống dễ mở rộng và bảo trì, dữ liệu sẽ đi qua các lớp (layers) theo trình tự sau:
+
+### **1. HTTP Request Flow (REST API)**
+
+1.  **Client (Frontend)**: Gửi request (GET, POST, PATCH...).
+2.  **Routes**: Nhận request và chuyển hướng tới đúng Controller.
+3.  **Middleware / Validators**:
+    - Kiểm tra Token (Auth).
+    - Kiểm tra dữ liệu đầu vào (Joi).
+    - Nếu lỗi -> Trả về lỗi ngay lập tức.
+4.  **Controllers**:
+    - Bóc tách dữ liệu từ `req.body`, `req.params`.
+    - Gọi đúng hàm xử lý ở lớp **Service**.
+    - Trả về response (JSON) cho Client.
+5.  **Services**:
+    - Xử lý **Business Logic** chính.
+    - Gọi lớp **Repository** để đọc/ghi dữ liệu.
+6.  **Repositories**:
+    - Nơi duy nhất chứa các câu lệnh `Mongoose` (DB Queries).
+    - Trả về dữ liệu cho Service.
+7.  **Models (Database)**: Định nghĩa cấu trúc Schema trong MongoDB.
+
+---
+
+## 🏆 Quy Tắc Vàng (Golden Rules)
+
+- **Controller**: Không chứa Logic nghiệp vụ.
+- **Service**: Không chứa trực tiếp cú pháp Mongoose (hãy dùng Repository).
+- **Repository**: Chỉ làm nhiệm vụ truy vấn và lưu dữ liệu.
