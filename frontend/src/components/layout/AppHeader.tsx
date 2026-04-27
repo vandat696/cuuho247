@@ -23,7 +23,7 @@ export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHead
     <header className="app-header">
       {/* Left: back button or spacer */}
       {showBack ? (
-        <button className="app-header__back" onClick={handleBack} aria-label="Quay lại">
+        <button type="button" className="app-header__back" onClick={handleBack} aria-label="Quay lại">
           <svg
             width="20"
             height="20"
