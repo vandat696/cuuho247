@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, forwardRef } from 'react';
+import { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, forwardRef, useId } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -10,10 +10,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, hint, error, leftIcon, rightIcon, onRightIconClick, className = '', ...props }, ref) => {
+  ({ label, hint, error, leftIcon, rightIcon, onRightIconClick, className = '', id, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
+
     const fieldClass = [
       'input-field',
       error ? 'input-field--error' : '',
+      leftIcon ? 'input-field--has-left' : '',
       rightIcon ? 'input-field--has-right' : '',
       className,
     ]
@@ -22,21 +26,28 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="input-group">
-        {label && <label className="input-label">{label}</label>}
+        {label && <label htmlFor={inputId} className="input-label">{label}</label>}
 
         <div className={leftIcon || rightIcon ? 'input-wrapper' : undefined}>
           {leftIcon && <span className="input-icon">{leftIcon}</span>}
 
-          <input ref={ref} className={fieldClass} {...props} />
+          <input ref={ref} id={inputId} className={fieldClass} {...props} />
 
           {rightIcon && (
-            <span
-              className="input-icon input-icon--right"
-              onClick={onRightIconClick}
-              role={onRightIconClick ? 'button' : undefined}
-            >
-              {rightIcon}
-            </span>
+            onRightIconClick ? (
+              <button
+                type="button"
+                className="input-icon input-icon--right"
+                onClick={onRightIconClick}
+                aria-label="Input action"
+              >
+                {rightIcon}
+              </button>
+            ) : (
+              <span className="input-icon input-icon--right">
+                {rightIcon}
+              </span>
+            )
           )}
         </div>
 

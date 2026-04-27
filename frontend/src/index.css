@@ -381,7 +381,7 @@ h4 {
 .input-wrapper {
   position: relative;
 }
-.input-wrapper .input-field {
+.input-wrapper .input-field--has-left {
   padding-left: 44px;
 }
 .input-wrapper .input-icon {
@@ -397,6 +397,12 @@ h4 {
   right: var(--sp-4);
   pointer-events: auto;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .input-wrapper .input-field--has-right {
   padding-right: 44px;

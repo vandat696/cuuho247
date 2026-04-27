@@ -19,6 +19,7 @@ export function Button({
   children,
   disabled,
   className = '',
+  type = 'button',
   ...props
 }: ButtonProps) {
   const classes = ['btn', `btn--${variant}`, `btn--${size}`, fullWidth ? 'btn--full' : '', className]
@@ -26,7 +27,7 @@ export function Button({
     .join(' ');
 
   return (
-    <button className={classes} disabled={disabled || loading} aria-busy={loading} {...props}>
+    <button type={type} className={classes} disabled={disabled || loading} aria-busy={loading} {...props}>
       {loading && <span className="btn__spinner" aria-hidden="true" />}
       <span
         style={

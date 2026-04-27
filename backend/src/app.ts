@@ -1,11 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import { connectDB } from './config/db';
 
 const app: Application = express();
-
-// Connect to MongoDB
-connectDB();
 
 // Middleware
 app.use(express.json());
