@@ -1,8 +1,11 @@
+export { AddressSchema, GeoPointSchema } from './shared';
+export type { IAddress, IGeoPoint } from './shared';
+
 export { User } from './User.model';
 export type { IUser, UserStatus } from './User.model';
 
 export { Company } from './Company.model';
-export type { ICompany, IAddress, IGeoPoint, CompanyStatus } from './Company.model';
+export type { ICompany, CompanyStatus } from './Company.model';
 
 export { Admin } from './Admin.model';
 export type { IAdmin } from './Admin.model';

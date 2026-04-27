@@ -1,5 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import type { IAddress, IGeoPoint } from './Company.model';
+import { GeoPointSchema } from './shared';
+import type { IAddress, IGeoPoint } from './shared';
 
 export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'rejected' | 'timeout';
 
@@ -105,20 +106,13 @@ const PaymentSchema = new Schema<IPayment>(
   { _id: false }
 );
 
-const AddressSchema = new Schema(
+// AddressSchema lenient (all fields optional) — rescue_requests.address không bắt buộc
+const PartialAddressSchema = new Schema<Partial<IAddress>>(
   {
     province: { type: String },
     district: { type: String },
     ward: { type: String },
     detail: { type: String },
-  },
-  { _id: false }
-);
-
-const GeoPointSchema = new Schema(
-  {
-    type: { type: String, enum: ['Point'], required: true },
-    coordinates: { type: [Number], required: true },
   },
   { _id: false }
 );
@@ -131,7 +125,7 @@ const RescueRequestSchema = new Schema<IRescueRequest>(
     description: { type: String, required: true },
     location: { type: GeoPointSchema, required: true },
     service_types: [{ type: Schema.Types.ObjectId, ref: 'ServiceCategory' }],
-    address: { type: AddressSchema },
+    address: { type: PartialAddressSchema },
     incident_photos: [{ type: String }],
     status: {
       type: String,
