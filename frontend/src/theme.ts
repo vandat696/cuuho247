@@ -147,8 +147,18 @@ export const theme = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: {
-          minHeight: '56px !important',
-          padding: '0 16px !important',
+          minHeight: 56,
+          '@media (min-width:600px)': {
+            minHeight: 56,
+          },
+        },
+        gutters: {
+          paddingLeft: 16,
+          paddingRight: 16,
+          '@media (min-width:600px)': {
+            paddingLeft: 16,
+            paddingRight: 16,
+          },
         },
       },
     },

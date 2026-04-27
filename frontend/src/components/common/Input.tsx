@@ -10,10 +10,27 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
   onRightIconClick?: () => void;
+  rightIconAriaLabel?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, hint, error, leftIcon, rightIcon, onRightIconClick, className, id, type, disabled, ...props }, ref) => {
+  (
+    {
+      label,
+      hint,
+      error,
+      leftIcon,
+      rightIcon,
+      onRightIconClick,
+      rightIconAriaLabel,
+      className,
+      id,
+      type,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
 
@@ -34,7 +51,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           endAdornment: rightIcon ? (
             <InputAdornment position="end">
               {onRightIconClick ? (
-                <IconButton onClick={onRightIconClick} edge="end" size="small">
+                <IconButton
+                  onClick={onRightIconClick}
+                  edge="end"
+                  size="small"
+                  aria-label={rightIconAriaLabel || 'Action'}
+                >
                   {rightIcon}
                 </IconButton>
               ) : (
