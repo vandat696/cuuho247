@@ -104,7 +104,7 @@ const ShowcasePage = () => {
                   This card has hover effects and an onClick handler.
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Cái này vẫn chưa chạy được ;-;
+                  chạy đượt gồi nha thỷ ;-;
                 </Typography>
               </Card>
             </Box>
