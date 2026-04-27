@@ -26,8 +26,27 @@ export function Button({
     .join(' ');
 
   return (
-    <button className={classes} disabled={disabled || loading} {...props}>
-      {loading ? <span className="btn__spinner" /> : children}
+    <button className={classes} disabled={disabled || loading} aria-busy={loading} {...props}>
+      {loading && <span className="btn__spinner" aria-hidden="true" />}
+      <span
+        style={
+          loading
+            ? {
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                padding: 0,
+                margin: '-1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                whiteSpace: 'nowrap',
+                border: 0,
+              }
+            : undefined
+        }
+      >
+        {children}
+      </span>
     </button>
   );
 }
