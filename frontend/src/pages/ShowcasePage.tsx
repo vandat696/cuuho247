@@ -3,104 +3,114 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Input } from '@/components/common/Input';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const ShowcasePage = () => {
   return (
     <MobileLayout>
       <AppHeader title="Component Showcase" onBack={() => console.log('Back clicked')} />
 
-      <div style={{ padding: '16px', paddingBottom: '80px', overflowY: 'auto' }}>
+      <Box sx={{ p: 2, pb: 10, overflowY: 'auto' }}>
         {/* Buttons */}
-        <section style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: '0 0 12px', color: '#1f2937' }}>Buttons</h2>
-          <div>
-            <div>
+        <Box component="section" sx={{ mb: 3 }}>
+          <Typography variant="h2" sx={{ fontSize: '1.125rem', mb: 1.5 }}>
+            Buttons
+          </Typography>
+          <Box>
+            <Box>
               <Button variant="primary" fullWidth>
                 Primary Button
               </Button>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Button variant="secondary" fullWidth>
                 Secondary Button
               </Button>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Button variant="outline" fullWidth>
                 Outline Button
               </Button>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Button variant="ghost" fullWidth>
                 Ghost Button
               </Button>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Button variant="primary" fullWidth loading>
                 Loading Button
               </Button>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <div style={{ flex: 1 }}>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1.5 }}>
+              <Box sx={{ flex: 1 }}>
                 <Button variant="primary" fullWidth>
                   Half
                 </Button>
-              </div>
-              <div style={{ flex: 1 }}>
+              </Box>
+              <Box sx={{ flex: 1 }}>
                 <Button variant="secondary" fullWidth>
                   Half
                 </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
 
         {/* Inputs */}
-        <section style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: '0 0 12px', color: '#1f2937' }}>Inputs</h2>
-          <div>
-            <div>
+        <Box component="section" sx={{ mb: 3 }}>
+          <Typography variant="h2" sx={{ fontSize: '1.125rem', mb: 1.5 }}>
+            Inputs
+          </Typography>
+          <Box>
+            <Box>
               <Input label="Standard Input" placeholder="Enter text..." />
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Input label="Input with Error" error="This field is required" placeholder="Enter text..." />
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Input label="Disabled Input" disabled placeholder="Cannot type here" />
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Input label="Password" type="password" placeholder="Enter password" />
-            </div>
-          </div>
-        </section>
+            </Box>
+          </Box>
+        </Box>
 
         {/* Cards */}
-        <section>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: '0 0 12px', color: '#1f2937' }}>Cards</h2>
-          <div>
-            <div>
+        <Box component="section">
+          <Typography variant="h2" sx={{ fontSize: '1.125rem', mb: 1.5 }}>
+            Cards
+          </Typography>
+          <Box>
+            <Box>
               <Card>
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontWeight: 600, color: '#1f2937', margin: '0 0 4px' }}>Standard Card</h3>
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-                    This is a standard card component used for displaying content.
-                  </p>
-                </div>
+                <Typography variant="h3" sx={{ fontSize: '1rem', mb: 0.5 }}>
+                  Standard Card
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  This is a standard card component used for displaying content.
+                </Typography>
               </Card>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Card onClick={() => console.log('Card clicked')}>
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontWeight: 600, color: '#1f2937', margin: '0 0 4px' }}>Clickable Card</h3>
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 8px' }}>
-                    This card has hover effects and an onClick handler.
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>Cái này vẫn chưa chạy được ;-;</p>
-                </div>
+                <Typography variant="h3" sx={{ fontSize: '1rem', mb: 0.5 }}>
+                  Clickable Card
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  This card has hover effects and an onClick handler.
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Cái này vẫn chưa chạy được ;-;
+                </Typography>
               </Card>
-            </div>
-          </div>
-        </section>
-      </div>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
     </MobileLayout>
   );
 };

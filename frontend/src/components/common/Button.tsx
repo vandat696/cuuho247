@@ -1,14 +1,18 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
+import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
   fullWidth?: boolean;
   loading?: boolean;
   children: ReactNode;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
 }
 
 export function Button({
@@ -18,36 +22,64 @@ export function Button({
   loading = false,
   children,
   disabled,
-  className = '',
+  className,
   type = 'button',
+  startIcon,
+  endIcon,
   ...props
 }: ButtonProps) {
-  const classes = ['btn', `btn--${variant}`, `btn--${size}`, fullWidth ? 'btn--full' : '', className]
-    .filter(Boolean)
-    .join(' ');
+  let muiVariant: MuiButtonProps['variant'] = 'contained';
+  let muiColor: MuiButtonProps['color'] = 'primary';
+
+  if (variant === 'secondary') {
+    muiVariant = 'contained';
+    muiColor = 'secondary';
+  } else if (variant === 'outline') {
+    muiVariant = 'outlined';
+    muiColor = 'primary';
+  } else if (variant === 'ghost') {
+    muiVariant = 'text';
+    muiColor = 'inherit';
+  }
+
+  let muiSize: MuiButtonProps['size'] = 'medium';
+  if (size === 'sm') muiSize = 'small';
+  if (size === 'lg') muiSize = 'large';
 
   return (
-    <button type={type} className={classes} disabled={disabled || loading} aria-busy={loading} {...props}>
-      {loading && <span className="btn__spinner" aria-hidden="true" />}
-      <span
-        style={
-          loading
-            ? {
-                position: 'absolute',
-                width: '1px',
-                height: '1px',
-                padding: 0,
-                margin: '-1px',
-                overflow: 'hidden',
-                clip: 'rect(0, 0, 0, 0)',
-                whiteSpace: 'nowrap',
-                border: 0,
-              }
-            : undefined
-        }
-      >
-        {children}
-      </span>
-    </button>
+    <MuiButton
+      type={type}
+      variant={muiVariant}
+      color={muiColor}
+      size={muiSize}
+      fullWidth={fullWidth}
+      disabled={disabled || loading}
+      className={className}
+      startIcon={loading ? <CircularProgress size={18} color="inherit" /> : startIcon}
+      endIcon={endIcon}
+      sx={{
+        ...(loading && {
+          '&.Mui-disabled': {
+            backgroundColor: muiVariant === 'contained' && muiColor !== 'inherit' ? `${muiColor}.main` : undefined,
+            color:
+              muiVariant === 'contained' && muiColor !== 'inherit'
+                ? `${muiColor}.contrastText`
+                : muiColor !== 'inherit'
+                  ? `${muiColor}.main`
+                  : 'inherit',
+            opacity: 0.6,
+          },
+        }),
+        ...(variant === 'ghost' && {
+          color: 'text.secondary',
+          '&:hover': {
+            backgroundColor: 'background.default',
+          },
+        }),
+      }}
+      {...(props as any)}
+    >
+      {children}
+    </MuiButton>
   );
 }
