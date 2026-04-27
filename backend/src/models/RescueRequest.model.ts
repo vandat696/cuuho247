@@ -9,7 +9,7 @@ export type CancelledBy = 'user' | 'company' | 'system';
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'e_wallet';
 
 export interface IStatusHistory {
-  status: string;
+  status: RequestStatus;
   changed_at?: Date;
   changed_by: ChangedBy;
   note?: string;
