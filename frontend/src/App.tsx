@@ -2,6 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 import ShowcasePage from '@/pages/ShowcasePage';
+import HomePage from '@/pages/HomePage';
+import LoginPage from '@/pages/auth/LoginPage';
+import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
+import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
+
 
 function App() {
   return (
@@ -19,7 +24,12 @@ function App() {
       />
 
       <Routes>
-        <Route path="/" element={<ShowcasePage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path = "/login" element = {<LoginPage />} />
+        <Route path = "/register" element = {<RoleSelectionPage />} />
+        <Route path = "/register/customer" element = {<CustomerRegisterPage />} />
+
+        <Route path="/showcase" element={<ShowcasePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

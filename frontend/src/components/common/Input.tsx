@@ -11,6 +11,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
   rightIcon?: ReactNode;
   onRightIconClick?: () => void;
   rightIconAriaLabel?: string;
+  required?: boolean; 
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -27,6 +28,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       id,
       type,
       disabled,
+      required,
+      value,
+      onChange,
       ...props
     },
     ref
@@ -43,9 +47,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       variant: 'outlined',
       type,
       disabled,
+      value, 
+      onChange,
+      required,
       error: !!error,
       helperText: error || hint,
-      slotProps: {
+      inputProps: {
         input: {
           startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
           endAdornment: rightIcon ? (
@@ -98,7 +105,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       disabled,
       error: !!error,
       helperText: error || hint,
-      slotProps: {
+      inputProps: {
         htmlInput: props,
       },
     };

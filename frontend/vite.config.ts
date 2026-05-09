@@ -27,4 +27,15 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
   },
+
+  // Add this to fix createTheme_default() error
+    optimizeDeps: {
+    include: [
+      '@mui/material',
+      '@mui/material/styles',
+      '@emotion/react',
+      '@emotion/styled',
+      '@mui/icons-material'
+    ],
+  },
 })

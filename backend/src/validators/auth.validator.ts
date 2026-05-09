@@ -6,10 +6,10 @@ export const registerSchema = Joi.object({
   phone: phoneSchema,
   email: emailSchema,
   password: passwordSchema,
-  confirm_password: Joi.any().valid(Joi.ref('password')).required()
+  // confirm_password: Joi.any().valid(Joi.ref('password')).required()
 });
 
 export const loginSchema = Joi.object({
   email: emailSchema,
-  password: passwordSchema
+  password: passwordSchema,
 });
