@@ -1,5 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, TextField, MenuItem, Select, FormControl } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileLayout } from '../../components/layout/MobileLayout';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -22,6 +37,16 @@ export default function VehicleFormPage() {
     status: 'available',
   });
   const [loading, setLoading] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [plateError, setPlateError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const validatePlate = (plate: string) => {
+    const regex = /^[0-9]{2}[A-Z][0-9A-Z]?-[0-9]{4,5}$/i;
+    if (!plate) return 'Biển số xe không được để trống';
+    if (!regex.test(plate)) return 'Định dạng biển số không hợp lệ (VD: 30A-12345)';
+    return '';
+  };
 
   useEffect(() => {
     if (isEdit && id) {
@@ -45,9 +70,18 @@ export default function VehicleFormPage() {
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'plate_number' && plateError) {
+      setPlateError('');
+    }
   };
 
   const handleSave = async () => {
+    const error = validatePlate(formData.plate_number);
+    if (error) {
+      setPlateError(error);
+      return;
+    }
+
     try {
       setLoading(true);
       if (isEdit && id) {
@@ -58,14 +92,18 @@ export default function VehicleFormPage() {
       navigate('/company/vehicles');
     } catch (error) {
       console.error('Lỗi khi lưu xe', error);
-      alert('Có lỗi xảy ra khi lưu. Có thể biển số đã tồn tại.');
+      setErrorMessage('Có lỗi xảy ra khi lưu. Có thể biển số đã tồn tại.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (isEdit && id && window.confirm('Bạn có chắc chắn muốn xóa xe này?')) {
+  const handleDeleteClick = () => {
+    setOpenConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (isEdit && id) {
       try {
         setLoading(true);
         await vehicleService.deleteVehicle(id);
@@ -73,6 +111,8 @@ export default function VehicleFormPage() {
       } catch (error) {
         console.error('Lỗi khi xóa xe', error);
         setLoading(false);
+      } finally {
+        setOpenConfirm(false);
       }
     }
   };
@@ -117,6 +157,8 @@ export default function VehicleFormPage() {
             placeholder="Ví dụ: 30A-12345"
             value={formData.plate_number}
             onChange={handleChange}
+            error={!!plateError}
+            helperText={plateError}
             sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
           />
         </Box>
@@ -156,7 +198,7 @@ export default function VehicleFormPage() {
             <Button
               variant="outlined"
               fullWidth
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               disabled={loading}
               sx={{
                 borderColor: '#1E3A5F',
@@ -173,6 +215,52 @@ export default function VehicleFormPage() {
           )}
         </Box>
       </Box>
+
+      <Dialog
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+        PaperProps={{
+          sx: { borderRadius: 3, p: 1, m: 2, width: '100%', maxWidth: '320px' },
+        }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#1E3A5F', pb: 1 }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: 'center' }}>Bạn có chắc chắn muốn xóa xe cứu hộ này?</DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ display: 'flex', gap: 1, px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpenConfirm(false)}
+            variant="outlined"
+            fullWidth
+            sx={{ color: '#1E3A5F', borderColor: '#1E3A5F', borderRadius: 2, textTransform: 'none', py: 1 }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            fullWidth
+            sx={{ borderRadius: 2, textTransform: 'none', py: 1 }}
+            autoFocus
+          >
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={4000}
+        onClose={() => setErrorMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setErrorMessage('')} severity="error" sx={{ width: '100%', borderRadius: 2 }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </MobileLayout>
   );
 }

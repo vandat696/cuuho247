@@ -1,6 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Card, Button, IconButton, Chip, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Card,
+  Button,
+  IconButton,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
+import RvHookupIcon from '@mui/icons-material/RvHookup';
+import AirportShuttleIcon from '@mui/icons-material/AirportShuttle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -14,6 +30,22 @@ export default function VehicleListPage() {
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const getVehicleIcon = (type: string) => {
+    switch (type) {
+      case 'Xe máy cứu hộ':
+        return <TwoWheelerIcon />;
+      case 'Xe kéo ô tô':
+        return <RvHookupIcon />;
+      case 'Xe bán tải':
+        return <AirportShuttleIcon />;
+      case 'Xe tải cẩu':
+        return <LocalShippingIcon />;
+      default:
+        return <LocalShippingIcon />;
+    }
+  };
 
   useEffect(() => {
     fetchVehicles();
@@ -31,13 +63,19 @@ export default function VehicleListPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa xe này?')) {
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
       try {
-        await vehicleService.deleteVehicle(id);
-        setVehicles(vehicles.filter((v) => v._id !== id));
+        await vehicleService.deleteVehicle(deleteId);
+        setVehicles(vehicles.filter((v) => v._id !== deleteId));
       } catch (error) {
         console.error('Lỗi khi xóa xe', error);
+      } finally {
+        setDeleteId(null);
       }
     }
   };
@@ -62,7 +100,7 @@ export default function VehicleListPage() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box sx={{ bgcolor: '#1E3A5F', color: 'white', p: 1, borderRadius: '50%', display: 'flex' }}>
-                      <LocalShippingIcon />
+                      {getVehicleIcon(vehicle.vehicle_type)}
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#1E3A5F' }}>
@@ -104,7 +142,7 @@ export default function VehicleListPage() {
                     color="error"
                     fullWidth
                     startIcon={<DeleteOutlineIcon />}
-                    onClick={() => handleDelete(vehicle._id)}
+                    onClick={() => handleDeleteClick(vehicle._id)}
                     sx={{ textTransform: 'none', borderRadius: 2 }}
                   >
                     Xóa
@@ -148,6 +186,43 @@ export default function VehicleListPage() {
           Thêm xe
         </Button>
       </Box>
+
+      <Dialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        PaperProps={{
+          sx: { borderRadius: 3, p: 1, m: 2, width: '100%', maxWidth: '320px' },
+        }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#1E3A5F', pb: 1 }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: 'center' }}>
+            Bạn có chắc chắn muốn xóa xe cứu hộ này khỏi hệ thống?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ display: 'flex', gap: 1, px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setDeleteId(null)}
+            variant="outlined"
+            fullWidth
+            sx={{ color: '#1E3A5F', borderColor: '#1E3A5F', borderRadius: 2, textTransform: 'none', py: 1 }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            fullWidth
+            sx={{ borderRadius: 2, textTransform: 'none', py: 1 }}
+            autoFocus
+          >
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MobileLayout>
   );
 }

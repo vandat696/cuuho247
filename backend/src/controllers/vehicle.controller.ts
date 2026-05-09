@@ -16,7 +16,8 @@ export class VehicleController {
 
   async getVehicle(req: Request, res: Response) {
     try {
-      const vehicle = await vehicleService.getVehicleById(req.params.id);
+      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const vehicle = await vehicleService.getVehicleById(companyId, req.params.id);
       res.json({ status: 'success', data: vehicle });
     } catch (error: any) {
       res.status(404).json({ status: 'error', message: error.message });

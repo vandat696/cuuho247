@@ -1,15 +1,19 @@
 import { vehicleRepository } from '../repositories/vehicle.repository';
 import { IVehicle } from '../models/Vehicle.model';
+import { RescueRequest } from '../models/RescueRequest.model';
 
 export class VehicleService {
   async getVehicles(companyId: string) {
     return vehicleRepository.findByCompany(companyId);
   }
 
-  async getVehicleById(vehicleId: string) {
+  async getVehicleById(companyId: string, vehicleId: string) {
     const vehicle = await vehicleRepository.findById(vehicleId);
     if (!vehicle) {
       throw new Error('Vehicle not found');
+    }
+    if (vehicle.company_id.toString() !== companyId) {
+      throw new Error('Unauthorized to access this vehicle');
     }
     return vehicle;
   }
@@ -62,6 +66,15 @@ export class VehicleService {
 
     if (vehicle.company_id.toString() !== companyId) {
       throw new Error('Unauthorized to delete this vehicle');
+    }
+
+    const activeMission = await RescueRequest.findOne({
+      'vehicle.vehicle_id': vehicleId,
+      status: { $in: ['pending', 'accepted', 'in_progress'] },
+    });
+
+    if (activeMission) {
+      throw new Error('Không thể xóa xe đang trong quá trình cứu hộ');
     }
 
     return vehicleRepository.delete(vehicleId);
