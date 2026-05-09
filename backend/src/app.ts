@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import vehicleRoutes from './routes/vehicle.routes';
 
 const app: Application = express();
 
@@ -29,6 +30,9 @@ app.get('/api/test', (_req, res) => {
     },
   });
 });
+
+// Mount Routes
+app.use('/api/vehicles', vehicleRoutes);
 
 // 404 handler
 app.use((req, res) => {

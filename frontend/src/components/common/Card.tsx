@@ -1,8 +1,5 @@
 import { KeyboardEvent } from 'react';
-import MuiCard, { CardProps as MuiCardProps } from '@mui/material/Card';
-import { CardActionAreaProps } from '@mui/material/CardActionArea';
-import CardActionArea from '@mui/material/CardActionArea';
-import Box from '@mui/material/Box';
+import { Card as MuiCard, CardProps as MuiCardProps, CardActionArea, CardActionAreaProps, Box } from '@mui/material';
 import { Theme, SxProps } from '@mui/material/styles';
 
 type CardVariant = 'default' | 'shadow' | 'orange' | 'navy';

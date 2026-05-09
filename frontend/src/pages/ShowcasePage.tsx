@@ -3,8 +3,7 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Input } from '@/components/common/Input';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { Box, Typography } from '@mui/material';
 
 const ShowcasePage = () => {
   return (
