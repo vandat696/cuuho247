@@ -1,0 +1,100 @@
+// ─── Incident Types ────────────────────────────────────────────────────────────
+
+export interface IncidentType {
+  label: string;
+  slug: string;
+}
+
+export const INCIDENT_TYPES: IncidentType[] = [
+  { label: 'Xe chết máy', slug: 'xe-chet-may' },
+  { label: 'Hết bình ắc quy', slug: 'het-binh-ac-quy' },
+  { label: 'Thủng lốp / nổ lốp', slug: 'thung-lop-no-lop' },
+  { label: 'Hết nhiên liệu', slug: 'het-nhien-lieu' },
+  { label: 'Xe không khởi động được', slug: 'xe-khong-khoi-dong' },
+  { label: 'Tai nạn giao thông', slug: 'tai-nan-giao-thong' },
+  { label: 'Xe bị sa lầy', slug: 'xe-bi-sa-lay' },
+  { label: 'Xe bị khóa vô lăng', slug: 'xe-bi-khoa-vo-lang' },
+  { label: 'Quên chìa khóa trong xe', slug: 'quen-chia-khoa-trong-xe' },
+  { label: 'Mất chìa khóa xe', slug: 'mat-chia-khoa-xe' },
+  { label: 'Động cơ quá nhiệt', slug: 'dong-co-qua-nhiet' },
+  { label: 'Hỏng phanh', slug: 'hong-phanh' },
+  { label: 'Hỏng côn', slug: 'hong-con' },
+  { label: 'Hỏng hộp số', slug: 'hong-hop-so' },
+  { label: 'Xe bị ngập nước', slug: 'xe-bi-ngap-nuoc' },
+  { label: 'Xe phát ra tiếng động lạ', slug: 'xe-phat-tieng-dong-la' },
+  { label: 'Đèn cảnh báo động cơ bật sáng', slug: 'den-canh-bao-dong-co' },
+  { label: 'Xe bị nghiêng/lật', slug: 'xe-bi-nghieng-lat' },
+  { label: 'Cần kéo xe về garage', slug: 'keo-xe-ve-garage' },
+  { label: 'Sự cố khác', slug: 'su-co-khac' },
+];
+
+// ─── Form Data ─────────────────────────────────────────────────────────────────
+
+export interface RescueLocation {
+  lat: number;
+  lng: number;
+  address: string; // human-readable address
+}
+
+export interface RescueFormData {
+  incident_type: IncidentType | null;
+  description: string;
+  images: File[];
+  location: RescueLocation | null;
+}
+
+export interface RescueFormErrors {
+  incident_type?: string;
+  description?: string;
+  location?: string;
+  images?: string;
+}
+
+// ─── Company Result ────────────────────────────────────────────────────────────
+
+export interface CompanyResult {
+  _id: string;
+  company_name: string;
+  phone: string;
+  address: {
+    province?: string;
+    district?: string;
+    ward?: string;
+    detail?: string;
+  };
+  location: {
+    type: 'Point';
+    coordinates: number[];
+  };
+  distance_km: number;
+  rating_avg: number;
+  rating_count: number;
+  status: string;
+  service_names: string[];
+}
+
+// ─── Search Params & Result ────────────────────────────────────────────────────
+
+export interface SearchCompaniesParams {
+  lat: number;
+  lng: number;
+  incident_type?: string;
+  max_distance_km?: number;
+}
+
+export interface SearchCompaniesResult {
+  total: number;
+  companies: CompanyResult[];
+}
+
+// ─── Navigation State (passed to results page) ────────────────────────────────
+
+export interface RescueSearchState {
+  formData: {
+    incident_type_label: string;
+    description: string;
+    location: RescueLocation | null;
+    locationManual: string;
+  };
+  results: SearchCompaniesResult;
+}

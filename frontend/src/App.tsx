@@ -10,6 +10,8 @@ import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
 import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
 import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import RescueRequestPage from '@/pages/customer/RescueRequestPage';
+import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
             </ProtectedRoute>
           }
         /> */}
+        <Route path="/rescue/request" element={<RescueRequestPage />} />
+        <Route path="/rescue/search" element={<RescueResultsPage />} />
 
         <Route path="/showcase" element={<ShowcasePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

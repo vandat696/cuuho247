@@ -9,7 +9,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
   rightIcon?: ReactNode;
   onRightIconClick?: () => void;
   rightIconAriaLabel?: string;
-  required?: boolean; 
+  required?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -45,7 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       variant: 'outlined',
       type,
       disabled,
-      value, 
+      value,
       onChange,
       required,
       error: !!error,
@@ -90,6 +90,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const generatedId = useId();
     const inputId = id ?? generatedId;
 
+    const { value, onChange, required, ...otherProps } = props;
+
     const textFieldProps: TextFieldProps = {
       inputRef: ref,
       id: inputId,
@@ -99,11 +101,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       multiline: true,
       variant: 'outlined',
       disabled,
+      value,
+      onChange,
+      required,
       error: !!error,
       helperText: error || hint,
-      inputProps: {
-        htmlInput: props,
-      },
+      inputProps: otherProps,
     };
 
     return <TextField {...textFieldProps} />;
