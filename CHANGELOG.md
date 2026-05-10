@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
+## [1.1.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v1.0.0...cuuho247-v1.1.0) (2026-05-10)
+
+
+### Features
+
+* **auth:** implement multi-role authentication with JWT ([0a78c38](https://github.com/vandat696/cuuho247/commit/0a78c38626d6161073a806b9412eda999004f4ec))
+* **env:** add example environment configuration file ([fa242f5](https://github.com/vandat696/cuuho247/commit/fa242f5ba332a19f24401b5bd5e8e1ab824469cb))
+* **validation:** add validation for spaces and vietnamese characters in password schema ([da62013](https://github.com/vandat696/cuuho247/commit/da620135331db49e3679c9bf7db1218921ce1c54))
+
 ## 1.0.0 (2026-05-05)
 
 
