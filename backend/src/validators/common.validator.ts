@@ -27,4 +27,5 @@ export const passwordSchema = Joi.string().min(8).required().messages({
   'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
   'any.required': 'Mật khẩu là bắt buộc',
   'string.empty': 'Mật khẩu không được để trống',
+  'string.pattern.base': 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)', // Add validate special character
 });
