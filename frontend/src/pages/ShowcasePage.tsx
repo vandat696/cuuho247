@@ -39,6 +39,11 @@ const ShowcasePage = () => {
               </Button>
             </Box>
             <Box sx={{ mt: 1.5 }}>
+              <Button variant="white" fullWidth>
+                White Button
+              </Button>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
               <Button variant="primary" fullWidth loading>
                 Loading Button
               </Button>
