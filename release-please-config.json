@@ -3,14 +3,6 @@
     ".": {
       "release-type": "node",
       "changelog-path": "CHANGELOG.md"
-    },
-    "backend": {
-      "release-type": "node",
-      "changelog-path": "backend/CHANGELOG.md"
-    },
-    "frontend": {
-      "release-type": "node",
-      "changelog-path": "frontend/CHANGELOG.md"
     }
   }
 }
