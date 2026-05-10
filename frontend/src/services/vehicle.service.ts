@@ -3,7 +3,7 @@ import { IVehicle, CreateVehicleDto, UpdateVehicleDto } from '../types/vehicle.t
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Tạo axios instance mock x-company-id
+// Create axios instance mock x-company-id
 const api = axios.create({
   baseURL: `${API_URL}/vehicles`,
   headers: {

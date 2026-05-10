@@ -10,11 +10,8 @@ export const nameSchema = Joi.string().min(2).max(50).required().messages({
 export const phoneSchema = Joi.string()
   .allow('', null)
   .pattern(/^[0-9]{10,11}$/) // Vietnam's phone number
-  // .required()
   .messages({
     'string.pattern.base': 'Số điện thoại không hợp lệ (phải từ 10-11 số)',
-    // 'any.required': 'Số điện thoại là bắt buộc',
-    // 'string.empty': 'Số điện thoại không được để trống'
   });
 
 export const emailSchema = Joi.string().trim().email().required().messages({
@@ -26,15 +23,9 @@ export const emailSchema = Joi.string().trim().email().required().messages({
 export const passwordSchema = Joi.string()
   .min(8)
   .custom((value, helpers) => {
-    if (/\s/.test(value)) {
-      return helpers.error('password.noSpaces');
-    }
-    if (
-      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/.test(
-        value
-      )
-    ) {
-      return helpers.error('password.noVietnamese');
+    // Only accept alphabets, number and special characters
+    if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(value)) {
+      return helpers.error('password.invalidChars');
     }
     return value;
   })
@@ -43,6 +34,5 @@ export const passwordSchema = Joi.string()
     'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
     'any.required': 'Mật khẩu là bắt buộc',
     'string.empty': 'Mật khẩu không được để trống',
-    'password.noSpaces': 'Mật khẩu không được chứa khoảng cách',
-    'password.noVietnamese': 'Mật khẩu không được chứa ký tự tiếng Việt',
+    'password.invalidChars': 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách',
   });
