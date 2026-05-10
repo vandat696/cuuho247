@@ -31,25 +31,11 @@ export const useLogin = () => {
       newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
       isValid = false;
     }
-    // Add validate special character
-    // else if (!/(?=.*[!@#$%^&*])/.test(password)) {
-    //   newErrors.password = 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)';
-    //   isValid = false;
-    // }
-    // Vietnamese
-    else if (
-      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/.test(
-        password
-      )
-    ) {
-      newErrors.password = 'Mật khẩu không được chứa ký tự tiếng Việt';
-      isValid = false;
-      // Space
-    } else if (/\s/.test(password)) {
-      newErrors.password = 'Mật khẩu không được chứa khoảng cách';
+    // Only accept alphabets, number and special characters
+    else if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(password)) {
+      newErrors.password = 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách';
       isValid = false;
     }
-
     setErrors(newErrors);
 
     // 3. Call API if form is valid
