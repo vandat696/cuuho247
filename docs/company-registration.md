@@ -100,6 +100,66 @@ Tài liệu này mô tả luồng **đăng ký tài khoản Công ty cứu hộ*
 - **Form**: `frontend/src/components/auth/CompanyRegisterForm.tsx`
 - **API service**: `frontend/src/services/auth.service.ts` → `authService.registerCompany(...)`
 
+### Mô tả các hàm/luồng (FE/BE)
+
+#### Backend (BE)
+
+- **Route**: `backend/src/routes/auth.route.ts`
+  - `POST /company-register` → `authController.registerCompany`
+
+- **Controller**: `backend/src/controllers/auth.controller.ts`
+  - **`registerCompany(req, res, next)`**:
+    - Validate `req.body` bằng `registerCompanySchema`
+    - Nếu lỗi → trả `400` với `message` + `errors[]`
+    - Nếu hợp lệ → gọi `authService.registerCompany(value)` và trả `201`
+
+- **Validator**: `backend/src/validators/auth.validator.ts`
+  - **`registerCompanySchema`**:
+    - Kiểm tra các field bắt buộc: `company_name`, `director_name`, `phone`, `email`, `password`, `address`, `service_area`, `terms_accepted`
+    - Field optional: `license_file_url` (URL)
+
+- **Service**: `backend/src/services/auth.service.ts`
+  - **`registerCompany(companyData)`**:
+    - Check trùng email ở cả `users` và `companies`
+    - Hash `password` → `password_hash`
+    - Tạo company mới với trạng thái:
+      - `status: 'pending_verification'`
+      - `is_verified: false`
+    - Trả về dữ liệu đã **loại `password_hash`**
+
+- **Repository/Model**:
+  - `backend/src/repositories/company.repository.ts`:
+    - `create(...)`: lưu document vào MongoDB
+    - `findByEmail(...)`: phục vụ check trùng
+  - `backend/src/models/Company.model.ts`:
+    - Schema field `license_file_url` để lưu link giấy phép
+
+#### Frontend (FE)
+
+- **Page**: `frontend/src/pages/auth/CompanyRegisterPage.tsx`
+  - Render layout + `<CompanyRegisterForm />`
+
+- **Form**: `frontend/src/components/auth/CompanyRegisterForm.tsx`
+  - **State**: `formData` chứa các input (gồm `license_file_url`), `errors`, `isLoading`
+  - **`handleChange(e)`**:
+    - Dựa vào `e.target.name` để set đúng field trong `formData`
+    - Hỗ trợ checkbox `terms_accepted`
+  - **`validateForm()`**:
+    - Validate nhanh phía client (required, format cơ bản)
+    - Set `errors[field]` để hiển thị dưới input
+  - **`handleSubmit(e)`**:
+    - Nếu validate OK → gọi `authService.registerCompany(payload)`
+    - Thành công → `toast.success(...)` + reset form + chuyển về `/login`
+    - Thất bại → `toast.error(...)` (ưu tiên `errors[]` từ backend)
+
+- **API service**: `frontend/src/services/auth.service.ts`
+  - **`authService.registerCompany(data)`**:
+    - `axios.post(`${VITE_API_URL}/auth/company-register`, data)`
+    - Gửi JSON (không dùng upload file)
+
+- **UI Input fix quan trọng**: `frontend/src/components/common/Input.tsx`
+  - `name` được truyền xuống `TextField` để `handleChange` hoạt động đúng (tránh lỗi “không gõ được chữ”).
+
 ### Ghi chú vận hành
 
 - Sau khi đăng ký, công ty **chưa đăng nhập được** cho tới khi admin duyệt (vì `pending_verification` / `is_verified=false`).
