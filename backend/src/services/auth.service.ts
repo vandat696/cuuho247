@@ -5,7 +5,7 @@ import { generateToken } from '../utils/jwt.util';
 import { ApiError } from '../utils/apiError.util';
 
 class AuthService {
-  async register(userData: any) {
+  async customerRegister(userData: any) {
     const { email, password, full_name, phone } = userData;
 
     // Check for duplicate data: email

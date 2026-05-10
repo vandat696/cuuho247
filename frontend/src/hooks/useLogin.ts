@@ -31,6 +31,24 @@ export const useLogin = () => {
       newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
       isValid = false;
     }
+    // Add validate special character
+    // else if (!/(?=.*[!@#$%^&*])/.test(password)) {
+    //   newErrors.password = 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)';
+    //   isValid = false;
+    // }
+    // Vietnamese
+    else if (
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/.test(
+        password
+      )
+    ) {
+      newErrors.password = 'Mật khẩu không được chứa ký tự tiếng Việt';
+      isValid = false;
+      // Space
+    } else if (/\s/.test(password)) {
+      newErrors.password = 'Mật khẩu không được chứa khoảng cách';
+      isValid = false;
+    }
 
     setErrors(newErrors);
 
