@@ -41,17 +41,22 @@ export const useLogin = () => {
         const response = await authService.login(email, password);
         if (response.status === 'success') {
           localStorage.setItem('accessToken', response.data.access_token);
+          localStorage.setItem('authRole', response.data.role);
+          localStorage.setItem('authUser', JSON.stringify(response.data.user));
 
           // Success
           toast.success('Đăng nhập thành công!');
-          if (response.data.role === 'customer') {
-            // navigate('/customer/dashboard');
-          } else if (response.data.role === 'company') {
-            // navigate('/company/dashboard');
-          }
+
+          // TODO: replace with real dashboards when available.
+          // Keep behavior consistent across roles for now.
+          navigate('/');
         }
       } catch (error: any) {
-        const errorMsg = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!';
+        const apiData = error.response?.data;
+        const errorMsg =
+          (Array.isArray(apiData?.errors) && apiData.errors.length > 0 ? apiData.errors.join('\n') : undefined) ||
+          apiData?.message ||
+          'Đăng nhập thất bại. Vui lòng thử lại!';
 
         // Error
         toast.error(errorMsg);

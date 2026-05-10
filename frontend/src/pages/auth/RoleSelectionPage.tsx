@@ -50,9 +50,7 @@ const RoleSelectionPage = () => {
 
           {/* Company */}
           <Box 
-            onClick={() => {
-              alert('Trang đăng ký dành cho Công ty do VTD đảm nhận!');
-            }}
+            onClick={() => navigate('/register/company')}
             sx={{ 
               display: 'flex', alignItems: 'center', p: 3, 
               border: '1.5px solid', borderColor: 'secondary.main', borderRadius: 2,

@@ -88,7 +88,11 @@ export const useCustomerRegister = () => {
           navigate('/login'); // Login after success
         }
       } catch (error: any) {
-        const errorMsg = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!';
+        const apiData = error.response?.data;
+        const errorMsg =
+          (Array.isArray(apiData?.errors) && apiData.errors.length > 0 ? apiData.errors.join('\n') : undefined) ||
+          apiData?.message ||
+          'Đăng ký thất bại. Vui lòng thử lại!';
         toast.error(errorMsg);
       } finally {
         setIsLoading(false);

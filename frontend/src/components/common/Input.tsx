@@ -26,6 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       rightIconAriaLabel,
       className,
       id,
+      name,
       type,
       disabled,
       required,
@@ -43,6 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       id: inputId,
       className,
       label,
+      name,
       fullWidth: true,
       variant: 'outlined',
       type,
@@ -52,27 +54,27 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       required,
       error: !!error,
       helperText: error || hint,
-      inputProps: {
-        input: {
-          startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
-          endAdornment: rightIcon ? (
-            <InputAdornment position="end">
-              {onRightIconClick ? (
-                <IconButton
-                  onClick={onRightIconClick}
-                  edge="end"
-                  size="small"
-                  aria-label={rightIconAriaLabel || 'Action'}
-                >
-                  {rightIcon}
-                </IconButton>
-              ) : (
-                rightIcon
-              )}
-            </InputAdornment>
-          ) : undefined,
-        },
-        htmlInput: props,
+      // Native input attributes like placeholder, autoComplete, etc.
+      inputProps: props,
+      // MUI Input adornments
+      InputProps: {
+        startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
+        endAdornment: rightIcon ? (
+          <InputAdornment position="end">
+            {onRightIconClick ? (
+              <IconButton
+                onClick={onRightIconClick}
+                edge="end"
+                size="small"
+                aria-label={rightIconAriaLabel || 'Action'}
+              >
+                {rightIcon}
+              </IconButton>
+            ) : (
+              rightIcon
+            )}
+          </InputAdornment>
+        ) : undefined,
       },
     };
 

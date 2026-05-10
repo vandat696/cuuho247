@@ -6,7 +6,11 @@ class CompanyRepository {
   }
 
   // Create new company
-  
+  async create(companyData: Partial<ICompany>): Promise<ICompany> {
+    const newCompany = new Company(companyData);
+    return newCompany.save();
+  }
+
   // Update last login time
   async updateById(companyId: string, updateData: Partial<ICompany>): Promise<ICompany | null> {
     return Company.findByIdAndUpdate(companyId, updateData, { new: true }).exec();

@@ -6,6 +6,7 @@ import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
 import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
+import CompanyRegisterPage from '@/pages/auth/CompanyRegisterPage';
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path = "/login" element = {<LoginPage />} />
         <Route path = "/register" element = {<RoleSelectionPage />} />
         <Route path = "/register/customer" element = {<CustomerRegisterPage />} />
+        <Route path = "/register/company" element = {<CompanyRegisterPage />} />
 
         <Route path="/showcase" element={<ShowcasePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
