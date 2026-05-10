@@ -1,7 +1,5 @@
 import { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, forwardRef, useId } from 'react';
-import TextField, { TextFieldProps } from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
+import { TextField, TextFieldProps, InputAdornment, IconButton } from '@mui/material';
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
@@ -52,28 +50,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       required,
       error: !!error,
       helperText: error || hint,
-      inputProps: {
-        input: {
-          startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
-          endAdornment: rightIcon ? (
-            <InputAdornment position="end">
-              {onRightIconClick ? (
-                <IconButton
-                  onClick={onRightIconClick}
-                  edge="end"
-                  size="small"
-                  aria-label={rightIconAriaLabel || 'Action'}
-                >
-                  {rightIcon}
-                </IconButton>
-              ) : (
-                rightIcon
-              )}
-            </InputAdornment>
-          ) : undefined,
-        },
-        htmlInput: props,
+      InputProps: {
+        startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
+        endAdornment: rightIcon ? (
+          <InputAdornment position="end">
+            {onRightIconClick ? (
+              <IconButton
+                onClick={onRightIconClick}
+                edge="end"
+                size="small"
+                aria-label={rightIconAriaLabel || 'Action'}
+              >
+                {rightIcon}
+              </IconButton>
+            ) : (
+              rightIcon
+            )}
+          </InputAdornment>
+        ) : undefined,
       },
+      inputProps: props,
     };
 
     return <TextField {...textFieldProps} />;
