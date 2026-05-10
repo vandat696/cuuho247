@@ -1,6 +1,6 @@
 {
   "name": "cuuho247",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS và chat trực tiếp.",
   "main": "index.js",
   "scripts": {
