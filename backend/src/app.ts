@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import vehicleRoutes from './routes/vehicle.routes';
-import authRoutes from './routes/auth.route';
+import routes from './routes';
 import { errorHandler } from './middleware/error.middleware';
 
 const app: Application = express();
@@ -12,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api', routes);
 
 // Health check route
 app.get('/api/health', (_req, res) => {
@@ -35,9 +34,6 @@ app.get('/api/test', (_req, res) => {
     },
   });
 });
-
-// Mount Routes
-app.use('/api/vehicles', vehicleRoutes);
 
 // 404 handler
 app.use((req, res) => {

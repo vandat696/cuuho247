@@ -8,6 +8,7 @@ interface MobileLayoutProps {
 export function MobileLayout({ children }: MobileLayoutProps) {
   return (
     <Box
+      className="mobile-shell"
       sx={{
         width: '100%',
         maxWidth: '430px' /* var(--mobile-max) */,

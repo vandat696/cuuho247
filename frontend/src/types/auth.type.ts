@@ -1,9 +1,11 @@
 import { User, Company } from './common.type';
 
+export type AuthRole = 'customer' | 'company';
+
 // Login Data Type
 export interface LoginData {
   user: User | Company;
-  role: 'customer' | 'company';
+  role: AuthRole;
   access_token: string;
 }
 
