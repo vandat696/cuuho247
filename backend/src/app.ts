@@ -1,6 +1,8 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import vehicleRoutes from './routes/vehicle.routes';
+import authRoutes from './routes/auth.route';
+import { errorHandler } from './middleware/error.middleware';
 
 const app: Application = express();
 
@@ -8,6 +10,9 @@ const app: Application = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Health check route
 app.get('/api/health', (_req, res) => {
@@ -44,12 +49,14 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({
-    status: 'error',
-    message: err.message || 'Internal server error',
-  });
-});
+// app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+//   console.error('Error:', err);
+//   res.status(500).json({
+//     status: 'error',
+//     message: err.message || 'Internal server error',
+//   });
+// });
+
+app.use(errorHandler);
 
 export default app;

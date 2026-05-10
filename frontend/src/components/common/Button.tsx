@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Button as MuiButton, ButtonProps as MuiButtonProps, CircularProgress } from '@mui/material';
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'white';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -12,6 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
+  sx?: any;
 }
 
 export function Button({
@@ -38,6 +39,9 @@ export function Button({
     muiColor = 'primary';
   } else if (variant === 'ghost') {
     muiVariant = 'text';
+    muiColor = 'inherit';
+  } else if (variant === 'white') {
+    muiVariant = 'contained';
     muiColor = 'inherit';
   }
 
@@ -71,6 +75,13 @@ export function Button({
         }),
         ...(variant === 'ghost' && {
           color: 'text.secondary',
+          '&:hover': {
+            backgroundColor: 'background.default',
+          },
+        }),
+        ...(variant === 'white' && {
+          backgroundColor: 'common.white',
+          color: 'secondary.main',
           '&:hover': {
             backgroundColor: 'background.default',
           },

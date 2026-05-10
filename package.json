@@ -1,6 +1,6 @@
 {
   "name": "cuuho247",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS và chat trực tiếp.",
   "main": "index.js",
   "scripts": {
@@ -24,8 +24,28 @@
   "dependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
+    "axios": "^1.16.0",
+    "bcryptjs": "^3.0.3",
+    "bull": "^4.16.5",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0"
+    "joi": "^18.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "leaflet": "^1.9.4",
+    "leaflet-geosearch": "^4.4.0",
+    "lint-staged": "^16.4.0",
+    "mongoose": "^9.6.1",
+    "multer": "^2.1.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-hot-toast": "^2.6.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.15.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
