@@ -23,9 +23,26 @@ export const emailSchema = Joi.string().trim().email().required().messages({
   'string.empty': 'Email không được để trống',
 });
 
-export const passwordSchema = Joi.string().min(8).required().messages({
-  'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
-  'any.required': 'Mật khẩu là bắt buộc',
-  'string.empty': 'Mật khẩu không được để trống',
-  'string.pattern.base': 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)', // Add validate special character
-});
+export const passwordSchema = Joi.string()
+  .min(8)
+  .custom((value, helpers) => {
+    if (/\s/.test(value)) {
+      return helpers.error('password.noSpaces');
+    }
+    if (
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/.test(
+        value
+      )
+    ) {
+      return helpers.error('password.noVietnamese');
+    }
+    return value;
+  })
+  .required()
+  .messages({
+    'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
+    'any.required': 'Mật khẩu là bắt buộc',
+    'string.empty': 'Mật khẩu không được để trống',
+    'password.noSpaces': 'Mật khẩu không được chứa khoảng cách',
+    'password.noVietnamese': 'Mật khẩu không được chứa ký tự tiếng Việt',
+  });
