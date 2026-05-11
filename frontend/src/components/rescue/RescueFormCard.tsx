@@ -6,6 +6,7 @@ import { IncidentTypeSelector } from './IncidentTypeSelector';
 import { ImageUploader } from './ImageUploader';
 import { AddressAutocomplete } from '../location/AddressAutocomplete';
 import { CurrentLocationButton } from '../location/CurrentLocationButton';
+import { MiniMap } from '../location/MiniMap';
 import { IncidentType, RescueLocation } from '@/types/rescue.type';
 
 interface RescueFormCardProps {
@@ -95,9 +96,13 @@ export function RescueFormCard({
       />
 
       {/* Location Section */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-        <AddressAutocomplete value={location} onChange={onLocationChange} error={locationError} />
-        <CurrentLocationButton onClick={onRetryGps} loading={geoStatus === 'loading'} />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+          <AddressAutocomplete value={location} onChange={onLocationChange} error={locationError} />
+          <CurrentLocationButton onClick={onRetryGps} loading={geoStatus === 'loading'} />
+        </Box>
+
+        {location && location.lat !== 0 && location.lng !== 0 && <MiniMap lat={location.lat} lng={location.lng} />}
       </Box>
 
       {/* Image Uploader */}

@@ -1,53 +1,57 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { Button } from '@/components/common/Button';
+import { RescueLocation } from '@/types/rescue.type';
+import { MiniMap } from '../location/MiniMap';
 
 interface SearchResultHeaderProps {
   incidentTypeLabel: string;
-  address: string;
+  location: RescueLocation | null;
   totalResults: number;
   onFilter?: () => void;
 }
 
-export function SearchResultHeader({ address, totalResults, onFilter }: SearchResultHeaderProps) {
+export function SearchResultHeader({ location, totalResults, onFilter }: SearchResultHeaderProps) {
   return (
     <Box>
-      {/* Location Section */}
+      {/* Map Section */}
+      <Box sx={{ p: 0, position: 'relative' }}>
+        {location && location.lat !== 0 && location.lng !== 0 ? (
+          <MiniMap lat={location.lat} lng={location.lng} />
+        ) : (
+          <Box
+            sx={{
+              height: 200,
+              bgcolor: '#f5f7fa',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Không có dữ liệu bản đồ
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Location Address Info */}
       <Box
         sx={{
-          bgcolor: '#f5f7fa',
-          pt: 5,
-          pb: 4,
+          bgcolor: '#fff',
+          py: 2,
           px: 2,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
+          borderBottom: '1px solid #edf2f7',
         }}
       >
-        {/* Orange Map Pin Icon */}
-        <Box
-          sx={{
-            width: 72,
-            height: 72,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mb: 1.5,
-          }}
-        >
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="#ff6b00">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-          </svg>
-        </Box>
-
         <Typography
           variant="h3"
           sx={{
             fontWeight: 700,
             color: '#1e3a5f',
             mb: 0.5,
-            fontSize: 18,
+            fontSize: 16,
           }}
         >
           Vị trí của bạn
@@ -56,12 +60,11 @@ export function SearchResultHeader({ address, totalResults, onFilter }: SearchRe
           variant="body2"
           sx={{
             color: '#718096',
-            fontSize: 14,
-            maxWidth: '80%',
+            fontSize: 13,
             lineHeight: 1.5,
           }}
         >
-          {address}
+          {location?.address || 'Chưa xác định'}
         </Typography>
       </Box>
 

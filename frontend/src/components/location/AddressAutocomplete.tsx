@@ -22,8 +22,9 @@ export function AddressAutocomplete({
   placeholder = 'Nhập địa chỉ của bạn...',
   label = 'Vị trí hiện tại',
 }: AddressAutocompleteProps) {
-  const { query, setQuery, options, loading, clearOptions } = useAddressSearch();
+  const { query, setQuery, options, loading, clearOptions, getFullLocation } = useAddressSearch();
   const [inputValue, setInputValue] = useState('');
+  const [isFetchingDetail, setIsFetchingDetail] = useState(false);
 
   // Sync internal input value with prop value (e.g. from GPS)
   useEffect(() => {
@@ -33,6 +34,25 @@ export function AddressAutocomplete({
       setInputValue('');
     }
   }, [value]);
+
+  const handleSelect = async (newValue: RescueLocation | null) => {
+    if (!newValue) {
+      onChange(null);
+      return;
+    }
+
+    setIsFetchingDetail(true);
+    try {
+      const fullLocation = await getFullLocation(newValue);
+      onChange(fullLocation);
+    } catch (error) {
+      console.error('Error fetching detail:', error);
+      onChange(newValue);
+    } finally {
+      setIsFetchingDetail(false);
+      clearOptions();
+    }
+  };
 
   return (
     <Autocomplete
@@ -45,16 +65,13 @@ export function AddressAutocomplete({
       includeInputInList
       filterSelectedOptions
       value={value}
-      noOptionsText={query.length < 3 ? 'Nhập ít nhất 3 ký tự' : 'Không tìm thấy địa chỉ'}
-      loading={loading}
+      noOptionsText={query.length === 0 ? 'Bắt đầu nhập địa chỉ...' : 'Không tìm thấy địa chỉ'}
+      loading={loading || isFetchingDetail}
       onInputChange={(_, newInputValue) => {
         setInputValue(newInputValue);
         setQuery(newInputValue);
       }}
-      onChange={(_, newValue) => {
-        onChange(newValue as RescueLocation | null);
-        clearOptions();
-      }}
+      onChange={(_, newValue) => handleSelect(newValue as RescueLocation | null)}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -69,7 +86,7 @@ export function AddressAutocomplete({
             sx: { borderRadius: '10px', height: 56 }, // Changed to 10px to match MUI theme shape
             endAdornment: (
               <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                {loading || isFetchingDetail ? <CircularProgress color="inherit" size={20} /> : null}
                 {params.InputProps.endAdornment}
               </>
             ),

@@ -65,7 +65,7 @@ export default function RescueResultsPage() {
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff' }}>
         <SearchResultHeader
           incidentTypeLabel={formData.incident_type_label}
-          address={displayAddress}
+          location={formData.location}
           totalResults={results.total}
           onFilter={() => toast('Tính năng lọc sẽ sớm ra mắt', { icon: '🔧' })}
         />

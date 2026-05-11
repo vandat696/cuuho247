@@ -1,62 +1,86 @@
 import { RescueLocation } from '../types/rescue.type';
 
 /**
- * Service for interacting with OpenStreetMap Nominatim API.
- * Free, no API key required.
+ * Service for interacting with Goong REST API.
  */
+const GOONG_API_KEY = import.meta.env.VITE_GOONG_API_KEY;
+
 export const locationService = {
   /**
-   * Search for addresses matching the query.
+   * Search for addresses matching the query using Goong Autocomplete.
    */
   async searchAddress(query: string): Promise<RescueLocation[]> {
-    if (!query || query.length < 3) return [];
+    if (!query) return [];
 
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          query
-        )}&format=json&addressdetails=1&limit=5&accept-language=vi&countrycodes=vn`
+        `https://rsapi.goong.io/Place/AutoComplete?api_key=${GOONG_API_KEY}&input=${encodeURIComponent(query)}`
       );
-      if (!res.ok) throw new Error('Nominatim search failed');
+      if (!res.ok) throw new Error('Goong autocomplete failed');
       const data = await res.json();
 
-      return data.map((item: any) => ({
-        address: item.display_name,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
+      if (data.status !== 'OK' || !data.predictions) return [];
+
+      return data.predictions.map((item: any) => ({
+        address: item.description,
+        placeId: item.place_id,
+        lat: 0,
+        lng: 0,
       }));
     } catch (error) {
-      console.error('Error searching address:', error);
+      console.error('Error searching address with Goong:', error);
       return [];
     }
   },
 
   /**
-   * Reverse geocode coordinates to a readable address.
+   * Get detailed location information (lat/lng) for a place ID.
+   */
+  async getPlaceDetail(placeId: string): Promise<RescueLocation | null> {
+    try {
+      const res = await fetch(`https://rsapi.goong.io/Place/Detail?place_id=${placeId}&api_key=${GOONG_API_KEY}`);
+      if (!res.ok) throw new Error('Goong place detail failed');
+      const data = await res.json();
+
+      if (data.status !== 'OK' || !data.result) return null;
+
+      const { location } = data.result.geometry;
+      return {
+        address: data.result.formatted_address,
+        lat: location.lat,
+        lng: location.lng,
+        placeId: placeId,
+      };
+    } catch (error) {
+      console.error('Error getting Goong place detail:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Reverse geocode coordinates to a readable address using Goong.
    */
   async reverseGeocode(lat: number, lng: number): Promise<RescueLocation | null> {
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=vi`
-      );
-      if (!res.ok) throw new Error('Nominatim reverse geocode failed');
+      const res = await fetch(`https://rsapi.goong.io/Geocode?latlng=${lat},${lng}&api_key=${GOONG_API_KEY}`);
+      if (!res.ok) throw new Error('Goong reverse geocode failed');
       const data = await res.json();
 
-      // Build a cleaner address if possible
-      const addr = data.address || {};
-      const parts: string[] = [];
-      if (addr.road || addr.street) parts.push(addr.road || addr.street);
-      if (addr.suburb || addr.neighbourhood) parts.push(addr.suburb || addr.neighbourhood);
-      if (addr.city_district || addr.district) parts.push(addr.city_district || addr.district);
-      if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
+      if (!data.results || data.results.length === 0) {
+        return {
+          address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+          lat,
+          lng,
+        };
+      }
 
       return {
-        address: parts.length > 0 ? parts.join(', ') : data.display_name,
+        address: data.results[0].formatted_address,
         lat,
         lng,
       };
     } catch (error) {
-      console.error('Error reverse geocoding:', error);
+      console.error('Error reverse geocoding with Goong:', error);
       return {
         address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
         lat,
