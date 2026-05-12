@@ -1,22 +1,23 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { vehicleService } from '../services/vehicle.service';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 export class VehicleController {
-  async getVehicles(req: Request, res: Response) {
+  async getVehicles(req: AuthRequest, res: Response) {
     try {
-      // Mock company ID cho đến khi có Auth middleware hoàn chỉnh
-      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const companyId = req.user.id;
 
       const vehicles = await vehicleService.getVehicles(companyId);
       res.json({ status: 'success', data: vehicles });
-    } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ status: 'error', message: err.message });
     }
   }
 
-  async getVehicle(req: Request, res: Response) {
+  async getVehicle(req: AuthRequest, res: Response) {
     try {
-      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const companyId = req.user.id;
       const vehicle = await vehicleService.getVehicleById(companyId, req.params.id);
       res.json({ status: 'success', data: vehicle });
     } catch (error: any) {
@@ -24,35 +25,38 @@ export class VehicleController {
     }
   }
 
-  async createVehicle(req: Request, res: Response) {
+  async createVehicle(req: AuthRequest, res: Response) {
     try {
-      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const companyId = req.user.id;
       const data = req.body;
       const vehicle = await vehicleService.createVehicle(companyId, data);
       res.status(201).json({ status: 'success', data: vehicle });
-    } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ status: 'error', message: err.message });
     }
   }
 
-  async updateVehicle(req: Request, res: Response) {
+  async updateVehicle(req: AuthRequest, res: Response) {
     try {
-      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const companyId = req.user.id;
       const data = req.body;
       const vehicle = await vehicleService.updateVehicle(companyId, req.params.id, data);
       res.json({ status: 'success', data: vehicle });
-    } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ status: 'error', message: err.message });
     }
   }
 
-  async deleteVehicle(req: Request, res: Response) {
+  async deleteVehicle(req: AuthRequest, res: Response) {
     try {
-      const companyId = (req.headers['x-company-id'] as string) || '6605b0b2b892a0f8b4a00001';
+      const companyId = req.user.id;
       await vehicleService.deleteVehicle(companyId, req.params.id);
       res.json({ status: 'success', message: 'Vehicle deleted successfully' });
-    } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ status: 'error', message: err.message });
     }
   }
 }

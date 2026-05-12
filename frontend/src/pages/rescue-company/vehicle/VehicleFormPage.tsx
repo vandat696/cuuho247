@@ -16,9 +16,9 @@ import {
   Alert,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MobileLayout } from '../../components/layout/MobileLayout';
-import { AppHeader } from '../../components/layout/AppHeader';
-import { vehicleService } from '../../services/vehicle.service';
+import { MobileLayout } from '../../../components/layout/MobileLayout';
+import { AppHeader } from '../../../components/layout/AppHeader';
+import { vehicleService } from '../../../services/vehicle.service';
 
 const VEHICLE_TYPES = ['Xe bán tải', 'Xe kéo ô tô', 'Xe máy cứu hộ', 'Xe tải cẩu'];
 

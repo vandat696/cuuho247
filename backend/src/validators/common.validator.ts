@@ -14,17 +14,21 @@ export const phoneSchema = Joi.string()
     'string.pattern.base': 'Số điện thoại không hợp lệ (phải từ 10-11 số)',
   });
 
-export const emailSchema = Joi.string().trim().email().required().messages({
-  'string.email': 'Email không đúng định dạng',
-  'any.required': 'Email là bắt buộc',
-  'string.empty': 'Email không được để trống',
-});
+export const emailSchema = Joi.string()
+  .trim()
+  .email({ tlds: { allow: false } })
+  .required()
+  .messages({
+    'string.email': 'Email không đúng định dạng',
+    'any.required': 'Email là bắt buộc',
+    'string.empty': 'Email không được để trống',
+  });
 
 export const passwordSchema = Joi.string()
   .min(8)
   .custom((value, helpers) => {
     // Only accept alphabets, number and special characters
-    if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(value)) {
+    if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]*$/.test(value)) {
       return helpers.error('password.invalidChars');
     }
     return value;

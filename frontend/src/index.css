@@ -460,6 +460,28 @@ h4 {
   padding: var(--sp-6);
 }
 
+/* Company Home page specific layout */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.action-item {
+  border-radius: var(--r-md);
+  display: block;
+}
+
+.text-center {
+  text-align: center;
+}
+
 /* ═══════════════════════════════════════════════
    Component: Screen / Page Layout
 ═══════════════════════════════════════════════ */
