@@ -16,6 +16,25 @@ class CompanyRepository {
   async findById(companyId: string): Promise<ICompany | null> {
     return Company.findById(companyId).exec();
   }
+
+  // Find companies nearby
+  async findNearby(lng: number, lat: number, maxDistanceKm: number): Promise<ICompany[]> {
+    return Company.find({
+      status: 'active',
+      location: {
+        $nearSphere: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [lng, lat],
+          },
+          $maxDistance: maxDistanceKm * 1000,
+        },
+      },
+    })
+      .select('-password_hash')
+      .limit(20)
+      .exec();
+  }
 }
 
 export default new CompanyRepository();

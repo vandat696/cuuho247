@@ -23,17 +23,16 @@ export function AddressAutocomplete({
   label = 'Vị trí hiện tại',
 }: AddressAutocompleteProps) {
   const { query, setQuery, options, loading, clearOptions, getFullLocation } = useAddressSearch();
-  const [inputValue, setInputValue] = useState('');
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
 
   // Sync internal input value with prop value (e.g. from GPS)
   useEffect(() => {
     if (value) {
-      setInputValue(value.address);
+      setQuery(value.address);
     } else {
-      setInputValue('');
+      setQuery('');
     }
-  }, [value]);
+  }, [value, setQuery]);
 
   const handleSelect = async (newValue: RescueLocation | null) => {
     if (!newValue) {
@@ -68,7 +67,6 @@ export function AddressAutocomplete({
       noOptionsText={query.length === 0 ? 'Bắt đầu nhập địa chỉ...' : 'Không tìm thấy địa chỉ'}
       loading={loading || isFetchingDetail}
       onInputChange={(_, newInputValue) => {
-        setInputValue(newInputValue);
         setQuery(newInputValue);
       }}
       onChange={(_, newValue) => handleSelect(newValue as RescueLocation | null)}
