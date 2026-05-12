@@ -1,7 +1,6 @@
 import { Company } from '../models/Company.model';
 import { Service } from '../models/Service.model';
 import { ServiceCategory } from '../models/ServiceCategory.model';
-import { ApiError } from '../utils/apiError.util';
 
 export interface SearchParams {
   lat: number;

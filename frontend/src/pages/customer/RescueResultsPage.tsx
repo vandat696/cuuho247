@@ -52,8 +52,6 @@ export default function RescueResultsPage() {
 
   const { formData, results } = locationState;
 
-  const displayAddress = formData.location?.address || 'Vị trí của bạn';
-
   const handleViewDetail = (company: CompanyResult) => {
     toast(`${company.company_name} – ${company.phone}`, { icon: '📞' });
   };

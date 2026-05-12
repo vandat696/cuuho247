@@ -34,6 +34,7 @@ export interface RescueLocation {
   lat: number;
   lng: number;
   address: string; // human-readable address
+  placeId?: string;
 }
 
 export interface RescueFormData {

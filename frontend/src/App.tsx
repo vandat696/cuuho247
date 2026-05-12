@@ -9,7 +9,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
 import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
 import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
-import { ProtectedRoute } from './components/common/ProtectedRoute';
+// import { ProtectedRoute } from './components/common/ProtectedRoute';
 import RescueRequestPage from '@/pages/customer/RescueRequestPage';
 import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 

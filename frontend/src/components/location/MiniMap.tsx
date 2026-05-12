@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ReactMapGL, { Marker } from '@goongmaps/goong-map-react';
 import Box from '@mui/material/Box';
 
