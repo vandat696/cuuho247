@@ -1,8 +1,6 @@
-import axios from 'axios';
+import { http } from './http';
 import { ApiResponse } from '../types/common.type';
 import { SearchCompaniesParams, SearchCompaniesResult } from '../types/rescue.type';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const rescueService = {
   searchCompanies: async (params: SearchCompaniesParams): Promise<ApiResponse<SearchCompaniesResult>> => {
@@ -16,9 +14,7 @@ export const rescueService = {
     if (incident_type) queryParams.append('incident_type', incident_type);
     if (max_distance_km) queryParams.append('max_distance_km', max_distance_km.toString());
 
-    const response = await axios.get<ApiResponse<SearchCompaniesResult>>(
-      `${API_URL}${API_URL.endsWith('/api') ? '' : '/api'}/rescue/companies?${queryParams.toString()}`
-    );
+    const response = await http.get<ApiResponse<SearchCompaniesResult>>(`/rescue/companies?${queryParams.toString()}`);
     return response.data;
   },
 };
