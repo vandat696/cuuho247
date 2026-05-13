@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Divider } from '@mui/material';
 import {
-  ApartmentRounded as ApartmentIcon,
   PersonOutlineRounded as PersonIcon,
   EmailOutlined as EmailIcon,
   PhoneOutlined as PhoneIcon,
@@ -15,8 +14,10 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
+import { CompanyInfoCard } from '@/components/company/CompanyInfoCard';
 import { Company } from '@/types/common.type';
 import { toast } from 'react-hot-toast';
+import { companyService } from '@/services/company.service';
 
 // ---------- InfoRow ----------
 
@@ -57,24 +58,10 @@ const CompanyProfilePage = () => {
 
   const fetchCompanyProfile = async () => {
     try {
-      // const response = await companyService.getProfile();
-      // if (response.status === 'success') {
-      //   setCompany(response.data);
-      // }
-      const mockCompany: Company = {
-        _id: '1',
-        company_name: 'Cứu Hộ Minh Anh',
-        director_name: 'Trần Minh Anh',
-        email: 'cuuhominhanh@email.com',
-        phone: '024 3456 7890',
-        address: {
-          street: '45 Giải Phóng, Hai Bà Trưng, Hà Nội',
-          city: 'Hà Nội',
-        },
-        is_verified: true,
-        is_active: true,
-      };
-      setCompany(mockCompany);
+      const response = await companyService.getProfile();
+      if (response.status === 'success') {
+        setCompany(response.data);
+      }
     } catch (error) {
       toast.error('Không thể tải thông tin công ty');
       console.error(error);
@@ -109,51 +96,7 @@ const CompanyProfilePage = () => {
       <AppHeader title="Thông tin công ty" onBack={() => navigate(-1)} />
 
       <Box sx={{ flex: 1, bgcolor: 'grey.100', display: 'flex', flexDirection: 'column', gap: 2, p: 3 }}>
-        <Card
-          variant="navy"
-          padding="lg"
-          sx={{
-            background: 'linear-gradient(135deg, #1a3a5c 0%, #2d5986 100%)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  bgcolor: 'rgba(255,255,255,0.15)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <ApartmentIcon sx={{ fontSize: 34, color: 'common.white' }} />
-              </Box>
-
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="h6" sx={{ color: 'common.white', fontWeight: 'bold', lineHeight: 1.2 }}>
-                  {company.company_name}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Hồ sơ công ty
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
-              <Box
-                sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: company.is_active ? '#4caf50' : 'grey.400' }}
-              />
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)' }}>
-                {company.is_active ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-              </Typography>
-            </Box>
-          </Box>
-        </Card>
+        <CompanyInfoCard company={company} />
 
         <Card variant="shadow" padding="md" sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 0.5 }}>
@@ -192,13 +135,12 @@ const CompanyProfilePage = () => {
           />
         </Card>
 
-        {/* ── Button: tái sử dụng y nguyên ── */}
         <Button
           variant="secondary"
           size="lg"
           fullWidth
           startIcon={<EditIcon />}
-          onClick={() => navigate('/company/edit')}
+          onClick={() => navigate('/company/profile/edit')}
         >
           Chỉnh sửa thông tin
         </Button>

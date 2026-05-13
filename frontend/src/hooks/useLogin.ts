@@ -7,7 +7,6 @@ import { toast } from 'react-hot-toast';
 export const useLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,17 +48,18 @@ export const useLogin = () => {
         if (response.status === 'success') {
           localStorage.setItem('accessToken', response.data.access_token);
           localStorage.setItem('role', response.data.role);
-          localStorage.setItem('companyId', response.data.user._id);
+          localStorage.setItem('accountId', response.data.user._id);
+          if (response.data.role === 'company') {
+            localStorage.setItem('companyId', response.data.user._id);
+          } else {
+            localStorage.removeItem('companyId');
+          }
           // Success
           toast.success('Đăng nhập thành công!');
-          if (from && from !== '/' && from !== '/login') {
-            navigate(from, { replace: true });
-            return;
-          }
           if (response.data.role === 'customer') {
-            // navigate('/customer/dashboard');
+            navigate('/', { replace: true });
           } else if (response.data.role === 'company') {
-            // navigate('/company/dashboard');
+            navigate('/company', { replace: true });
           }
         }
       } catch (error: unknown) {

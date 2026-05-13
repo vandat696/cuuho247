@@ -20,10 +20,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import { MobileLayout } from '../../components/layout/MobileLayout';
-import { AppHeader } from '../../components/layout/AppHeader';
-import { IVehicle } from '../../types/vehicle.types';
-import { vehicleService } from '../../services/vehicle.service';
+import { MobileLayout } from '../../../components/layout/MobileLayout';
+import { AppHeader } from '../../../components/layout/AppHeader';
+import { IVehicle } from '../../../types/vehicle.types';
+import { vehicleService } from '../../../services/vehicle.service';
 
 export default function VehicleListPage() {
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ export default function VehicleListPage() {
       <AppHeader title="Danh sách xe cứu hộ" />
 
       <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: '#1E3A5F' }}>
+        <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: 'secondary.main' }}>
           Tổng số xe: {vehicles.length}
         </Typography>
 
@@ -95,14 +95,14 @@ export default function VehicleListPage() {
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {vehicles.map((vehicle) => (
-              <Card key={vehicle._id} sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
+              <Card key={vehicle._id} sx={{ p: 2, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Box sx={{ bgcolor: '#1E3A5F', color: 'white', p: 1, borderRadius: '50%', display: 'flex' }}>
+                    <Box sx={{ bgcolor: 'secondary.main', color: 'white', p: 1, borderRadius: '50%', display: 'flex' }}>
                       {getVehicleIcon(vehicle.vehicle_type)}
                     </Box>
                     <Box>
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#1E3A5F' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" sx={{ color: 'secondary.main' }}>
                         {vehicle.vehicle_type}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -128,10 +128,9 @@ export default function VehicleListPage() {
                     startIcon={<EditIcon />}
                     onClick={() => navigate(`/company/vehicles/${vehicle._id}/edit`)}
                     sx={{
-                      bgcolor: '#1E3A5F',
+                      bgcolor: 'secondary.main',
                       '&:hover': { bgcolor: '#152943' },
                       textTransform: 'none',
-                      borderRadius: 2,
                     }}
                   >
                     Chỉnh sửa
@@ -142,7 +141,7 @@ export default function VehicleListPage() {
                     fullWidth
                     startIcon={<DeleteOutlineIcon />}
                     onClick={() => handleDeleteClick(vehicle._id)}
-                    sx={{ textTransform: 'none', borderRadius: 2 }}
+                    sx={{ textTransform: 'none' }}
                   >
                     Xóa
                   </Button>
@@ -177,7 +176,6 @@ export default function VehicleListPage() {
             color: 'white',
             py: 1.5,
             textTransform: 'none',
-            borderRadius: 2,
             fontSize: '16px',
             fontWeight: 'bold',
           }}
@@ -193,7 +191,7 @@ export default function VehicleListPage() {
           sx: { borderRadius: 3, p: 1, m: 2, width: '100%', maxWidth: '320px' },
         }}
       >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#1E3A5F', pb: 1 }}>
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: 'secondary.main', pb: 1 }}>
           Xác nhận xóa
         </DialogTitle>
         <DialogContent>
@@ -206,7 +204,7 @@ export default function VehicleListPage() {
             onClick={() => setDeleteId(null)}
             variant="outlined"
             fullWidth
-            sx={{ color: '#1E3A5F', borderColor: '#1E3A5F', borderRadius: 2, textTransform: 'none', py: 1 }}
+            sx={{ color: 'secondary.main', borderColor: 'secondary.main', textTransform: 'none', py: 1 }}
           >
             Hủy
           </Button>
@@ -215,7 +213,7 @@ export default function VehicleListPage() {
             color="error"
             variant="contained"
             fullWidth
-            sx={{ borderRadius: 2, textTransform: 'none', py: 1 }}
+            sx={{ textTransform: 'none', py: 1 }}
             autoFocus
           >
             Xóa
