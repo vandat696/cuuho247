@@ -1,7 +1,10 @@
 export interface Service {
   _id: string;
   company_id: string;
-  category_id: string;
+  category_id?: {
+    _id: string;
+    name: string;
+  };
   name: string;
   price: number;
   description?: string;

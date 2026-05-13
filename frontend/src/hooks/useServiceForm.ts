@@ -9,7 +9,7 @@ export const useServiceForm = (initialService?: Service) => {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [formData, setFormData] = useState<ServiceFormData>({
-    category_id: initialService?.category_id || '',
+    category_id: initialService?.category_id?._id || '',
     name: initialService?.name || '',
     price: initialService?.price || 0,
     description: initialService?.description || '',
@@ -22,7 +22,7 @@ export const useServiceForm = (initialService?: Service) => {
   useEffect(() => {
     if (initialService) {
       setFormData({
-        category_id: initialService.category_id || '',
+        category_id: initialService.category_id?._id || '',
         name: initialService.name || '',
         price: initialService.price || 0,
         description: initialService.description || '',
@@ -102,7 +102,7 @@ export const useServiceForm = (initialService?: Service) => {
         const response = await serviceService.updateService(initialService._id, formData);
         if (response?.status === 'success') {
           toast.success('Cập nhật dịch vụ thành công!');
-          navigate('/company/services');
+          navigate(`/company/services/${initialService._id}`);
         } else {
           toast.error(response?.message || 'Cập nhật dịch vụ thất bại');
         }
@@ -111,7 +111,7 @@ export const useServiceForm = (initialService?: Service) => {
         const response = await serviceService.createService(formData);
         if (response?.status === 'success') {
           toast.success('Tạo dịch vụ thành công!');
-          navigate('/company/services');
+          navigate(`/company/services/${response.data._id}`);
         } else {
           toast.error(response?.message || 'Tạo dịch vụ thất bại');
         }
@@ -119,6 +119,8 @@ export const useServiceForm = (initialService?: Service) => {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Lỗi không xác định';
       toast.error(errorMsg);
+      if (initialService) navigate(`/company/services/${initialService._id}`);
+      else navigate('/company/services');
     } finally {
       setIsLoading(false);
     }

@@ -22,7 +22,7 @@ class ServiceRepository {
 
   // Find service by ID
   async findById(serviceId: string): Promise<IService | null> {
-    return Service.findById(serviceId).exec();
+    return Service.findById(serviceId).populate('category_id', 'name').exec();
   }
 
   // Find services by company ID
@@ -32,7 +32,7 @@ class ServiceRepository {
 
   // Update service
   async updateById(serviceId: string, updateData: Partial<IService>): Promise<IService | null> {
-    return Service.findByIdAndUpdate(serviceId, updateData, { new: true }).exec();
+    return Service.findByIdAndUpdate(serviceId, updateData, { new: true }).populate('category_id', 'name').exec();
   }
 
   // Delete service

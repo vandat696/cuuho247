@@ -1,24 +1,10 @@
 import { useEffect, useState } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { Box, Typography, Button, TextField, MenuItem, Select, FormControl, Snackbar, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileLayout } from '../../../components/layout/MobileLayout';
 import { AppHeader } from '../../../components/layout/AppHeader';
 import { vehicleService } from '../../../services/vehicle.service';
+import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
 
 const VEHICLE_TYPES = ['Xe bán tải', 'Xe kéo ô tô', 'Xe máy cứu hộ', 'Xe tải cẩu'];
 
@@ -123,17 +109,11 @@ export default function VehicleFormPage() {
 
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Loại xe cứu hộ <span style={{ color: 'red' }}>*</span>
           </Typography>
           <FormControl fullWidth size="small">
-            <Select
-              name="vehicle_type"
-              value={formData.vehicle_type}
-              onChange={handleChange}
-              displayEmpty
-              sx={{ borderRadius: 2 }}
-            >
+            <Select name="vehicle_type" value={formData.vehicle_type} onChange={handleChange} displayEmpty>
               <MenuItem value="" disabled>
                 Chọn loại xe
               </MenuItem>
@@ -147,7 +127,7 @@ export default function VehicleFormPage() {
         </Box>
 
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Biển số xe
           </Typography>
           <TextField
@@ -159,16 +139,15 @@ export default function VehicleFormPage() {
             onChange={handleChange}
             error={!!plateError}
             helperText={plateError}
-            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
           />
         </Box>
 
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Trạng thái
           </Typography>
           <FormControl fullWidth size="small">
-            <Select name="status" value={formData.status} onChange={handleChange} sx={{ borderRadius: 2 }}>
+            <Select name="status" value={formData.status} onChange={handleChange}>
               <MenuItem value="available">Hoạt động</MenuItem>
               <MenuItem value="unavailable">Bảo trì</MenuItem>
             </Select>
@@ -182,11 +161,10 @@ export default function VehicleFormPage() {
             onClick={handleSave}
             disabled={loading || !formData.vehicle_type || !formData.plate_number}
             sx={{
-              bgcolor: '#1E3A5F',
+              bgcolor: 'secondary.main',
               '&:hover': { bgcolor: '#152943' },
               py: 1.5,
               textTransform: 'none',
-              borderRadius: 2,
               fontSize: '16px',
               fontWeight: 'bold',
             }}
@@ -201,11 +179,10 @@ export default function VehicleFormPage() {
               onClick={handleDeleteClick}
               disabled={loading}
               sx={{
-                borderColor: '#1E3A5F',
-                color: '#1E3A5F',
+                borderColor: 'secondary.main',
+                color: 'secondary.main',
                 py: 1.5,
                 textTransform: 'none',
-                borderRadius: 2,
                 fontSize: '16px',
                 fontWeight: 'bold',
               }}
@@ -216,40 +193,14 @@ export default function VehicleFormPage() {
         </Box>
       </Box>
 
-      <Dialog
+      <ConfirmDialog
         open={openConfirm}
         onClose={() => setOpenConfirm(false)}
-        PaperProps={{
-          sx: { borderRadius: 3, p: 1, m: 2, width: '100%', maxWidth: '320px' },
-        }}
-      >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#1E3A5F', pb: 1 }}>
-          Xác nhận xóa
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ textAlign: 'center' }}>Bạn có chắc chắn muốn xóa xe cứu hộ này?</DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', gap: 1, px: 3, pb: 2 }}>
-          <Button
-            onClick={() => setOpenConfirm(false)}
-            variant="outlined"
-            fullWidth
-            sx={{ color: '#1E3A5F', borderColor: '#1E3A5F', borderRadius: 2, textTransform: 'none', py: 1 }}
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="contained"
-            fullWidth
-            sx={{ borderRadius: 2, textTransform: 'none', py: 1 }}
-            autoFocus
-          >
-            Xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        content="Bạn có chắc chắn muốn xóa xe cứu hộ này?"
+        loading={loading}
+      />
 
       <Snackbar
         open={!!errorMessage}
@@ -257,7 +208,7 @@ export default function VehicleFormPage() {
         onClose={() => setErrorMessage('')}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={() => setErrorMessage('')} severity="error" sx={{ width: '100%', borderRadius: 2 }}>
+        <Alert onClose={() => setErrorMessage('')} severity="error" sx={{ width: '100%' }}>
           {errorMessage}
         </Alert>
       </Snackbar>

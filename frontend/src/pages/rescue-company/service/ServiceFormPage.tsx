@@ -31,6 +31,15 @@ export default function ServiceFormPage() {
     );
   }
 
+  const sortedCategories = [...categories].sort((a, b) => {
+    const isOtherA = a.name.includes('Sự cố khác');
+    const isOtherB = b.name.includes('Sự cố khác');
+
+    if (isOtherA && !isOtherB) return 1;
+    if (!isOtherA && isOtherB) return -1;
+    return 0;
+  });
+
   return (
     <MobileLayout>
       <AppHeader title={isEditing ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'} />
@@ -38,7 +47,7 @@ export default function ServiceFormPage() {
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
         {/* Category Select */}
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Loại dịch vụ <span style={{ color: 'red' }}>*</span>
           </Typography>
           {categoriesLoading ? (
@@ -54,7 +63,7 @@ export default function ServiceFormPage() {
                 <MenuItem value="" disabled>
                   Chọn loại dịch vụ
                 </MenuItem>
-                {categories.map((cat) => (
+                {sortedCategories.map((cat) => (
                   <MenuItem key={cat._id} value={cat._id}>
                     {cat.name}
                   </MenuItem>
@@ -71,7 +80,7 @@ export default function ServiceFormPage() {
 
         {/* Name Input */}
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Tên dịch vụ <span style={{ color: 'red' }}>*</span>
           </Typography>
           <TextField
@@ -88,7 +97,7 @@ export default function ServiceFormPage() {
 
         {/* Price Input */}
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Giá dịch vụ (VNĐ) <span style={{ color: 'red' }}>*</span>
           </Typography>
           <TextField
@@ -109,7 +118,7 @@ export default function ServiceFormPage() {
 
         {/* Description */}
         <Box>
-          <Typography variant="body2" fontWeight="bold" sx={{ color: '#1E3A5F', mb: 1 }}>
+          <Typography variant="body2" fontWeight="bold" sx={{ color: 'secondary.main', mb: 1 }}>
             Mô tả dịch vụ
           </Typography>
           <TextField
@@ -134,7 +143,7 @@ export default function ServiceFormPage() {
             onClick={handleSubmit}
             disabled={isLoading || categoriesLoading}
             sx={{
-              bgcolor: '#1E3A5F',
+              bgcolor: 'secondary.main',
               '&:hover': { bgcolor: '#152943' },
               py: 1.5,
               textTransform: 'none',
@@ -151,8 +160,8 @@ export default function ServiceFormPage() {
             onClick={handleCancel}
             disabled={isLoading}
             sx={{
-              borderColor: '#1E3A5F',
-              color: '#1E3A5F',
+              borderColor: 'secondary.main',
+              color: 'secondary.main',
               py: 1.5,
               textTransform: 'none',
               fontSize: '16px',

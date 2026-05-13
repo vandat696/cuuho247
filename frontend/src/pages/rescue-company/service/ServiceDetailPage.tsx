@@ -1,27 +1,21 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { useServiceDetail } from '@/hooks/useServiceDetail';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { CompanyInfoCard } from '@/components/company/CompanyInfoCard';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+
 import toast from 'react-hot-toast';
 import {
   BuildRounded as WrenchIcon,
   EditRounded as EditIcon,
   DeleteRounded as DeleteIcon,
   AttachMoneyRounded as DollarIcon,
+  CategoryRounded as CategoryIcon,
 } from '@mui/icons-material';
 import { serviceService } from '@/services/service.service';
 
@@ -97,7 +91,7 @@ export default function ServiceDetailPage() {
           icon={WrenchIcon}
         />
         <Card variant="default" padding="md" sx={{ border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1E3A5F', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 3 }}>
             Thông tin dịch vụ
           </Typography>
 
@@ -110,8 +104,22 @@ export default function ServiceDetailPage() {
                 </Typography>
               </Box>
               <Box sx={{ pl: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1E3A5F' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
                   {service.name}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <CategoryIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Danh mục dịch vụ
+                </Typography>
+              </Box>
+              <Box sx={{ pl: 4 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: 'secondary.main' }}>
+                  {(service.category_id?.name as string) || 'Chưa phân loại'}
                 </Typography>
               </Box>
             </Box>
@@ -153,7 +161,7 @@ export default function ServiceDetailPage() {
             sx={{
               py: 1.5,
               fontWeight: 'bold',
-              bgcolor: '#1E3A5F',
+              bgcolor: 'secondary.main',
               '&:hover': { bgcolor: '#152943' },
             }}
           >
@@ -179,47 +187,19 @@ export default function ServiceDetailPage() {
       </Box>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
+
+      <ConfirmDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
-        PaperProps={{
-          sx: { borderRadius: 3, p: 1, m: 2, width: '100%', maxWidth: '320px' },
-        }}
-      >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#1E3A5F', pb: 1 }}>
-          Xác nhận xóa
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ textAlign: 'center' }}>
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        content={
+          <span>
             Bạn có chắc chắn muốn xóa dịch vụ <strong>{service.name}</strong>? Hành động này không thể hoàn tác.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', gap: 1, px: 3, pb: 2 }}>
-          <Button
-            onClick={() => setOpenDeleteDialog(false)}
-            variant="outline"
-            fullWidth
-            sx={{ color: '#1E3A5F', borderColor: '#1E3A5F', borderRadius: 2, textTransform: 'none', py: 1 }}
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="primary"
-            fullWidth
-            disabled={isDeleting}
-            sx={{
-              textTransform: 'none',
-              py: 1,
-              bgcolor: 'error.main',
-              '&:hover': { bgcolor: 'error.dark' },
-            }}
-          >
-            {isDeleting ? <CircularProgress size={24} color="inherit" /> : 'Xóa'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </span>
+        }
+        loading={isDeleting}
+      />
     </MobileLayout>
   );
 }
