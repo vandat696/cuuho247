@@ -18,11 +18,9 @@ class ServiceController {
   // get service by id
   async getServiceById(req: AuthRequest, res: Response) {
     try {
+      const companyId = req.user.id;
       const { serviceId } = req.params;
-      const service = await serviceRepository.findById(serviceId);
-      if (!service) {
-        throw new Error('Dịch vụ không tồn tại');
-      }
+      const service = await serviceService.getServiceById(serviceId, companyId);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -44,12 +42,10 @@ class ServiceController {
   // update service
   async updateService(req: AuthRequest, res: Response) {
     try {
+      const companyId = req.user.id;
       const { serviceId } = req.params;
       const updateData = req.body;
-      const service = await serviceService.updateService(serviceId, updateData);
-      if (!service) {
-        throw new Error('Dịch vụ không tồn tại');
-      }
+      const service = await serviceService.updateService(serviceId, companyId, updateData);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -59,11 +55,9 @@ class ServiceController {
   // delete service
   async deleteService(req: AuthRequest, res: Response) {
     try {
+      const companyId = req.user.id;
       const { serviceId } = req.params;
-      const service = await serviceRepository.deleteById(serviceId);
-      if (!service) {
-        throw new Error('Dịch vụ không tồn tại');
-      }
+      const service = await serviceService.deleteService(serviceId, companyId);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;

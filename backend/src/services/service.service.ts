@@ -27,8 +27,8 @@ class ServiceService {
 
   async createService(serviceData: any) {
     // Validate required fields
-    if (!serviceData.company_id || !serviceData.name || !serviceData.price) {
-      throw new ApiError(400, 'Tên, giá và company_id là bắt buộc');
+    if (!serviceData.company_id || !serviceData.name || !serviceData.price || !serviceData.category_id) {
+      throw new ApiError(400, 'Tên, danh mục, giá và company_id là bắt buộc');
     }
 
     // Check if duplicate service name for the same company
@@ -42,7 +42,7 @@ class ServiceService {
     return service;
   }
 
-  async updateService(serviceId: string, updateData: any) {
+  async updateService(serviceId: string, companyId: string, updateData: any) {
     if (!serviceId) {
       throw new ApiError(400, 'Service ID là bắt buộc');
     }
@@ -52,10 +52,13 @@ class ServiceService {
     if (!service) {
       throw new ApiError(404, 'Dịch vụ không tồn tại');
     }
+    if (service.company_id.toString() !== companyId) {
+      throw new ApiError(403, 'Không có quyền chỉnh sửa dịch vụ này');
+    }
 
     // Check for duplicate service name if updating name
     if (updateData.name) {
-      const existingService = await serviceRepository.findByCompanyId(service.company_id.toString());
+      const existingService = await serviceRepository.findByCompanyId(companyId);
       if (existingService.some((s) => s.name === updateData.name && s._id.toString() !== serviceId)) {
         throw new ApiError(400, 'Dịch vụ với tên này đã tồn tại cho công ty này');
       }
