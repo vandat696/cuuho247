@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { vehicleService } from '../services/vehicle.service';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { createVehicleSchema, updateVehicleSchema } from '../validators/vehicle.validator';
 
 export class VehicleController {
   async getVehicles(req: AuthRequest, res: Response) {
@@ -28,8 +29,19 @@ export class VehicleController {
   async createVehicle(req: AuthRequest, res: Response) {
     try {
       const companyId = req.user.id;
-      const data = req.body;
-      const vehicle = await vehicleService.createVehicle(companyId, data);
+
+      const { error, value } = createVehicleSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errorMessages = error.details.map((detail) => detail.message);
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      const vehicle = await vehicleService.createVehicle(companyId, value);
       res.status(201).json({ status: 'success', data: vehicle });
     } catch (error: unknown) {
       const err = error as Error;
@@ -40,8 +52,19 @@ export class VehicleController {
   async updateVehicle(req: AuthRequest, res: Response) {
     try {
       const companyId = req.user.id;
-      const data = req.body;
-      const vehicle = await vehicleService.updateVehicle(companyId, req.params.id, data);
+
+      const { error, value } = updateVehicleSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errorMessages = error.details.map((detail) => detail.message);
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      const vehicle = await vehicleService.updateVehicle(companyId, req.params.id, value);
       res.json({ status: 'success', data: vehicle });
     } catch (error: unknown) {
       const err = error as Error;

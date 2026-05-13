@@ -26,11 +26,6 @@ class ServiceService {
   }
 
   async createService(serviceData: any) {
-    // Validate required fields
-    if (!serviceData.company_id || !serviceData.name || !serviceData.price || !serviceData.category_id) {
-      throw new ApiError(400, 'Tên, danh mục, giá và company_id là bắt buộc');
-    }
-
     // Check if duplicate service name for the same company
     const existingService = await serviceRepository.findByCompanyId(serviceData.company_id);
     if (existingService.some((s) => s.name === serviceData.name)) {

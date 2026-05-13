@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '@/middleware/auth.middleware';
 import serviceService from '@/services/service.service';
 import serviceRepository from '@/repositories/service.repository';
+import { createServiceSchema, updateServiceSchema } from '@/validators/service.validator';
 
 class ServiceController {
   // get all
@@ -32,7 +33,19 @@ class ServiceController {
     try {
       const companyId = req.user.id;
       const serviceData = { ...req.body, company_id: companyId };
-      const service = await serviceService.createService(serviceData);
+
+      const { error, value } = createServiceSchema.validate(serviceData, { abortEarly: false });
+      if (error) {
+        const errorMessages = error.details.map((detail) => detail.message);
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      const service = await serviceService.createService(value);
       res.status(201).json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -44,8 +57,19 @@ class ServiceController {
     try {
       const companyId = req.user.id;
       const { serviceId } = req.params;
-      const updateData = req.body;
-      const service = await serviceService.updateService(serviceId, companyId, updateData);
+
+      const { error, value } = updateServiceSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errorMessages = error.details.map((detail) => detail.message);
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      const service = await serviceService.updateService(serviceId, companyId, value);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
