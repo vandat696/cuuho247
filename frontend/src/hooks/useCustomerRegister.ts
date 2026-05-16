@@ -61,6 +61,11 @@ export const useCustomerRegister = () => {
       newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
       isValid = false;
     }
+    // Only accept alphabets, number and special characters
+    else if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(formData.password)) {
+      newErrors.password = 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách';
+      isValid = false;
+    }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';

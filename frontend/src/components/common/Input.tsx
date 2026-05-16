@@ -1,7 +1,5 @@
 import { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, forwardRef, useId } from 'react';
-import TextField, { TextFieldProps } from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
+import { TextField, TextFieldProps, InputAdornment, IconButton } from '@mui/material';
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
@@ -11,7 +9,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
   rightIcon?: ReactNode;
   onRightIconClick?: () => void;
   rightIconAriaLabel?: string;
-  required?: boolean; 
+  required?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -49,14 +47,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       variant: 'outlined',
       type,
       disabled,
-      value, 
+      value,
       onChange,
       required,
       error: !!error,
       helperText: error || hint,
-      // Native input attributes like placeholder, autoComplete, etc.
-      inputProps: props,
-      // MUI Input adornments
       InputProps: {
         startAdornment: leftIcon ? <InputAdornment position="start">{leftIcon}</InputAdornment> : undefined,
         endAdornment: rightIcon ? (
@@ -76,6 +71,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </InputAdornment>
         ) : undefined,
       },
+      inputProps: props,
     };
 
     return <TextField {...textFieldProps} />;
@@ -96,6 +92,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const generatedId = useId();
     const inputId = id ?? generatedId;
 
+    const { value, onChange, required, ...otherProps } = props;
+
     const textFieldProps: TextFieldProps = {
       inputRef: ref,
       id: inputId,
@@ -105,11 +103,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       multiline: true,
       variant: 'outlined',
       disabled,
+      value,
+      onChange,
+      required,
       error: !!error,
       helperText: error || hint,
-      inputProps: {
-        htmlInput: props,
-      },
+      inputProps: otherProps,
     };
 
     return <TextField {...textFieldProps} />;

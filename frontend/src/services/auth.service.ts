@@ -1,13 +1,10 @@
-import axios from 'axios';
+import { http } from './http';
 import { ApiResponse } from '../types/common.type';
 import { LoginData, CustomerRegisterData } from '../types/auth.type';
 
-// API URL
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const authService = {
   login: async (email: string, password: string): Promise<ApiResponse<LoginData>> => {
-    const response = await axios.post<ApiResponse<LoginData>>(`${API_URL}/auth/login`, {
+    const response = await http.post<ApiResponse<LoginData>>(`/auth/login`, {
       email,
       password,
     });
@@ -19,7 +16,7 @@ export const authService = {
     full_name: string;
     phone: string;
   }): Promise<ApiResponse<CustomerRegisterData>> => {
-    const response = await axios.post<ApiResponse<CustomerRegisterData>>(`${API_URL}/auth/customer-register`, data);
+    const response = await http.post<ApiResponse<CustomerRegisterData>>(`/auth/customer-register`, data);
     return response.data;
   },
   registerCompany: async (data: {

@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path';
-import authRoutes from './routes/auth.route';
+import routes from './routes';
 import { errorHandler } from './middleware/error.middleware';
 
 const app: Application = express();
@@ -15,7 +15,7 @@ app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api', routes);
 
 // Health check route
 app.get('/api/health', (_req, res) => {
@@ -49,14 +49,6 @@ app.use((req, res) => {
 });
 
 // Error handler
-// app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-//   console.error('Error:', err);
-//   res.status(500).json({
-//     status: 'error',
-//     message: err.message || 'Internal server error',
-//   });
-// });
-
 app.use(errorHandler);
 
 export default app;

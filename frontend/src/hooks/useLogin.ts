@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { AxiosError } from 'axios';
 import { authService } from '../services/auth.service';
 import { toast } from 'react-hot-toast';
 
 export const useLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +14,7 @@ export const useLogin = () => {
 
   const handleLogin = async () => {
     // 1. Reset errors
-    let newErrors = { email: '', password: '' };
+    const newErrors = { email: '', password: '' };
     let isValid = true;
 
     // 2. Validate
@@ -31,7 +33,11 @@ export const useLogin = () => {
       newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
       isValid = false;
     }
-
+    // Only accept alphabets, number and special characters
+    else if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]*$/.test(password)) {
+      newErrors.password = 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách';
+      isValid = false;
+    }
     setErrors(newErrors);
 
     // 3. Call API if form is valid
@@ -41,22 +47,24 @@ export const useLogin = () => {
         const response = await authService.login(email, password);
         if (response.status === 'success') {
           localStorage.setItem('accessToken', response.data.access_token);
-          localStorage.setItem('authRole', response.data.role);
-          localStorage.setItem('authUser', JSON.stringify(response.data.user));
-
+          localStorage.setItem('role', response.data.role);
+          localStorage.setItem('accountId', response.data.user._id);
+          if (response.data.role === 'company') {
+            localStorage.setItem('companyId', response.data.user._id);
+          } else {
+            localStorage.removeItem('companyId');
+          }
           // Success
           toast.success('Đăng nhập thành công!');
-
-          // TODO: replace with real dashboards when available.
-          // Keep behavior consistent across roles for now.
-          navigate('/');
+          if (response.data.role === 'customer') {
+            navigate('/', { replace: true });
+          } else if (response.data.role === 'company') {
+            navigate('/company', { replace: true });
+          }
         }
-      } catch (error: any) {
-        const apiData = error.response?.data;
-        const errorMsg =
-          (Array.isArray(apiData?.errors) && apiData.errors.length > 0 ? apiData.errors.join('\n') : undefined) ||
-          apiData?.message ||
-          'Đăng nhập thất bại. Vui lòng thử lại!';
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        const errorMsg = axiosError.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!';
 
         // Error
         toast.error(errorMsg);

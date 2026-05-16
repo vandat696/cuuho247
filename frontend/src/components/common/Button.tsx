@@ -1,6 +1,5 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
-import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
+import { Button as MuiButton, ButtonProps as MuiButtonProps, CircularProgress } from '@mui/material';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'white';
 type Size = 'sm' | 'md' | 'lg';

@@ -190,12 +190,33 @@ h4 {
   flex-shrink: 0;
 }
 
-.app-header__title {
+.app-header__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-header__center {
   flex: 1;
-  text-align: center;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-header__title {
   font-size: var(--fs-lg);
   font-weight: var(--fw-semibold);
   color: var(--clr-text-inverse);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-header__back {
@@ -437,6 +458,28 @@ h4 {
 }
 .card-body-lg {
   padding: var(--sp-6);
+}
+
+/* Company Home page specific layout */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.action-item {
+  border-radius: var(--r-md);
+  display: block;
+}
+
+.text-center {
+  text-align: center;
 }
 
 /* ═══════════════════════════════════════════════

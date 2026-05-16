@@ -17,21 +17,33 @@ export const companyNameSchema = Joi.string().min(2).max(100).required().message
 export const phoneSchema = Joi.string()
   .allow('', null)
   .pattern(/^[0-9]{10,11}$/) // Vietnam's phone number
-  // .required()
   .messages({
     'string.pattern.base': 'Số điện thoại không hợp lệ (phải từ 10-11 số)',
-    // 'any.required': 'Số điện thoại là bắt buộc',
-    // 'string.empty': 'Số điện thoại không được để trống'
   });
 
-export const emailSchema = Joi.string().trim().email().required().messages({
-  'string.email': 'Email không đúng định dạng',
-  'any.required': 'Email là bắt buộc',
-  'string.empty': 'Email không được để trống',
-});
+export const emailSchema = Joi.string()
+  .trim()
+  .email({ tlds: { allow: false } })
+  .required()
+  .messages({
+    'string.email': 'Email không đúng định dạng',
+    'any.required': 'Email là bắt buộc',
+    'string.empty': 'Email không được để trống',
+  });
 
-export const passwordSchema = Joi.string().min(8).required().messages({
-  'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
-  'any.required': 'Mật khẩu là bắt buộc',
-  'string.empty': 'Mật khẩu không được để trống',
-});
+export const passwordSchema = Joi.string()
+  .min(8)
+  .custom((value, helpers) => {
+    // Only accept alphabets, number and special characters
+    if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]*$/.test(value)) {
+      return helpers.error('password.invalidChars');
+    }
+    return value;
+  })
+  .required()
+  .messages({
+    'string.min': 'Mật khẩu phải có ít nhất {#limit} ký tự',
+    'any.required': 'Mật khẩu là bắt buộc',
+    'string.empty': 'Mật khẩu không được để trống',
+    'password.invalidChars': 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách',
+  });

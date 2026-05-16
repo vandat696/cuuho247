@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -8,6 +8,7 @@ interface MobileLayoutProps {
 export function MobileLayout({ children }: MobileLayoutProps) {
   return (
     <Box
+      className="mobile-shell"
       sx={{
         width: '100%',
         maxWidth: '430px' /* var(--mobile-max) */,

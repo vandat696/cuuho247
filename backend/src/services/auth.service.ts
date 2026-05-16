@@ -5,7 +5,7 @@ import { generateToken } from '../utils/jwt.util';
 import { ApiError } from '../utils/apiError.util';
 
 class AuthService {
-  async register(userData: any) {
+  async customerRegister(userData: any) {
     const { email, password, full_name, phone } = userData;
 
     // Check for duplicate data: email
@@ -90,7 +90,17 @@ class AuthService {
     }
 
     // Check password
-    const isPasswordValid = await comparePassword(password, account.password_hash);
+    if (!account.password_hash) {
+      throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+    }
+
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await comparePassword(password, account.password_hash);
+    } catch {
+      throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+    }
+
     if (!isPasswordValid) {
       throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
     }
@@ -115,11 +125,10 @@ class AuthService {
     }
 
     // 5. Update last login time
-    const accountId = (account.id || account._id?.toString?.()) as string;
-    await repository.updateById(accountId, { last_login_at: new Date() });
+    await repository.updateById(account._id.toString(), { last_login_at: new Date() });
 
     // 6. Generate token
-    const accessToken = generateToken(accountId, account.email, role);
+    const accessToken = generateToken(account._id.toString(), account.email, role);
 
     // 7. Clean data before return
     const accountResponse = account.toObject();
