@@ -24,11 +24,11 @@ const storage: StorageEngine = multer.diskStorage({
 
 // Configure file filter
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('File type not supported'));
+    cb(new Error('Chỉ hỗ trợ upload ảnh JPG, PNG hoặc WEBP'));
   }
 };
 

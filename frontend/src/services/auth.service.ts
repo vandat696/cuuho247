@@ -27,10 +27,23 @@ export const authService = {
     phone: string;
     address: string;
     service_area: string;
-    license_file_url?: string;
+    license_file?: File | null;
     terms_accepted: boolean;
   }): Promise<ApiResponse<any>> => {
-    const response = await http.post<ApiResponse<any>>(`/auth/company-register`, data);
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    formData.append('company_name', data.company_name);
+    formData.append('director_name', data.director_name);
+    formData.append('phone', data.phone);
+    formData.append('address', data.address);
+    formData.append('service_area', data.service_area);
+    formData.append('terms_accepted', String(data.terms_accepted));
+    if (data.license_file) {
+      formData.append('license_file', data.license_file);
+    }
+
+    const response = await http.post<ApiResponse<any>>(`/auth/company-register`, formData);
     return response.data;
   },
 };

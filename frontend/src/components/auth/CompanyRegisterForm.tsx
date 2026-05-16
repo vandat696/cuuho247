@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { Box, Typography, Checkbox, FormControlLabel, Button as MuiButton, IconButton, Stack } from '@mui/material';
+import {
+  CheckCircleRounded as CheckCircleIcon,
+  CloseRounded as CloseIcon,
+  ImageOutlined as ImageIcon,
+  UploadFileRounded as UploadFileIcon,
+} from '@mui/icons-material';
 import { authService } from '../../services/auth.service';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
@@ -8,7 +14,7 @@ import { Select } from '../common/Select';
 import { SERVICE_AREAS } from '../../constants/serviceAreas';
 import { toast } from 'react-hot-toast';
 
-interface FormData {
+interface CompanyRegisterFormData {
   company_name: string;
   director_name: string;
   email: string;
@@ -17,7 +23,7 @@ interface FormData {
   phone: string;
   address: string;
   service_area: string;
-  license_file_url: string;
+  license_file: File | null;
   terms_accepted: boolean;
 }
 
@@ -25,9 +31,17 @@ interface FormErrors {
   [key: string]: string;
 }
 
+const formatFileSize = (size: number) => {
+  if (size < 1024 * 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 const CompanyRegisterForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<CompanyRegisterFormData>({
     company_name: '',
     director_name: '',
     email: '',
@@ -36,7 +50,7 @@ const CompanyRegisterForm = () => {
     phone: '',
     address: '',
     service_area: '',
-    license_file_url: '',
+    license_file: null,
     terms_accepted: false,
   });
 
@@ -47,18 +61,45 @@ const CompanyRegisterForm = () => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
     const { name, value, type } = target as any;
     const checked = (target as HTMLInputElement).checked;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
     // Clear error when user starts typing/selecting
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         [name]: '',
       }));
     }
+  };
+
+  const handleLicenseFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    setFormData((prev) => ({
+      ...prev,
+      license_file: file,
+    }));
+
+    if (errors.license_file) {
+      setErrors((prev) => ({
+        ...prev,
+        license_file: '',
+      }));
+    }
+  };
+
+  const handleRemoveLicenseFile = () => {
+    setFormData((prev) => ({
+      ...prev,
+      license_file: null,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      license_file: '',
+    }));
   };
 
   const validateForm = (): boolean => {
@@ -112,6 +153,15 @@ const CompanyRegisterForm = () => {
       newErrors.terms_accepted = 'Bạn phải đồng ý với Điều khoản dịch vụ';
     }
 
+    if (formData.license_file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(formData.license_file.type)) {
+        newErrors.license_file = 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP';
+      } else if (formData.license_file.size > 5 * 1024 * 1024) {
+        newErrors.license_file = 'Ảnh không được vượt quá 5MB';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -133,7 +183,7 @@ const CompanyRegisterForm = () => {
         phone: formData.phone.trim(),
         address: formData.address.trim(),
         service_area: formData.service_area.trim(),
-        license_file_url: formData.license_file_url.trim() || undefined,
+        license_file: formData.license_file,
         terms_accepted: formData.terms_accepted,
       });
 
@@ -148,7 +198,7 @@ const CompanyRegisterForm = () => {
           phone: '',
           address: '',
           service_area: '',
-          license_file_url: '',
+          license_file: null,
           terms_accepted: false,
         });
         setTimeout(() => {
@@ -290,27 +340,78 @@ const CompanyRegisterForm = () => {
             Giấy phép kinh doanh
           </Typography>
 
-          <Input
-            label="Link giấy phép (ảnh/PDF)"
-            name="license_file_url"
-            type="url"
-            placeholder="https://..."
-            value={formData.license_file_url}
-            onChange={handleChange}
-            error={errors.license_file_url}
-          />
+          <Box
+            sx={{
+              border: '1.5px dashed',
+              borderColor: errors.license_file ? 'error.main' : formData.license_file ? 'primary.main' : 'divider',
+              borderRadius: 2,
+              bgcolor: formData.license_file ? 'rgba(255, 107, 0, 0.04)' : 'background.default',
+              p: 2,
+            }}
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: formData.license_file ? 'primary.main' : 'action.hover',
+                  color: formData.license_file ? 'primary.contrastText' : 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {formData.license_file ? <CheckCircleIcon /> : <ImageIcon />}
+              </Box>
+
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  {formData.license_file ? formData.license_file.name : 'Ảnh giấy phép kinh doanh'}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: errors.license_file ? 'error.main' : 'text.secondary', mt: 0.5 }}
+                >
+                  {errors.license_file ||
+                    (formData.license_file
+                      ? `Đã chọn 1 ảnh - ${formatFileSize(formData.license_file.size)}`
+                      : 'Chọn 1 ảnh JPG, PNG hoặc WEBP, tối đa 5MB')}
+                </Typography>
+              </Box>
+
+              {formData.license_file ? (
+                <IconButton aria-label="Bỏ ảnh đã chọn" onClick={handleRemoveLicenseFile} size="small">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              ) : null}
+            </Stack>
+
+            <MuiButton
+              component="label"
+              variant="outlined"
+              color={errors.license_file ? 'error' : 'primary'}
+              fullWidth
+              startIcon={<UploadFileIcon />}
+              sx={{ mt: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 700 }}
+            >
+              {formData.license_file ? 'Đổi ảnh' : 'Chọn ảnh'}
+              <input
+                hidden
+                name="license_file"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleLicenseFileChange}
+              />
+            </MuiButton>
+          </Box>
         </Box>
 
         {/* Điều khoản */}
         <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
           <FormControlLabel
-            control={
-              <Checkbox
-                name="terms_accepted"
-                checked={formData.terms_accepted}
-                onChange={handleChange}
-              />
-            }
+            control={<Checkbox name="terms_accepted" checked={formData.terms_accepted} onChange={handleChange} />}
             label="Tôi xác nhận thông tin trên là chính xác và đồng ý với Điều khoản dịch vụ"
           />
           {errors.terms_accepted && (
