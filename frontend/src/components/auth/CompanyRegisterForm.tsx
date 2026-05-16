@@ -5,14 +5,18 @@ import {
   CheckCircleRounded as CheckCircleIcon,
   CloseRounded as CloseIcon,
   ImageOutlined as ImageIcon,
+  LocationOnRounded as LocationOnIcon,
   UploadFileRounded as UploadFileIcon,
 } from '@mui/icons-material';
 import { authService } from '../../services/auth.service';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
+import { AddressAutocomplete } from '../location/AddressAutocomplete';
+import { LocationPickerDialog } from '../location/LocationPickerDialog';
 import { SERVICE_AREAS } from '../../constants/serviceAreas';
 import { toast } from 'react-hot-toast';
+import { RescueLocation } from '../../types/rescue.type';
 
 interface CompanyRegisterFormData {
   company_name: string;
@@ -22,6 +26,7 @@ interface CompanyRegisterFormData {
   confirmPassword: string;
   phone: string;
   address: string;
+  company_location: RescueLocation | null;
   service_area: string;
   license_file: File | null;
   terms_accepted: boolean;
@@ -49,6 +54,7 @@ const CompanyRegisterForm = () => {
     confirmPassword: '',
     phone: '',
     address: '',
+    company_location: null,
     service_area: '',
     license_file: null,
     terms_accepted: false,
@@ -56,6 +62,28 @@ const CompanyRegisterForm = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
+
+  const handleCompanyLocationChange = (location: RescueLocation | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      company_location: location,
+      address: location?.address || prev.address,
+    }));
+
+    if (errors.company_location || errors.address) {
+      setErrors((prev) => ({
+        ...prev,
+        company_location: '',
+        address: '',
+      }));
+    }
+  };
+
+  const handleConfirmCompanyLocation = (location: RescueLocation) => {
+    handleCompanyLocationChange(location);
+    setIsLocationPickerOpen(false);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
@@ -145,6 +173,16 @@ const CompanyRegisterForm = () => {
       newErrors.address = 'Địa chỉ phải có ít nhất 5 ký tự';
     }
 
+    if (
+      !formData.company_location ||
+      typeof formData.company_location.lat !== 'number' ||
+      typeof formData.company_location.lng !== 'number' ||
+      formData.company_location.lat === 0 ||
+      formData.company_location.lng === 0
+    ) {
+      newErrors.company_location = 'Vui lòng chọn vị trí công ty trên bản đồ';
+    }
+
     if (!formData.service_area.trim()) {
       newErrors.service_area = 'Khu vực hoạt động là bắt buộc';
     }
@@ -182,6 +220,8 @@ const CompanyRegisterForm = () => {
         password: formData.password,
         phone: formData.phone.trim(),
         address: formData.address.trim(),
+        latitude: formData.company_location!.lat,
+        longitude: formData.company_location!.lng,
         service_area: formData.service_area.trim(),
         license_file: formData.license_file,
         terms_accepted: formData.terms_accepted,
@@ -197,6 +237,7 @@ const CompanyRegisterForm = () => {
           confirmPassword: '',
           phone: '',
           address: '',
+          company_location: null,
           service_area: '',
           license_file: null,
           terms_accepted: false,
@@ -284,6 +325,52 @@ const CompanyRegisterForm = () => {
             onChange={handleChange}
             error={errors.address}
           />
+
+          <Box sx={{ mt: 2 }}>
+            <AddressAutocomplete
+              value={formData.company_location}
+              onChange={handleCompanyLocationChange}
+              label="Chọn vị trí công ty"
+              placeholder="Nhập địa chỉ công ty để chọn vị trí..."
+              error={errors.company_location}
+            />
+          </Box>
+
+          <Box
+            sx={{
+              mt: 2,
+              p: 2,
+              border: '1px solid',
+              borderColor: errors.company_location ? 'error.main' : 'divider',
+              borderRadius: 2,
+              bgcolor: formData.company_location ? 'rgba(255, 107, 0, 0.04)' : 'background.default',
+            }}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <LocationOnIcon color={formData.company_location ? 'primary' : 'disabled'} />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography sx={{ fontWeight: 700 }}>
+                  {formData.company_location ? 'Đã chọn vị trí công ty' : 'Chưa chọn tọa độ công ty'}
+                </Typography>
+                <Typography variant="body2" sx={{ color: errors.company_location ? 'error.main' : 'text.secondary' }}>
+                  {errors.company_location ||
+                    (formData.company_location
+                      ? `${formData.company_location.lat.toFixed(6)}, ${formData.company_location.lng.toFixed(6)}`
+                      : 'Mở bản đồ để click hoặc kéo marker tới vị trí công ty')}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <MuiButton
+              variant="outlined"
+              fullWidth
+              startIcon={<LocationOnIcon />}
+              sx={{ mt: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 700 }}
+              onClick={() => setIsLocationPickerOpen(true)}
+            >
+              {formData.company_location ? 'Chỉnh vị trí trên bản đồ' : 'Mở bản đồ chọn vị trí'}
+            </MuiButton>
+          </Box>
         </Box>
 
         {/* Khu vực hoạt động */}
@@ -446,6 +533,13 @@ const CompanyRegisterForm = () => {
           </Typography>
         </Box>
       </form>
+
+      <LocationPickerDialog
+        open={isLocationPickerOpen}
+        value={formData.company_location}
+        onClose={() => setIsLocationPickerOpen(false)}
+        onConfirm={handleConfirmCompanyLocation}
+      />
     </Box>
   );
 };

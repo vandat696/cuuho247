@@ -12,10 +12,13 @@ export const customerRegisterSchema = Joi.object({
 export const registerCompanySchema = Joi.object({
   company_name: companyNameSchema,
   director_name: nameSchema,
-  phone: Joi.string().pattern(/^[0-9]{10,11}$/).required().messages({
-    'string.pattern.base': 'Số điện thoại không hợp lệ (phải từ 10-11 số)',
-    'any.required': 'Số điện thoại là bắt buộc',
-  }),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10,11}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Số điện thoại không hợp lệ (phải từ 10-11 số)',
+      'any.required': 'Số điện thoại là bắt buộc',
+    }),
   email: emailSchema,
   password: passwordSchema,
   address: Joi.string().min(5).max(200).required().messages({
@@ -24,8 +27,20 @@ export const registerCompanySchema = Joi.object({
     'any.required': 'Địa chỉ là bắt buộc',
     'string.empty': 'Địa chỉ không được để trống',
   }),
+  latitude: Joi.number().min(-90).max(90).required().messages({
+    'number.base': 'Vĩ độ công ty không hợp lệ',
+    'number.min': 'Vĩ độ công ty không hợp lệ',
+    'number.max': 'Vĩ độ công ty không hợp lệ',
+    'any.required': 'Vị trí công ty là bắt buộc',
+  }),
+  longitude: Joi.number().min(-180).max(180).required().messages({
+    'number.base': 'Kinh độ công ty không hợp lệ',
+    'number.min': 'Kinh độ công ty không hợp lệ',
+    'number.max': 'Kinh độ công ty không hợp lệ',
+    'any.required': 'Vị trí công ty là bắt buộc',
+  }),
   service_area: Joi.string()
-    .valid(...SERVICE_AREAS.map(area => area.id))
+    .valid(...SERVICE_AREAS.map((area) => area.id))
     .required()
     .messages({
       'any.only': 'Khu vực hoạt động không hợp lệ',
@@ -46,9 +61,9 @@ export const registerCompanySchema = Joi.object({
     .valid(true)
     .required()
     .messages({
-    'any.only': 'Bạn phải đồng ý với Điều khoản dịch vụ',
-    'any.required': 'Bạn phải đồng ý với Điều khoản dịch vụ',
-  }),
+      'any.only': 'Bạn phải đồng ý với Điều khoản dịch vụ',
+      'any.required': 'Bạn phải đồng ý với Điều khoản dịch vụ',
+    }),
 });
 
 export const loginSchema = Joi.object({

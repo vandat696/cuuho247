@@ -36,8 +36,18 @@ class AuthService {
   }
 
   async registerCompany(companyData: any) {
-    const { email, password, company_name, director_name, phone, address, service_area, license_file_url } =
-      companyData;
+    const {
+      email,
+      password,
+      company_name,
+      director_name,
+      phone,
+      address,
+      latitude,
+      longitude,
+      service_area,
+      license_file_url,
+    } = companyData;
 
     // Check for duplicate data: email
     const existingUser = await userRepository.findByEmail(email);
@@ -64,7 +74,7 @@ class AuthService {
       },
       location: {
         type: 'Point',
-        coordinates: [0, 0],
+        coordinates: [longitude, latitude],
       },
       service_area,
       license_file_url,
