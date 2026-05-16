@@ -36,7 +36,8 @@ class AuthService {
   }
 
   async registerCompany(companyData: any) {
-    const { email, password, company_name, director_name, phone, address, service_area, license_file_url } = companyData;
+    const { email, password, company_name, director_name, phone, address, service_area, license_file_url } =
+      companyData;
 
     // Check for duplicate data: email
     const existingUser = await userRepository.findByEmail(email);
@@ -55,7 +56,16 @@ class AuthService {
       company_name,
       director_name,
       phone,
-      address,
+      address: {
+        province: 'Chưa cập nhật',
+        district: 'Chưa cập nhật',
+        ward: 'Chưa cập nhật',
+        detail: address,
+      },
+      location: {
+        type: 'Point',
+        coordinates: [0, 0],
+      },
       service_area,
       license_file_url,
       status: 'pending_verification',

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import {
   ApartmentRounded as ApartmentIcon,

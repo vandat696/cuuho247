@@ -30,7 +30,7 @@ export const authService = {
     license_file_url?: string;
     terms_accepted: boolean;
   }): Promise<ApiResponse<any>> => {
-    const response = await axios.post<ApiResponse<any>>(`${API_URL}/auth/company-register`, data);
+    const response = await http.post<ApiResponse<any>>(`/auth/company-register`, data);
     return response.data;
   },
 };
