@@ -68,14 +68,12 @@ const CompanyRegisterForm = () => {
     setFormData((prev) => ({
       ...prev,
       company_location: location,
-      address: location?.address || prev.address,
     }));
 
-    if (errors.company_location || errors.address) {
+    if (errors.company_location) {
       setErrors((prev) => ({
         ...prev,
         company_location: '',
-        address: '',
       }));
     }
   };
@@ -320,7 +318,7 @@ const CompanyRegisterForm = () => {
             label="Địa chỉ"
             name="address"
             type="text"
-            placeholder="Nhập địa chỉ"
+            placeholder="Nhập địa chỉ của công ty"
             value={formData.address}
             onChange={handleChange}
             error={errors.address}
@@ -331,7 +329,7 @@ const CompanyRegisterForm = () => {
               value={formData.company_location}
               onChange={handleCompanyLocationChange}
               label="Chọn vị trí công ty"
-              placeholder="Nhập địa chỉ công ty để chọn vị trí..."
+              placeholder="Tìm nhanh vị trí trên bản đồ..."
               error={errors.company_location}
             />
           </Box>
@@ -356,7 +354,7 @@ const CompanyRegisterForm = () => {
                   {errors.company_location ||
                     (formData.company_location
                       ? `${formData.company_location.lat.toFixed(6)}, ${formData.company_location.lng.toFixed(6)}`
-                      : 'Mở bản đồ để click hoặc kéo marker tới vị trí công ty')}
+                      : 'Mở bản đồ để click hoặc kéo marker tới tọa độ công ty')}
                 </Typography>
               </Box>
             </Stack>
