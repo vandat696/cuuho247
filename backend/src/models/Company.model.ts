@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { AddressSchema, GeoPointSchema, IAddress, IGeoPoint } from './shared';
 
 export type CompanyStatus = 'pending_verification' | 'active' | 'rejected' | 'locked';
 
@@ -8,7 +9,8 @@ export interface ICompany extends Document {
   company_name: string;
   director_name: string;
   phone: string;
-  address: string;
+  address: IAddress;
+  location: IGeoPoint;
   service_area: string;
   license_file_url?: string;
   status?: CompanyStatus;
@@ -27,7 +29,8 @@ const CompanySchema = new Schema<ICompany>(
     company_name: { type: String, required: true },
     director_name: { type: String, required: true },
     phone: { type: String, required: true },
-    address: { type: String, required: true },
+    address: { type: AddressSchema, required: true },
+    location: { type: GeoPointSchema, required: true },
     service_area: { type: String, required: true },
     license_file_url: { type: String },
     status: {
@@ -45,6 +48,6 @@ const CompanySchema = new Schema<ICompany>(
   }
 );
 
-// Không cần 2dsphere index nữa vì không dùng geospatial
+CompanySchema.index({ location: '2dsphere' });
 
 export const Company = model<ICompany>('Company', CompanySchema);
