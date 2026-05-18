@@ -12,7 +12,6 @@ import { authService } from '../../services/auth.service';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
-import { AddressAutocomplete } from '../location/AddressAutocomplete';
 import { LocationPickerDialog } from '../location/LocationPickerDialog';
 import { SERVICE_AREAS } from '../../constants/serviceAreas';
 import { toast } from 'react-hot-toast';
@@ -323,16 +322,6 @@ const CompanyRegisterForm = () => {
             onChange={handleChange}
             error={errors.address}
           />
-
-          <Box sx={{ mt: 2 }}>
-            <AddressAutocomplete
-              value={formData.company_location}
-              onChange={handleCompanyLocationChange}
-              label="Chọn vị trí công ty"
-              placeholder="Tìm nhanh vị trí trên bản đồ..."
-              error={errors.company_location}
-            />
-          </Box>
 
           <Box
             sx={{
