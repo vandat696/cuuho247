@@ -67,7 +67,7 @@
 
   /* --- Layout --- */
   --mobile-max: 375px;
-  --header-h: 56px;
+  --header-h: 70px;
   --bottom-nav-h: 64px;
 }
 
@@ -219,7 +219,7 @@ h4 {
   font-size: var(--fs-lg);
   font-weight: var(--fw-semibold);
   color: var(--clr-text-inverse);
-  line-height: 1;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
