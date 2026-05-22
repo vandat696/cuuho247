@@ -24,15 +24,18 @@ const StatCard = ({
   label,
   color,
   hoverColor,
+  onClick,
 }: {
   value: number | string;
   label: string;
   color: string;
   hoverColor: string;
+  onClick?: () => void;
 }) => (
   <Box
     component="button"
     type="button"
+    onClick={onClick}
     sx={{
       minHeight: 92,
       p: 2,
@@ -44,6 +47,7 @@ const StatCard = ({
       alignItems: 'center',
       justifyContent: 'center',
       textAlign: 'center',
+      cursor: onClick ? 'pointer' : 'default',
       transition: 'border-color 0.15s, transform 0.1s',
       '&:hover': { borderColor: hoverColor },
       '&:active': { transform: 'scale(0.99)' },
@@ -154,7 +158,13 @@ export default function CompanyHomePage() {
         </Box>
 
         <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-          <StatCard value={counts.waiting} label="Đang chờ" color={ORANGE} hoverColor={ORANGE} />
+          <StatCard
+            value={counts.waiting}
+            label="Đang chờ"
+            color={ORANGE}
+            hoverColor={ORANGE}
+            onClick={() => navigate('/company/rescue/pending')}
+          />
           <StatCard value={counts.inProgress} label="Đang thực hiện" color={NAVY} hoverColor={NAVY} />
           <StatCard value={counts.done} label="Hoàn thành" color="#16a34a" hoverColor="#16a34a" />
           <StatCard value={counts.cancelled} label="Đã hủy" color="#dc2626" hoverColor="#dc2626" />

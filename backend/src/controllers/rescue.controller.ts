@@ -1,7 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import rescueService from '../services/rescue.service';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 class RescueController {
+  async getCompanyPendingRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const requests = await rescueService.getPendingRequestsForCompany(companyId);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy danh sách yêu cầu đang chờ thành công',
+        data: {
+          total: requests.length,
+          requests,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   /**
    * GET /api/rescue/companies
    * Query params: lat, lng, incident_type, max_distance_km

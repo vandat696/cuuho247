@@ -17,6 +17,7 @@ import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
 import RescueRequestPage from '@/pages/customer/RescueRequestPage';
 import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
+import PendingRescueRequestsPage from './pages/rescue-company/rescue/PendingRescueRequestsPage';
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
         <Route path="/company" element={<Navigate to="/company/home" replace />} />
         <Route path="/company/home" element={<CompanyHomePage />} />
         <Route path="/company/profile" element={<CompanyProfilePage />} />
+        <Route path="/company/rescue/pending" element={<PendingRescueRequestsPage />} />
         {/* <Route
           path="/company/:id"
           element={

@@ -1,6 +1,7 @@
 import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
+import { RescueRequest } from '../models/RescueRequest.model';
 
 export interface SearchParams {
   lat: number;
@@ -30,7 +31,54 @@ export interface CompanyResult {
   service_names: string[];
 }
 
+export interface PendingRescueRequestResult {
+  _id: string;
+  title: string;
+  description: string;
+  distance_km: number | null;
+  created_at?: Date;
+  address?: Record<string, unknown>;
+  status?: string;
+}
+
 class RescueService {
+  async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
+    const company = await companyRepository.findById(companyId);
+    const companyCoords = company?.location?.coordinates;
+
+    const requests = await RescueRequest.find({
+      'company.company_id': companyId,
+      status: 'pending',
+    })
+      .populate('service_types', 'name slug')
+      .sort({ created_at: -1 })
+      .lean()
+      .exec();
+
+    return requests.map((request: any) => {
+      const requestCoords = request.location?.coordinates;
+      const serviceName = request.service_types?.[0]?.name;
+      const title = serviceName || this.getTitleFromDescription(request.description);
+
+      let distanceKm: number | null = null;
+      if (companyCoords && requestCoords) {
+        distanceKm =
+          Math.round(this.calcDistanceKm(companyCoords[1], companyCoords[0], requestCoords[1], requestCoords[0]) * 10) /
+          10;
+      }
+
+      return {
+        _id: request._id.toString(),
+        title,
+        description: request.description,
+        distance_km: distanceKm,
+        created_at: request.created_at,
+        address: request.address,
+        status: request.status,
+      };
+    });
+  }
+
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {
     const { lat, lng, incident_type, max_distance_km = 50 } = params;
 
@@ -99,6 +147,11 @@ class RescueService {
 
   private toRad(deg: number) {
     return (deg * Math.PI) / 180;
+  }
+
+  private getTitleFromDescription(description?: string): string {
+    if (!description) return 'Sự cố cứu hộ';
+    return description.split(/[,.]/)[0].trim() || 'Sự cố cứu hộ';
   }
 }
 

@@ -88,6 +88,21 @@ export interface SearchCompaniesResult {
   companies: CompanyResult[];
 }
 
+export interface PendingRescueRequest {
+  _id: string;
+  title: string;
+  description: string;
+  distance_km: number | null;
+  created_at?: string;
+  status?: string;
+  address?: Record<string, unknown>;
+}
+
+export interface PendingRescueRequestsResult {
+  total: number;
+  requests: PendingRescueRequest[];
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {
