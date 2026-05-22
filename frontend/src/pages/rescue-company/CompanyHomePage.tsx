@@ -1,30 +1,57 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import {
-  ApartmentRounded as ApartmentIcon,
-  HomeRepairServiceOutlined as ServicesIcon,
+  ApartmentOutlined as ApartmentIcon,
+  DescriptionOutlined as ServicesIcon,
   LocalShippingOutlined as VehiclesIcon,
-  ChevronRightRounded as ChevronRightIcon,
+  NotificationsNoneRounded as NotificationsIcon,
 } from '@mui/icons-material';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { Card } from '@/components/common/Card';
-import { CompanyInfoCard } from '@/components/company/CompanyInfoCard';
 import { Company } from '@/types/common.type';
 import { companyService } from '@/services/company.service';
 import { toast } from 'react-hot-toast';
 
-const StatCard = ({ value, label, color }: { value: number | string; label: string; color: string }) => (
-  <Card variant="shadow" padding="md" sx={{ textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-    <Typography variant="h5" sx={{ fontWeight: 'bold', color }}>
-      {value}
-    </Typography>
-    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: 500 }}>
-      {label}
-    </Typography>
-  </Card>
+const NAVY = '#1B3A5D';
+const ORANGE = '#FF6B00';
+const CARD_RADIUS = '12px';
+const CIRCLE_RADIUS = '9999px';
+
+const StatCard = ({
+  value,
+  label,
+  color,
+  hoverColor,
+}: {
+  value: number | string;
+  label: string;
+  color: string;
+  hoverColor: string;
+}) => (
+  <Box
+    component="button"
+    type="button"
+    sx={{
+      minHeight: 92,
+      p: 2,
+      border: '2px solid #e5e7eb',
+      borderRadius: CARD_RADIUS,
+      bgcolor: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      transition: 'border-color 0.15s, transform 0.1s',
+      '&:hover': { borderColor: hoverColor },
+      '&:active': { transform: 'scale(0.99)' },
+    }}
+  >
+    <Typography sx={{ fontSize: 24, lineHeight: 1, fontWeight: 800, color }}>{value}</Typography>
+    <Typography sx={{ mt: 1, fontSize: 12, color: '#4b5563', lineHeight: 1.2 }}>{label}</Typography>
+  </Box>
 );
 
 const ActionCard = ({
@@ -39,46 +66,32 @@ const ActionCard = ({
   onClick: () => void;
 }) => (
   <Box
+    component="button"
+    type="button"
     onClick={onClick}
     sx={{
+      width: '100%',
+      p: 2,
+      border: '2px solid #e5e7eb',
+      borderRadius: CARD_RADIUS,
+      bgcolor: '#fff',
       display: 'flex',
       alignItems: 'center',
-      p: 2.5,
-      border: '1.5px solid',
-      borderColor: 'grey.300',
-      borderRadius: 2,
-      bgcolor: 'common.white',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(255, 107, 0, 0.04)' },
-      '&:active': { transform: 'scale(0.98)' },
+      gap: 1.5,
+      textAlign: 'left',
+      color: NAVY,
+      transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
+      '&:hover': { bgcolor: '#F5F7FA', borderColor: '#e5e7eb' },
+      '&:active': { transform: 'scale(0.99)' },
     }}
   >
-    <Box
-      sx={{
-        width: 56,
-        height: 56,
-        bgcolor: 'rgba(26, 58, 92, 0.06)',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#1a3a5c',
-        flexShrink: 0,
-        mr: 2.5,
-      }}
-    >
+    <Box sx={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       {icon}
     </Box>
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 0.25 }}>
-        {title}
-      </Typography>
-      <Typography variant="body2" sx={{ color: 'text.secondary', display: 'block' }}>
-        {description}
-      </Typography>
+    <Box sx={{ minWidth: 0, flex: 1 }}>
+      <Typography sx={{ fontSize: 16, fontWeight: 500, color: NAVY, lineHeight: 1.25 }}>{title}</Typography>
+      <Typography sx={{ mt: 0.25, fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>{description}</Typography>
     </Box>
-    <ChevronRightIcon sx={{ color: 'text.disabled' }} />
   </Box>
 );
 
@@ -102,57 +115,72 @@ export default function CompanyHomePage() {
       toast.error('Không thể tải thông tin công ty');
     }
 
-    // TODO: Replace with real statistics API when available
     setCounts({ waiting: 5, inProgress: 3, done: 12, cancelled: 2 });
   };
 
-  const handleProfileClick = () => {
-    navigate('/company/profile');
-  };
+  const companyName = company?.company_name || 'Cứu hộ Minh Anh';
 
   return (
     <MobileLayout>
-      <AppHeader title="Cứu hộ 247" showBack={false} />
+      <AppHeader
+        title="Cứu hộ 247"
+        showBack={false}
+        rightSlot={
+          <IconButton aria-label="Thông báo" size="small" sx={{ p: 1, color: '#fff' }}>
+            <NotificationsIcon sx={{ fontSize: 24 }} />
+          </IconButton>
+        }
+      />
 
-      <Box sx={{ flex: 1, bgcolor: 'grey.100', display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
-        {company && <CompanyInfoCard company={company} onClick={handleProfileClick} />}
-
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 1.5 }}>
-            Tổng quan
+      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
+        <Box
+          onClick={() => navigate('/company/profile')}
+          sx={{
+            p: 2,
+            mb: 3,
+            borderRadius: CARD_RADIUS,
+            background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
+            color: '#fff',
+            cursor: 'pointer',
+          }}
+        >
+          <Typography sx={{ mb: 0.5, fontSize: 20, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
+            {companyName}
           </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <StatCard value={counts.waiting} label="Đang chờ" color="#FF7A00" />
-            <StatCard value={counts.inProgress} label="Đang thực hiện" color="#1E3A5F" />
-            <StatCard value={counts.done} label="Hoàn thành" color="#4caf50" />
-            <StatCard value={counts.cancelled} label="Đã hủy" color="#f44336" />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: '#4ade80' }} />
+            <Typography sx={{ fontSize: 14, color: '#fff', lineHeight: 1.25 }}>Đang hoạt động</Typography>
           </Box>
         </Box>
 
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 1.5 }}>
-            Quản lý nhanh
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <ActionCard
-              icon={<ApartmentIcon fontSize="medium" />}
-              title="Thông tin công ty"
-              description="Xem và chỉnh sửa thông tin"
-              onClick={handleProfileClick}
-            />
-            <ActionCard
-              icon={<ServicesIcon fontSize="medium" />}
-              title="Danh mục dịch vụ"
-              description="Quản lý dịch vụ cung cấp"
-              onClick={() => navigate('/company/services')}
-            />
-            <ActionCard
-              icon={<VehiclesIcon fontSize="medium" />}
-              title="Phương tiện cứu hộ"
-              description="Quản lý xe cứu hộ"
-              onClick={() => navigate('/company/vehicles')}
-            />
-          </Box>
+        <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+          <StatCard value={counts.waiting} label="Đang chờ" color={ORANGE} hoverColor={ORANGE} />
+          <StatCard value={counts.inProgress} label="Đang thực hiện" color={NAVY} hoverColor={NAVY} />
+          <StatCard value={counts.done} label="Hoàn thành" color="#16a34a" hoverColor="#16a34a" />
+          <StatCard value={counts.cancelled} label="Đã hủy" color="#dc2626" hoverColor="#dc2626" />
+        </Box>
+
+        <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <ActionCard
+            icon={<ApartmentIcon sx={{ fontSize: 24 }} />}
+            title="Thông tin công ty"
+            description="Xem và chỉnh sửa thông tin"
+            onClick={() => navigate('/company/profile')}
+          />
+          <ActionCard
+            icon={<ServicesIcon sx={{ fontSize: 24 }} />}
+            title="Danh mục dịch vụ"
+            description="Quản lý dịch vụ cung cấp"
+            onClick={() => navigate('/company/services')}
+          />
+          <ActionCard
+            icon={<VehiclesIcon sx={{ fontSize: 24 }} />}
+            title="Phương tiện cứu hộ"
+            description="Quản lý xe cứu hộ"
+            onClick={() => navigate('/company/vehicles')}
+          />
         </Box>
       </Box>
     </MobileLayout>

@@ -58,7 +58,7 @@ export const useLogin = () => {
           if (response.data.role === 'customer') {
             navigate('/', { replace: true });
           } else if (response.data.role === 'company') {
-            navigate('/company', { replace: true });
+            navigate('/company/home', { replace: true });
           }
         }
       } catch (error: unknown) {

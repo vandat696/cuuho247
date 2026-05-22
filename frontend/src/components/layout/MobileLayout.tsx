@@ -11,14 +11,15 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       className="mobile-shell"
       sx={{
         width: '100%',
-        maxWidth: '430px' /* var(--mobile-max) */,
-        minHeight: '100dvh',
-        backgroundColor: 'background.default',
+        maxWidth: '375px',
+        minHeight: '100vh',
+        backgroundColor: '#fff',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)',
         display: 'flex',
         flexDirection: 'column',
         overflowX: 'hidden',
         position: 'relative',
-        margin: '0 auto' /* To center it when window > max-width */,
+        margin: '0 auto',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >

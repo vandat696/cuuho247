@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldOutlined as ShieldOutlinedIcon } from '@mui/icons-material';
+import { ApartmentOutlined as ApartmentIcon } from '@mui/icons-material';
 
 interface AppHeaderProps {
   title: string;
@@ -25,21 +25,22 @@ export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHead
       {showBack ? (
         <button type="button" className="app-header__back" onClick={handleBack} aria-label="Quay lại">
           <svg
-            width="20"
-            height="20"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M15 18l-6-6 6-6" />
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
           </svg>
         </button>
       ) : (
         <div className="app-header__logo" aria-hidden="true">
-          <ShieldOutlinedIcon sx={{ fontSize: 18 }} />
+          <ApartmentIcon sx={{ fontSize: 24 }} />
         </div>
       )}
 
