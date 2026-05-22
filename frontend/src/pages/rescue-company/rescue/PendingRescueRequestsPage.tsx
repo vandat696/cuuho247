@@ -131,7 +131,7 @@ export default function PendingRescueRequestsPage() {
               <RequestCard
                 key={request._id}
                 request={request}
-                onViewDetail={() => navigate(`/company/rescue/pending/${request._id}`)}
+                onViewDetail={() => navigate(`/company/rescue/pending/detail/${request._id}`)}
               />
             ))}
           </Box>

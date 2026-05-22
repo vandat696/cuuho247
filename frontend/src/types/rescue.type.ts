@@ -103,6 +103,22 @@ export interface PendingRescueRequestsResult {
   requests: PendingRescueRequest[];
 }
 
+export interface PendingRescueRequestDetail extends PendingRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+  incident_photos: string[];
+  location?: {
+    type: 'Point';
+    coordinates: number[];
+  };
+}
+
+export interface PendingRescueRequestDetailResult {
+  request: PendingRescueRequestDetail;
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {

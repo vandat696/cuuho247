@@ -21,6 +21,32 @@ class RescueController {
     }
   }
 
+  async getCompanyPendingRequestDetail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const request = await rescueService.getPendingRequestDetailForCompany(companyId, requestId);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy yêu cầu đang chờ',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy chi tiết yêu cầu đang chờ thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   /**
    * GET /api/rescue/companies
    * Query params: lat, lng, incident_type, max_distance_km

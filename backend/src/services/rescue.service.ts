@@ -2,6 +2,7 @@ import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
 import { RescueRequest } from '../models/RescueRequest.model';
+import { isValidObjectId } from 'mongoose';
 
 export interface SearchParams {
   lat: number;
@@ -41,6 +42,18 @@ export interface PendingRescueRequestResult {
   status?: string;
 }
 
+export interface PendingRescueRequestDetailResult extends PendingRescueRequestResult {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+  incident_photos: string[];
+  location?: {
+    type: 'Point';
+    coordinates: number[];
+  };
+}
+
 class RescueService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
     const company = await companyRepository.findById(companyId);
@@ -77,6 +90,59 @@ class RescueService {
         status: request.status,
       };
     });
+  }
+
+  async getPendingRequestDetailForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<PendingRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const company = await companyRepository.findById(companyId);
+    const companyCoords = company?.location?.coordinates;
+
+    const request = (await RescueRequest.findOne({
+      _id: requestId,
+      'company.company_id': companyId,
+      status: 'pending',
+    })
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    const requestCoords = request.location?.coordinates;
+    const serviceName = request.service_types?.[0]?.name;
+    const title = serviceName || this.getTitleFromDescription(request.description);
+
+    let distanceKm: number | null = null;
+    if (companyCoords && requestCoords) {
+      distanceKm =
+        Math.round(this.calcDistanceKm(companyCoords[1], companyCoords[0], requestCoords[1], requestCoords[0]) * 10) /
+        10;
+    }
+
+    return {
+      _id: request._id.toString(),
+      title,
+      description: request.description,
+      distance_km: distanceKm,
+      created_at: request.created_at,
+      address: request.address,
+      status: request.status,
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+      incident_photos: request.incident_photos || [],
+      location: request.location,
+    };
   }
 
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {

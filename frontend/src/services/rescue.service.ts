@@ -1,6 +1,11 @@
 import { http } from './http';
 import { ApiResponse } from '../types/common.type';
-import { PendingRescueRequestsResult, SearchCompaniesParams, SearchCompaniesResult } from '../types/rescue.type';
+import {
+  PendingRescueRequestDetailResult,
+  PendingRescueRequestsResult,
+  SearchCompaniesParams,
+  SearchCompaniesResult,
+} from '../types/rescue.type';
 
 export const rescueService = {
   searchCompanies: async (params: SearchCompaniesParams): Promise<ApiResponse<SearchCompaniesResult>> => {
@@ -20,6 +25,13 @@ export const rescueService = {
 
   getCompanyPendingRequests: async (): Promise<ApiResponse<PendingRescueRequestsResult>> => {
     const response = await http.get<ApiResponse<PendingRescueRequestsResult>>('/rescue/company/pending');
+    return response.data;
+  },
+
+  getCompanyPendingRequestDetail: async (requestId: string): Promise<ApiResponse<PendingRescueRequestDetailResult>> => {
+    const response = await http.get<ApiResponse<PendingRescueRequestDetailResult>>(
+      `/rescue/company/pending/${requestId}`
+    );
     return response.data;
   },
 };
