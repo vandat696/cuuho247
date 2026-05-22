@@ -51,7 +51,8 @@ function App() {
         <Route path="/register/customer" element={<CustomerRegisterPage />} />
         <Route path="/register/company" element={<CompanyRegisterPage />} />
 
-        <Route path="/company" element={<CompanyHomePage />} />
+        <Route path="/company" element={<Navigate to="/company/home" replace />} />
+        <Route path="/company/home" element={<CompanyHomePage />} />
         <Route path="/company/profile" element={<CompanyProfilePage />} />
         {/* <Route
           path="/company/:id"

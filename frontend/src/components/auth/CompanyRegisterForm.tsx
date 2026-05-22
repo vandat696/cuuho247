@@ -225,23 +225,14 @@ const CompanyRegisterForm = () => {
       });
 
       if (response.status === 'success') {
-        toast.success('Đăng ký tài khoản Công ty thành công! Vui lòng chờ xác minh.');
-        setFormData({
-          company_name: '',
-          director_name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          phone: '',
-          address: '',
-          company_location: null,
-          service_area: '',
-          license_file: null,
-          terms_accepted: false,
-        });
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        const loginResponse = await authService.login(formData.email.trim(), formData.password);
+        localStorage.setItem('accessToken', loginResponse.data.access_token);
+        localStorage.setItem('role', loginResponse.data.role);
+        localStorage.setItem('accountId', loginResponse.data.user._id);
+        localStorage.setItem('companyId', loginResponse.data.user._id);
+        toast.success('Đăng ký thành công!');
+        navigate('/company/home', { replace: true });
+        return;
       }
     } catch (error: any) {
       const apiData = error.response?.data;

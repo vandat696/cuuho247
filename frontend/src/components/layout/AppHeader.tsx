@@ -43,7 +43,7 @@ export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHead
         </div>
       )}
 
-      <div className="app-header__center">
+      <div className={showBack ? 'app-header__center' : 'app-header__center app-header__center--start'}>
         <h1 className="app-header__title">{title}</h1>
       </div>
 
