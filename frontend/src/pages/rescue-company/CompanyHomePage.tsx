@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Badge, Box, IconButton, Typography } from '@mui/material';
 import {
   ApartmentOutlined as ApartmentIcon,
   DescriptionOutlined as ServicesIcon,
@@ -11,13 +11,16 @@ import {
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Company } from '@/types/common.type';
+import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
+import { rescueService } from '@/services/rescue.service';
 import { toast } from 'react-hot-toast';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';
 const CARD_RADIUS = '12px';
 const CIRCLE_RADIUS = '9999px';
+const NOTIFICATION_POLL_MS = 15000;
 
 const StatCard = ({
   value,
@@ -101,14 +104,24 @@ const ActionCard = ({
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({ waiting: 0, inProgress: 0, done: 0, cancelled: 0 });
+  const [counts, setCounts] = useState({ waiting: 0, inProgress: 3, done: 12, cancelled: 2 });
   const [company, setCompany] = useState<Company | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<PendingRescueRequest[]>([]);
+  const knownPendingIdsRef = useRef<Set<string>>(new Set());
+  const hasInitializedNotificationsRef = useRef(false);
 
   useEffect(() => {
-    fetchData();
+    fetchCompanyProfile();
+    fetchPendingRequests({ notifyNew: false });
+
+    const intervalId = window.setInterval(() => {
+      fetchPendingRequests({ notifyNew: true });
+    }, NOTIFICATION_POLL_MS);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
-  const fetchData = async () => {
+  const fetchCompanyProfile = async () => {
     try {
       const response = await companyService.getProfile();
       if (response.status === 'success') {
@@ -118,8 +131,40 @@ export default function CompanyHomePage() {
       console.error('Error fetching company profile:', error);
       toast.error('Không thể tải thông tin công ty');
     }
+  };
 
-    setCounts({ waiting: 5, inProgress: 3, done: 12, cancelled: 2 });
+  const fetchPendingRequests = async ({ notifyNew }: { notifyNew: boolean }) => {
+    try {
+      const response = await rescueService.getCompanyPendingRequests();
+      if (response.status !== 'success') return;
+
+      const requests = response.data.requests;
+      setPendingRequests(requests);
+      setCounts((prev) => ({ ...prev, waiting: response.data.total }));
+
+      const nextIds = new Set(requests.map((request) => request._id));
+
+      if (!hasInitializedNotificationsRef.current) {
+        knownPendingIdsRef.current = nextIds;
+        hasInitializedNotificationsRef.current = true;
+        return;
+      }
+
+      const newRequests = requests.filter((request) => !knownPendingIdsRef.current.has(request._id));
+      knownPendingIdsRef.current = nextIds;
+
+      if (notifyNew && newRequests.length > 0) {
+        const firstRequest = newRequests[0];
+        toast.success(
+          newRequests.length === 1
+            ? `Có yêu cầu cứu hộ mới: ${firstRequest.title}`
+            : `Có ${newRequests.length} yêu cầu cứu hộ mới`,
+          { duration: 5000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching pending rescue notifications:', error);
+    }
   };
 
   const companyName = company?.company_name || 'Cứu hộ Minh Anh';
@@ -130,8 +175,27 @@ export default function CompanyHomePage() {
         title="Cứu hộ 247"
         showBack={false}
         rightSlot={
-          <IconButton aria-label="Thông báo" size="small" sx={{ p: 1, color: '#fff' }}>
-            <NotificationsIcon sx={{ fontSize: 24 }} />
+          <IconButton
+            aria-label="Thông báo yêu cầu cứu hộ"
+            size="small"
+            onClick={() => navigate('/company/notifications')}
+            sx={{ p: 1, color: '#fff' }}
+          >
+            <Badge
+              badgeContent={pendingRequests.length}
+              color="error"
+              overlap="circular"
+              sx={{
+                '& .MuiBadge-badge': {
+                  minWidth: 16,
+                  height: 16,
+                  fontSize: 10,
+                  fontWeight: 700,
+                },
+              }}
+            >
+              <NotificationsIcon sx={{ fontSize: 24 }} />
+            </Badge>
           </IconButton>
         }
       />
