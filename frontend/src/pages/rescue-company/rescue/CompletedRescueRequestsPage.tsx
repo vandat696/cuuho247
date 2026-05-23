@@ -24,6 +24,7 @@ interface MetaRowProps {
 
 interface CompletedRequestCardProps {
   request: CompletedRescueRequest;
+  onViewDetail: () => void;
 }
 
 const formatAddress = (address?: Record<string, unknown>) => {
@@ -55,7 +56,7 @@ const MetaRow = ({ icon, value }: MetaRowProps) => (
   </Box>
 );
 
-const CompletedRequestCard = ({ request }: CompletedRequestCardProps) => (
+const CompletedRequestCard = ({ request, onViewDetail }: CompletedRequestCardProps) => (
   <Box
     sx={{
       p: 2,
@@ -96,7 +97,7 @@ const CompletedRequestCard = ({ request }: CompletedRequestCardProps) => (
     <Box
       component="button"
       type="button"
-      onClick={() => toast('Tính năng xem chi tiết nhiệm vụ đã hoàn thành đang được phát triển')}
+      onClick={onViewDetail}
       sx={{
         width: '100%',
         py: 1,
@@ -159,7 +160,11 @@ export default function CompletedRescueRequestsPage() {
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {requests.map((request) => (
-              <CompletedRequestCard key={request._id} request={request} />
+              <CompletedRequestCard
+                key={request._id}
+                request={request}
+                onViewDetail={() => navigate(`/company/rescue/completed/detail/${request._id}`)}
+              />
             ))}
           </Box>
         )}

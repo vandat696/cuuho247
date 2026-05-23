@@ -66,6 +66,13 @@ export interface CompletedRescueRequestResult extends ActiveRescueRequestResult 
   completed_at?: Date;
 }
 
+export interface CompletedRescueRequestDetailResult extends CompletedRescueRequestResult {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
 export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResult {
   customer: {
     full_name: string;
@@ -280,6 +287,54 @@ class RescueService {
         };
       })
     );
+  }
+
+  async getCompletedRequestDetailForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<CompletedRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const request = (await RescueRequest.findOne({
+      _id: requestId,
+      'company.company_id': companyId,
+      status: 'completed',
+    })
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    const serviceName = request.service_types?.[0]?.name;
+    const title = serviceName || this.getTitleFromDescription(request.description);
+    const vehicle = request.vehicle?.vehicle_id
+      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+      : null;
+
+    return {
+      _id: request._id.toString(),
+      title,
+      description: request.description,
+      distance_km: null,
+      created_at: request.created_at,
+      completed_at: request.completed_at,
+      address: request.address,
+      status: request.status,
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+      vehicle: {
+        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+      },
+    };
   }
 
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {

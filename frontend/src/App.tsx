@@ -19,6 +19,7 @@ import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
 import ActiveRescueRequestDetailPage from './pages/rescue-company/rescue/ActiveRescueRequestDetailPage';
 import ActiveRescueRequestsPage from './pages/rescue-company/rescue/ActiveRescueRequestsPage';
+import CompletedRescueRequestDetailPage from './pages/rescue-company/rescue/CompletedRescueRequestDetailPage';
 import CompletedRescueRequestsPage from './pages/rescue-company/rescue/CompletedRescueRequestsPage';
 import PendingRescueRequestsPage from './pages/rescue-company/rescue/PendingRescueRequestsPage';
 import PendingRescueRequestDetailPage from './pages/rescue-company/rescue/PendingRescueRequestDetailPage';
@@ -65,6 +66,8 @@ function App() {
         <Route path="/company/rescue/active/detail" element={<Navigate to="/company/rescue/active" replace />} />
         <Route path="/company/rescue/active/detail/:requestId" element={<ActiveRescueRequestDetailPage />} />
         <Route path="/company/rescue/completed" element={<CompletedRescueRequestsPage />} />
+        <Route path="/company/rescue/completed/detail" element={<Navigate to="/company/rescue/completed" replace />} />
+        <Route path="/company/rescue/completed/detail/:requestId" element={<CompletedRescueRequestDetailPage />} />
         <Route path="/company/rescue/pending" element={<PendingRescueRequestsPage />} />
         <Route path="/company/rescue/pending/detail/:requestId" element={<PendingRescueRequestDetailPage />} />
         <Route path="/company/rescue/pending/:requestId" element={<PendingRescueRequestDetailPage />} />

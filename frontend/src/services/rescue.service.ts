@@ -3,6 +3,7 @@ import { ApiResponse } from '../types/common.type';
 import {
   ActiveRescueRequestDetailResult,
   ActiveRescueRequestsResult,
+  CompletedRescueRequestDetailResult,
   CompletedRescueRequestsResult,
   PendingRescueRequestDetailResult,
   PendingRescueRequestsResult,
@@ -45,6 +46,15 @@ export const rescueService = {
 
   getCompanyCompletedRequests: async (): Promise<ApiResponse<CompletedRescueRequestsResult>> => {
     const response = await http.get<ApiResponse<CompletedRescueRequestsResult>>('/rescue/company/completed');
+    return response.data;
+  },
+
+  getCompanyCompletedRequestDetail: async (
+    requestId: string
+  ): Promise<ApiResponse<CompletedRescueRequestDetailResult>> => {
+    const response = await http.get<ApiResponse<CompletedRescueRequestDetailResult>>(
+      `/rescue/company/completed/${requestId}`
+    );
     return response.data;
   },
 

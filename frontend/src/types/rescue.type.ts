@@ -151,6 +151,17 @@ export interface CompletedRescueRequestsResult {
   requests: CompletedRescueRequest[];
 }
 
+export interface CompletedRescueRequestDetail extends CompletedRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface CompletedRescueRequestDetailResult {
+  request: CompletedRescueRequestDetail;
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {
