@@ -91,6 +91,50 @@ class RescueController {
     }
   }
 
+  async getCompanyCanceledRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const requests = await rescueService.getCanceledRequestsForCompany(companyId);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy danh sách nhiệm vụ đã hủy thành công',
+        data: {
+          total: requests.length,
+          requests,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCompanyCanceledRequestDetail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const request = await rescueService.getCanceledRequestDetailForCompany(companyId, requestId);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy nhiệm vụ đã hủy',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy chi tiết nhiệm vụ đã hủy thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getCompanyPendingRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;

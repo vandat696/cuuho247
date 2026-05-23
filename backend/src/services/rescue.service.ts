@@ -73,6 +73,18 @@ export interface CompletedRescueRequestDetailResult extends CompletedRescueReque
   };
 }
 
+export interface CanceledRescueRequestResult extends ActiveRescueRequestResult {
+  cancelled_at?: Date;
+  cancellation?: Record<string, unknown>;
+}
+
+export interface CanceledRescueRequestDetailResult extends CanceledRescueRequestResult {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
 export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResult {
   customer: {
     full_name: string;
@@ -324,6 +336,92 @@ class RescueService {
       distance_km: null,
       created_at: request.created_at,
       completed_at: request.completed_at,
+      address: request.address,
+      status: request.status,
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+      vehicle: {
+        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+      },
+    };
+  }
+
+  async getCanceledRequestsForCompany(companyId: string): Promise<CanceledRescueRequestResult[]> {
+    const requests = await RescueRequest.find({
+      'company.company_id': companyId,
+      status: 'cancelled',
+    })
+      .populate('service_types', 'name slug')
+      .sort({ cancelled_at: -1, updated_at: -1, created_at: -1 })
+      .lean()
+      .exec();
+
+    return Promise.all(
+      requests.map(async (request: any) => {
+        const serviceName = request.service_types?.[0]?.name;
+        const title = serviceName || this.getTitleFromDescription(request.description);
+        const vehicle = request.vehicle?.vehicle_id
+          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+          : null;
+
+        return {
+          _id: request._id.toString(),
+          title,
+          description: request.description,
+          distance_km: null,
+          created_at: request.created_at,
+          cancelled_at: request.cancelled_at,
+          cancellation: request.cancellation,
+          address: request.address,
+          status: request.status,
+          vehicle: {
+            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+          },
+        };
+      })
+    );
+  }
+
+  async getCanceledRequestDetailForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<CanceledRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const request = (await RescueRequest.findOne({
+      _id: requestId,
+      'company.company_id': companyId,
+      status: 'cancelled',
+    })
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    const serviceName = request.service_types?.[0]?.name;
+    const title = serviceName || this.getTitleFromDescription(request.description);
+    const vehicle = request.vehicle?.vehicle_id
+      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+      : null;
+
+    return {
+      _id: request._id.toString(),
+      title,
+      description: request.description,
+      distance_km: null,
+      created_at: request.created_at,
+      cancelled_at: request.cancelled_at,
+      cancellation: request.cancellation,
       address: request.address,
       status: request.status,
       customer: {

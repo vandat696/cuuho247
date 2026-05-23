@@ -114,6 +114,7 @@ export default function CompanyHomePage() {
     fetchCompanyProfile();
     fetchActiveRequestsCount();
     fetchCompletedRequestsCount();
+    fetchCanceledRequestsCount();
     fetchPendingRequests({ notifyNew: false });
 
     const intervalId = window.setInterval(() => {
@@ -188,6 +189,17 @@ export default function CompanyHomePage() {
       }
     } catch (error) {
       console.error('Error fetching completed rescue count:', error);
+    }
+  };
+
+  const fetchCanceledRequestsCount = async () => {
+    try {
+      const response = await rescueService.getCompanyCanceledRequests();
+      if (response.status === 'success') {
+        setCounts((prev) => ({ ...prev, cancelled: response.data.total }));
+      }
+    } catch (error) {
+      console.error('Error fetching canceled rescue count:', error);
     }
   };
 
@@ -267,7 +279,13 @@ export default function CompanyHomePage() {
             hoverColor="#16a34a"
             onClick={() => navigate('/company/rescue/completed')}
           />
-          <StatCard value={counts.cancelled} label="Đã hủy" color="#dc2626" hoverColor="#dc2626" />
+          <StatCard
+            value={counts.cancelled}
+            label="Đã hủy"
+            color="#dc2626"
+            hoverColor="#dc2626"
+            onClick={() => navigate('/company/rescue/canceled')}
+          />
         </Box>
 
         <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>

@@ -19,6 +19,13 @@ router.get(
   authorize(['company']),
   rescueController.getCompanyCompletedRequestDetail
 );
+router.get('/company/canceled', authenticate, authorize(['company']), rescueController.getCompanyCanceledRequests);
+router.get(
+  '/company/canceled/:requestId',
+  authenticate,
+  authorize(['company']),
+  rescueController.getCompanyCanceledRequestDetail
+);
 router.get('/company/pending', authenticate, authorize(['company']), rescueController.getCompanyPendingRequests);
 router.get(
   '/company/pending/:requestId',

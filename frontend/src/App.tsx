@@ -19,6 +19,8 @@ import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
 import ActiveRescueRequestDetailPage from './pages/rescue-company/rescue/ActiveRescueRequestDetailPage';
 import ActiveRescueRequestsPage from './pages/rescue-company/rescue/ActiveRescueRequestsPage';
+import CanceledRescueRequestDetailPage from './pages/rescue-company/rescue/CanceledRescueRequestDetailPage';
+import CanceledRescueRequestsPage from './pages/rescue-company/rescue/CanceledRescueRequestsPage';
 import CompletedRescueRequestDetailPage from './pages/rescue-company/rescue/CompletedRescueRequestDetailPage';
 import CompletedRescueRequestsPage from './pages/rescue-company/rescue/CompletedRescueRequestsPage';
 import PendingRescueRequestsPage from './pages/rescue-company/rescue/PendingRescueRequestsPage';
@@ -68,6 +70,9 @@ function App() {
         <Route path="/company/rescue/completed" element={<CompletedRescueRequestsPage />} />
         <Route path="/company/rescue/completed/detail" element={<Navigate to="/company/rescue/completed" replace />} />
         <Route path="/company/rescue/completed/detail/:requestId" element={<CompletedRescueRequestDetailPage />} />
+        <Route path="/company/rescue/canceled" element={<CanceledRescueRequestsPage />} />
+        <Route path="/company/rescue/canceled/detail" element={<Navigate to="/company/rescue/canceled" replace />} />
+        <Route path="/company/rescue/canceled/detail/:requestId" element={<CanceledRescueRequestDetailPage />} />
         <Route path="/company/rescue/pending" element={<PendingRescueRequestsPage />} />
         <Route path="/company/rescue/pending/detail/:requestId" element={<PendingRescueRequestDetailPage />} />
         <Route path="/company/rescue/pending/:requestId" element={<PendingRescueRequestDetailPage />} />

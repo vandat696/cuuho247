@@ -162,6 +162,30 @@ export interface CompletedRescueRequestDetailResult {
   request: CompletedRescueRequestDetail;
 }
 
+export interface CanceledRescueRequest extends ActiveRescueRequest {
+  cancelled_at?: string;
+  cancellation?: {
+    cancelled_by?: string;
+    reason?: string;
+  };
+}
+
+export interface CanceledRescueRequestsResult {
+  total: number;
+  requests: CanceledRescueRequest[];
+}
+
+export interface CanceledRescueRequestDetail extends CanceledRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface CanceledRescueRequestDetailResult {
+  request: CanceledRescueRequestDetail;
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {
