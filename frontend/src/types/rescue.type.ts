@@ -142,6 +142,15 @@ export interface ActiveRescueRequestDetailResult {
   request: ActiveRescueRequestDetail;
 }
 
+export interface CompletedRescueRequest extends ActiveRescueRequest {
+  completed_at?: string;
+}
+
+export interface CompletedRescueRequestsResult {
+  total: number;
+  requests: CompletedRescueRequest[];
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {

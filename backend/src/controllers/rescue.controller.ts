@@ -47,6 +47,24 @@ class RescueController {
     }
   }
 
+  async getCompanyCompletedRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const requests = await rescueService.getCompletedRequestsForCompany(companyId);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy danh sách nhiệm vụ đã hoàn thành thành công',
+        data: {
+          total: requests.length,
+          requests,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getCompanyPendingRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;

@@ -113,6 +113,7 @@ export default function CompanyHomePage() {
   useEffect(() => {
     fetchCompanyProfile();
     fetchActiveRequestsCount();
+    fetchCompletedRequestsCount();
     fetchPendingRequests({ notifyNew: false });
 
     const intervalId = window.setInterval(() => {
@@ -176,6 +177,17 @@ export default function CompanyHomePage() {
       }
     } catch (error) {
       console.error('Error fetching active rescue count:', error);
+    }
+  };
+
+  const fetchCompletedRequestsCount = async () => {
+    try {
+      const response = await rescueService.getCompanyCompletedRequests();
+      if (response.status === 'success') {
+        setCounts((prev) => ({ ...prev, done: response.data.total }));
+      }
+    } catch (error) {
+      console.error('Error fetching completed rescue count:', error);
     }
   };
 
@@ -248,7 +260,13 @@ export default function CompanyHomePage() {
             hoverColor={NAVY}
             onClick={() => navigate('/company/rescue/active')}
           />
-          <StatCard value={counts.done} label="Hoàn thành" color="#16a34a" hoverColor="#16a34a" />
+          <StatCard
+            value={counts.done}
+            label="Hoàn thành"
+            color="#16a34a"
+            hoverColor="#16a34a"
+            onClick={() => navigate('/company/rescue/completed')}
+          />
           <StatCard value={counts.cancelled} label="Đã hủy" color="#dc2626" hoverColor="#dc2626" />
         </Box>
 

@@ -62,6 +62,10 @@ export interface ActiveRescueRequestResult extends PendingRescueRequestResult {
   };
 }
 
+export interface CompletedRescueRequestResult extends ActiveRescueRequestResult {
+  completed_at?: Date;
+}
+
 export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResult {
   customer: {
     full_name: string;
@@ -240,6 +244,42 @@ class RescueService {
         plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
       },
     };
+  }
+
+  async getCompletedRequestsForCompany(companyId: string): Promise<CompletedRescueRequestResult[]> {
+    const requests = await RescueRequest.find({
+      'company.company_id': companyId,
+      status: 'completed',
+    })
+      .populate('service_types', 'name slug')
+      .sort({ completed_at: -1, updated_at: -1, created_at: -1 })
+      .lean()
+      .exec();
+
+    return Promise.all(
+      requests.map(async (request: any) => {
+        const serviceName = request.service_types?.[0]?.name;
+        const title = serviceName || this.getTitleFromDescription(request.description);
+        const vehicle = request.vehicle?.vehicle_id
+          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+          : null;
+
+        return {
+          _id: request._id.toString(),
+          title,
+          description: request.description,
+          distance_km: null,
+          created_at: request.created_at,
+          completed_at: request.completed_at,
+          address: request.address,
+          status: request.status,
+          vehicle: {
+            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+          },
+        };
+      })
+    );
   }
 
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {
