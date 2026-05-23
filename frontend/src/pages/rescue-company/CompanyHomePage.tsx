@@ -112,6 +112,7 @@ export default function CompanyHomePage() {
 
   useEffect(() => {
     fetchCompanyProfile();
+    fetchActiveRequestsCount();
     fetchPendingRequests({ notifyNew: false });
 
     const intervalId = window.setInterval(() => {
@@ -164,6 +165,17 @@ export default function CompanyHomePage() {
       }
     } catch (error) {
       console.error('Error fetching pending rescue notifications:', error);
+    }
+  };
+
+  const fetchActiveRequestsCount = async () => {
+    try {
+      const response = await rescueService.getCompanyActiveRequests();
+      if (response.status === 'success') {
+        setCounts((prev) => ({ ...prev, inProgress: response.data.total }));
+      }
+    } catch (error) {
+      console.error('Error fetching active rescue count:', error);
     }
   };
 
@@ -229,7 +241,13 @@ export default function CompanyHomePage() {
             hoverColor={ORANGE}
             onClick={() => navigate('/company/rescue/pending')}
           />
-          <StatCard value={counts.inProgress} label="Đang thực hiện" color={NAVY} hoverColor={NAVY} />
+          <StatCard
+            value={counts.inProgress}
+            label="Đang thực hiện"
+            color={NAVY}
+            hoverColor={NAVY}
+            onClick={() => navigate('/company/rescue/active')}
+          />
           <StatCard value={counts.done} label="Hoàn thành" color="#16a34a" hoverColor="#16a34a" />
           <StatCard value={counts.cancelled} label="Đã hủy" color="#dc2626" hoverColor="#dc2626" />
         </Box>

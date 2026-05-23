@@ -2,6 +2,7 @@ import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
 import { RescueRequest } from '../models/RescueRequest.model';
+import { Vehicle } from '../models/Vehicle.model';
 import { isValidObjectId } from 'mongoose';
 
 export interface SearchParams {
@@ -51,6 +52,20 @@ export interface PendingRescueRequestDetailResult extends PendingRescueRequestRe
   location?: {
     type: 'Point';
     coordinates: number[];
+  };
+}
+
+export interface ActiveRescueRequestResult extends PendingRescueRequestResult {
+  vehicle: {
+    vehicle_type: string;
+    plate_number: string;
+  };
+}
+
+export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResult {
+  customer: {
+    full_name: string;
+    phone: string;
   };
 }
 
@@ -142,6 +157,88 @@ class RescueService {
       },
       incident_photos: request.incident_photos || [],
       location: request.location,
+    };
+  }
+
+  async getActiveRequestsForCompany(companyId: string): Promise<ActiveRescueRequestResult[]> {
+    const requests = await RescueRequest.find({
+      'company.company_id': companyId,
+      status: { $in: ['accepted', 'in_progress'] },
+    })
+      .populate('service_types', 'name slug')
+      .sort({ started_at: -1, accepted_at: -1, created_at: -1 })
+      .lean()
+      .exec();
+
+    return Promise.all(
+      requests.map(async (request: any) => {
+        const serviceName = request.service_types?.[0]?.name;
+        const title = serviceName || this.getTitleFromDescription(request.description);
+        const vehicle = request.vehicle?.vehicle_id
+          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+          : null;
+
+        return {
+          _id: request._id.toString(),
+          title,
+          description: request.description,
+          distance_km: null,
+          created_at: request.created_at,
+          address: request.address,
+          status: request.status,
+          vehicle: {
+            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+          },
+        };
+      })
+    );
+  }
+
+  async getActiveRequestDetailForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<ActiveRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const request = (await RescueRequest.findOne({
+      _id: requestId,
+      'company.company_id': companyId,
+      status: { $in: ['accepted', 'in_progress'] },
+    })
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    const serviceName = request.service_types?.[0]?.name;
+    const title = serviceName || this.getTitleFromDescription(request.description);
+    const vehicle = request.vehicle?.vehicle_id
+      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+      : null;
+
+    return {
+      _id: request._id.toString(),
+      title,
+      description: request.description,
+      distance_km: null,
+      created_at: request.created_at,
+      address: request.address,
+      status: request.status,
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+      vehicle: {
+        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+      },
     };
   }
 

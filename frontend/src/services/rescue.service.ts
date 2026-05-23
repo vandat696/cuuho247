@@ -1,6 +1,8 @@
 import { http } from './http';
 import { ApiResponse } from '../types/common.type';
 import {
+  ActiveRescueRequestDetailResult,
+  ActiveRescueRequestsResult,
   PendingRescueRequestDetailResult,
   PendingRescueRequestsResult,
   SearchCompaniesParams,
@@ -25,6 +27,18 @@ export const rescueService = {
 
   getCompanyPendingRequests: async (): Promise<ApiResponse<PendingRescueRequestsResult>> => {
     const response = await http.get<ApiResponse<PendingRescueRequestsResult>>('/rescue/company/pending');
+    return response.data;
+  },
+
+  getCompanyActiveRequests: async (): Promise<ApiResponse<ActiveRescueRequestsResult>> => {
+    const response = await http.get<ApiResponse<ActiveRescueRequestsResult>>('/rescue/company/active');
+    return response.data;
+  },
+
+  getCompanyActiveRequestDetail: async (requestId: string): Promise<ApiResponse<ActiveRescueRequestDetailResult>> => {
+    const response = await http.get<ApiResponse<ActiveRescueRequestDetailResult>>(
+      `/rescue/company/active/${requestId}`
+    );
     return response.data;
   },
 

@@ -119,6 +119,29 @@ export interface PendingRescueRequestDetailResult {
   request: PendingRescueRequestDetail;
 }
 
+export interface ActiveRescueRequest extends PendingRescueRequest {
+  vehicle: {
+    vehicle_type: string;
+    plate_number: string;
+  };
+}
+
+export interface ActiveRescueRequestsResult {
+  total: number;
+  requests: ActiveRescueRequest[];
+}
+
+export interface ActiveRescueRequestDetail extends ActiveRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface ActiveRescueRequestDetailResult {
+  request: ActiveRescueRequestDetail;
+}
+
 // ─── Navigation State (passed to results page) ────────────────────────────────
 
 export interface RescueSearchState {

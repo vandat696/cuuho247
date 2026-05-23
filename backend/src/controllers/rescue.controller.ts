@@ -3,6 +3,50 @@ import rescueService from '../services/rescue.service';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 class RescueController {
+  async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const requests = await rescueService.getActiveRequestsForCompany(companyId);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy danh sách nhiệm vụ đang thực hiện thành công',
+        data: {
+          total: requests.length,
+          requests,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCompanyActiveRequestDetail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const request = await rescueService.getActiveRequestDetailForCompany(companyId, requestId);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy nhiệm vụ đang thực hiện',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy chi tiết nhiệm vụ đang thực hiện thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getCompanyPendingRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;

@@ -5,6 +5,13 @@ import { authorize } from '@/middleware/authorize.middleware';
 
 const router = Router();
 
+router.get('/company/active', authenticate, authorize(['company']), rescueController.getCompanyActiveRequests);
+router.get(
+  '/company/active/:requestId',
+  authenticate,
+  authorize(['company']),
+  rescueController.getCompanyActiveRequestDetail
+);
 router.get('/company/pending', authenticate, authorize(['company']), rescueController.getCompanyPendingRequests);
 router.get(
   '/company/pending/:requestId',
