@@ -15,6 +15,8 @@ import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
 // import { ProtectedRoute } from './components/common/ProtectedRoute';
 import RescueRequestPage from '@/pages/customer/RescueRequestPage';
 import RescueResultsPage from '@/pages/customer/RescueResultsPage';
+import CompanyDetailsPage from '@/pages/customer/CompanyDetailsPage';
+import ConfirmRequestPage from '@/pages/customer/ConfirmRequestPage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
 
 function App() {
@@ -61,6 +63,8 @@ function App() {
         /> */}
         <Route path="/rescue/request" element={<RescueRequestPage />} />
         <Route path="/rescue/search" element={<RescueResultsPage />} />
+        <Route path="/rescue/company/:id" element={<CompanyDetailsPage />} />
+        <Route path="/rescue/confirm" element={<ConfirmRequestPage />} />
 
         <Route path="/showcase" element={<ShowcasePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
