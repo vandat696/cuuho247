@@ -6,6 +6,7 @@ Nền tảng số kết nối người tham gia giao thông gặp sự cố vớ
 
 - [Hướng dẫn cấu trúc & yêu cầu](./setup.md)
 - [Roadmap phiên bản tiếp theo](./roadmap.md)
+- [Đăng ký tài khoản Công ty](./docs/company-registration.md)
 
 ---
 

@@ -163,22 +163,22 @@ export const theme = createTheme({
       },
     },
     MuiCssBaseline: {
-      styleOverrides: `
-        * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
-        html {
-          -webkit-text-size-adjust: 100%;
-          scroll-behavior: smooth;
-        }
-        body {
-          background-color: #f5f7fa;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-      `,
+      styleOverrides: {
+        '*': {
+          boxSizing: 'border-box',
+          margin: 0,
+          padding: 0,
+        },
+        html: {
+          WebkitTextSizeAdjust: '100%',
+          scrollBehavior: 'smooth',
+        },
+        body: {
+          backgroundColor: '#f5f7fa',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+        },
+      },
     },
   },
 });

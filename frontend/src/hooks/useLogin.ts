@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import { authService } from '../services/auth.service';
 import { toast } from 'react-hot-toast';
 
 export const useLogin = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);

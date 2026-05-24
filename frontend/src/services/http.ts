@@ -13,6 +13,10 @@ const http = axios.create({
 // Add a request interceptor to attach the token
 http.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

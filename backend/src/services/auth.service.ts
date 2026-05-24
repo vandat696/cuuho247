@@ -35,6 +35,60 @@ class AuthService {
     return userResponse;
   }
 
+  async registerCompany(companyData: any) {
+    const {
+      email,
+      password,
+      company_name,
+      director_name,
+      phone,
+      address,
+      latitude,
+      longitude,
+      service_area,
+      license_file_url,
+    } = companyData;
+
+    // Check for duplicate data: email
+    const existingUser = await userRepository.findByEmail(email);
+    const existingCompany = await companyRepository.findByEmail(email);
+    if (existingUser || existingCompany) {
+      throw new ApiError(400, 'Email đã được sử dụng');
+    }
+
+    // Hash password when register
+    const hashedPassword = await hashPassword(password);
+
+    // Save to Database
+    const newCompany = await companyRepository.create({
+      email,
+      password_hash: hashedPassword,
+      company_name,
+      director_name,
+      phone,
+      address: {
+        province: 'Chưa cập nhật',
+        district: 'Chưa cập nhật',
+        ward: 'Chưa cập nhật',
+        detail: address,
+      },
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
+      service_area,
+      license_file_url,
+      status: 'pending_verification',
+      is_verified: false,
+    });
+
+    // Return data without password hash
+    const companyResponse = newCompany.toObject();
+    delete companyResponse.password_hash;
+
+    return companyResponse;
+  }
+
   async login(userData: any) {
     const { email, password } = userData;
 
@@ -69,6 +123,25 @@ class AuthService {
 
     if (!isPasswordValid) {
       throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+    }
+
+    // Company-specific checks
+    if (role === 'company') {
+      const status = account.status as string | undefined;
+      const isVerified = Boolean(account.is_verified);
+
+      if (status === 'locked') {
+        throw new ApiError(403, 'Tài khoản công ty đã bị khóa');
+      }
+      if (status === 'rejected') {
+        throw new ApiError(403, 'Hồ sơ công ty đã bị từ chối. Vui lòng liên hệ hỗ trợ');
+      }
+      if (status === 'pending_verification' || !isVerified) {
+        throw new ApiError(403, 'Tài khoản công ty chưa được xác minh. Vui lòng chờ quản trị viên phê duyệt');
+      }
+      if (status && status !== 'active') {
+        throw new ApiError(403, 'Tài khoản công ty không ở trạng thái hoạt động');
+      }
     }
 
     // 5. Update last login time

@@ -6,6 +6,9 @@ class CompanyRepository {
   }
 
   // Create new company
+  async create(companyData: Partial<ICompany>): Promise<ICompany> {
+    return Company.create(companyData);
+  }
 
   // Update last login time
   async updateById(companyId: string, updateData: Partial<ICompany>): Promise<ICompany | null> {
