@@ -22,8 +22,6 @@ interface ConfirmRequestCardProps {
   onConfirm: () => void;
   onBack: () => void;
   loading?: boolean;
-  isSubmitted?: boolean;
-  onCancel?: () => void;
 }
 
 export function ConfirmRequestCard({
@@ -35,65 +33,36 @@ export function ConfirmRequestCard({
   onConfirm,
   onBack,
   loading = false,
-  isSubmitted = false,
-  onCancel,
 }: ConfirmRequestCardProps) {
   const formatPrice = (price: number) => new Intl.NumberFormat('vi-VN').format(price);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Alert */}
-      {isSubmitted ? (
-        <Box
-          sx={{
-            bgcolor: '#ecfdf5',
-            border: '1px solid #10b981',
-            borderRadius: '12px',
-            p: 2,
-            display: 'flex',
-            gap: 1.5,
-          }}
-        >
-          <Box sx={{ color: '#059669', mt: 0.25 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" sx={{ color: '#047857', fontWeight: 700, mb: 0.5 }}>
-              Gửi yêu cầu thành công!
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#065f46' }}>
-              Công ty cứu hộ đã nhận được thông tin và sẽ liên hệ với bạn.
-            </Typography>
-          </Box>
+      <Box
+        sx={{
+          bgcolor: '#fff7ed',
+          border: '1px solid #f97316',
+          borderRadius: '12px',
+          p: 2,
+          display: 'flex',
+          gap: 1.5,
+        }}
+      >
+        <Box sx={{ color: '#ea580c', mt: 0.25 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+          </svg>
         </Box>
-      ) : (
-        <Box
-          sx={{
-            bgcolor: '#fff7ed',
-            border: '1px solid #f97316',
-            borderRadius: '12px',
-            p: 2,
-            display: 'flex',
-            gap: 1.5,
-          }}
-        >
-          <Box sx={{ color: '#ea580c', mt: 0.25 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-            </svg>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" sx={{ color: '#c2410c', fontWeight: 700, mb: 0.5 }}>
-              Vui lòng kiểm tra thông tin
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#475569' }}>
-              Đảm bảo thông tin chính xác trước khi gửi yêu cầu cứu hộ.
-            </Typography>
-          </Box>
+        <Box>
+          <Typography variant="subtitle2" sx={{ color: '#c2410c', fontWeight: 700, mb: 0.5 }}>
+            Vui lòng kiểm tra thông tin
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#475569' }}>
+            Đảm bảo thông tin chính xác trước khi gửi yêu cầu cứu hộ.
+          </Typography>
         </Box>
-      )}
+      </Box>
 
       {/* Incident Info */}
       <Box
@@ -188,60 +157,26 @@ export function ConfirmRequestCard({
 
       {/* Actions */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
-        {isSubmitted ? (
-          <>
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={onCancel}
-              loading={loading}
-              sx={{
-                height: 52,
-                fontSize: 16,
-                borderRadius: '12px',
-                color: '#ef4444',
-                borderColor: '#fee2e2',
-                '&:hover': { bgcolor: '#fef2f2', borderColor: '#fca5a5' },
-              }}
-            >
-              Hủy yêu cầu
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={onBack}
-              disabled={loading}
-              sx={{ height: 52, fontSize: 16, borderRadius: '12px' }}
-            >
-              Quay lại màn hình chính
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={onConfirm}
-              loading={loading}
-              sx={{ height: 52, fontSize: 16, borderRadius: '12px' }}
-            >
-              Xác nhận yêu cầu
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={onBack}
-              disabled={loading}
-              sx={{ height: 52, fontSize: 16, borderRadius: '12px' }}
-            >
-              Quay lại
-            </Button>
-          </>
-        )}
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          onClick={onConfirm}
+          loading={loading}
+          sx={{ height: 52, fontSize: 16, borderRadius: '12px' }}
+        >
+          Xác nhận yêu cầu
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          fullWidth
+          onClick={onBack}
+          disabled={loading}
+          sx={{ height: 52, fontSize: 16, borderRadius: '12px' }}
+        >
+          Quay lại
+        </Button>
       </Box>
     </Box>
   );

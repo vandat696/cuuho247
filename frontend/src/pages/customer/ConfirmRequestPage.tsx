@@ -15,8 +15,6 @@ export default function ConfirmRequestPage() {
   const locationState = useLocation().state as { formData: RescueFormData; company: CompanyResult } | null;
 
   const [loading, setLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [requestId, setRequestId] = useState<string | null>(null);
 
   if (!locationState) {
     return (
@@ -47,32 +45,12 @@ export default function ConfirmRequestPage() {
         address: formData.location?.address,
       };
 
-      const res = await rescueRequestService.createRequest(payload);
+      await rescueRequestService.createRequest(payload);
 
-      setRequestId(res.data._id);
-      setIsSubmitted(true);
       toast.success('Gửi yêu cầu thành công!');
+      navigate('/'); // Redirect to home immediately
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra khi gửi yêu cầu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (!requestId) return;
-
-    setLoading(true);
-    try {
-      await rescueRequestService.cancelRequest(requestId);
-
-      toast.success('Đã hủy yêu cầu thành công');
-      setIsSubmitted(false);
-      setRequestId(null);
-      // Quay về màn hình danh sách các công ty cứu hộ (quay lại 2 bước)
-      navigate(-2);
-    } catch (error: any) {
-      toast.error(error.message || 'Không thể hủy yêu cầu');
     } finally {
       setLoading(false);
     }
@@ -98,16 +76,8 @@ export default function ConfirmRequestPage() {
             maxPrice: 300000,
           }}
           onConfirm={handleConfirm}
-          onBack={() => {
-            if (isSubmitted) {
-              navigate('/'); // Quay về trang chủ
-            } else {
-              navigate(-1); // Quay lại trang công ty
-            }
-          }}
+          onBack={() => navigate(-1)}
           loading={loading}
-          isSubmitted={isSubmitted}
-          onCancel={handleCancel}
         />
       </Box>
     </MobileLayout>
