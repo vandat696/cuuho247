@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { ValidationErrorItem } from 'joi';
 import { AuthRequest } from '@/middleware/auth.middleware';
 import serviceService from '@/services/service.service';
 import serviceRepository from '@/repositories/service.repository';
@@ -36,7 +37,7 @@ class ServiceController {
 
       const { error, value } = createServiceSchema.validate(serviceData, { abortEarly: false });
       if (error) {
-        const errorMessages = error.details.map((detail) => detail.message);
+        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
         res.status(400).json({
           status: 'error',
           message: 'Dữ liệu không hợp lệ',
@@ -60,7 +61,7 @@ class ServiceController {
 
       const { error, value } = updateServiceSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        const errorMessages = error.details.map((detail) => detail.message);
+        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
         res.status(400).json({
           status: 'error',
           message: 'Dữ liệu không hợp lệ',

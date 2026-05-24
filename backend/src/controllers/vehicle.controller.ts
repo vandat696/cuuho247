@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { ValidationErrorItem } from 'joi';
 import { vehicleService } from '../services/vehicle.service';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { createVehicleSchema, updateVehicleSchema } from '../validators/vehicle.validator';
@@ -32,7 +33,7 @@ export class VehicleController {
 
       const { error, value } = createVehicleSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        const errorMessages = error.details.map((detail) => detail.message);
+        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
         res.status(400).json({
           status: 'error',
           message: 'Dữ liệu không hợp lệ',
@@ -55,7 +56,7 @@ export class VehicleController {
 
       const { error, value } = updateVehicleSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        const errorMessages = error.details.map((detail) => detail.message);
+        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
         res.status(400).json({
           status: 'error',
           message: 'Dữ liệu không hợp lệ',

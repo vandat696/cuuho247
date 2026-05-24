@@ -11,6 +11,7 @@ import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
 import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
+import CompanyRegisterPage from '@/pages/auth/CompanyRegisterPage';
 import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
 // import { ProtectedRoute } from './components/common/ProtectedRoute';
 import RescueRequestPage from '@/pages/customer/RescueRequestPage';
@@ -48,6 +49,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RoleSelectionPage />} />
         <Route path="/register/customer" element={<CustomerRegisterPage />} />
+        <Route path="/register/company" element={<CompanyRegisterPage />} />
 
         <Route path="/company" element={<CompanyHomePage />} />
         <Route path="/company/profile" element={<CompanyProfilePage />} />

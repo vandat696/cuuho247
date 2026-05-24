@@ -7,6 +7,13 @@ export const nameSchema = Joi.string().min(2).max(50).required().messages({
   'string.empty': 'Họ tên không được để trống',
 });
 
+export const companyNameSchema = Joi.string().min(2).max(100).required().messages({
+  'string.min': 'Tên công ty phải có ít nhất {#limit} ký tự',
+  'string.max': 'Tên công ty không được vượt quá {#limit} ký tự',
+  'any.required': 'Tên công ty là bắt buộc',
+  'string.empty': 'Tên công ty không được để trống',
+});
+
 export const phoneSchema = Joi.string()
   .allow('', null)
   .pattern(/^[0-9]{10,11}$/) // Vietnam's phone number
