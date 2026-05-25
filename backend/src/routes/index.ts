@@ -3,6 +3,7 @@ import authRoutes from './auth.route';
 import companyRoutes from './company.route';
 import vehicleRoutes from './vehicle.routes';
 import rescueRoutes from './rescue.route';
+import rescueRequestRoutes from './rescueRequest.route';
 import serviceRoutes from './service.route';
 import serviceCategoryRoutes from './serviceCategory.route';
 
@@ -25,5 +26,6 @@ router.use('/vehicles', vehicleRoutes);
 
 // Rescue Routes
 router.use('/rescue', rescueRoutes);
+router.use('/rescue/requests', rescueRequestRoutes);
 
 export default router;
