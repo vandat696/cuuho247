@@ -1,6 +1,10 @@
 # Road Rescue System - Hệ Thống Cứu Hộ Xe Cộ
 
-Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS và chat trực tiếp.
+Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS, chat trực tiếp và quy trình xử lý theo vai trò.
+
+**Phiên bản hiện tại:** v1.1.0
+
+**GitHub Releases:** https://github.com/vandat696/cuuho247/releases
 
 ## 📋 Tài Liệu Liên Quan
 
@@ -57,12 +61,12 @@ npm run dev
 
 | Lớp           | Công Nghệ          | Phiên Bản |
 | ------------- | ------------------ | --------- |
-| **Frontend**  | React + Vite       | 18 + 5    |
-| **Backend**   | Express + Node.js  | 4.18      |
-| **Database**  | MongoDB + Mongoose | Atlas     |
-| **Real-time** | Socket.IO          | 4.7       |
+| **Frontend**  | React + Vite       | 19 + 5    |
+| **Backend**   | Express + Node.js  | 5.2       |
+| **Database**  | MongoDB + Mongoose | 9         |
+| **Real-time** | Socket.IO          | 4.8       |
 | **Maps**      | Leaflet            | 1.9       |
-| **State**     | Zustand            | 4.4       |
+| **State**     | Zustand            | 5         |
 | **Auth**      | JWT + bcryptjs     | -         |
 | **Language**  | TypeScript         | -         |
 
@@ -131,24 +135,29 @@ cuuho247/
 
 ---
 
-## 📚 Tính Năng Hiện Tại (v0.1.0)
+## 📚 Tính Năng Hiện Tại (v1.1.0)
 
 ### 👤 Người Dùng Cá Nhân
 
 - ✅ Đăng ký / Đăng nhập
 - ✅ Tạo yêu cầu cứu hộ với GPS
+- ✅ Nhập địa chỉ thủ công theo cấp hành chính khi không dùng GPS
+- ✅ Đính kèm ảnh hiện trường
 - ✅ Xem trạng thái real-time
 - ✅ Đánh giá dịch vụ
 - ✅ Chat với công ty cứu hộ
 - ✅ Tham gia cộng đồng (bài viết, bình luận)
+- ✅ Hủy yêu cầu theo trạng thái xử lý
 
 ### 🚗 Công Ty Cứu Hộ
 
-- ✅ Đăng ký công ty (chờ duyệt)
-- ✅ Quản lý dịch vụ & giá cả
-- ✅ Nhận yêu cầu real-time
-- ✅ Cập nhật trạng thái xử lý
-- ✅ Phản hồi đánh giá
+- ✅ Đăng ký công ty và chờ Admin duyệt
+- ✅ Quản lý dịch vụ, giá cả và danh mục
+- ✅ Quản lý danh sách xe cứu hộ
+- ✅ Nhận yêu cầu real-time và cập nhật ETA
+- ✅ Cập nhật trạng thái xử lý, hoàn tất và thanh toán
+- ✅ Chat với khách hàng trong quá trình xử lý
+- ✅ Phản hồi đánh giá của khách hàng
 
 ### 👨‍💼 Quản Trị Viên
 
@@ -156,6 +165,19 @@ cuuho247/
 - ✅ Quản lý người dùng
 - ✅ Kiểm duyệt nội dung
 - ✅ Xem thống kê
+
+---
+
+## 🚀 Release Notes v1.1.0
+
+Bản phát hành này tập trung vào luồng xác thực, khởi tạo dữ liệu cốt lõi và hoàn thiện các thành phần nền tảng cho frontend/backend.
+
+### Nổi bật
+
+- Multi-role authentication bằng JWT.
+- Bổ sung file cấu hình môi trường mẫu.
+- Chuẩn hóa validation cho mật khẩu.
+- Đồng bộ phiên bản package và changelog cho quy trình release-please.
 
 ---
 
