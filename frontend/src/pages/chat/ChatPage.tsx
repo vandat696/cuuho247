@@ -6,12 +6,9 @@ import { messageService } from '@/services/message.service';
 import { getSocket } from '@/utils/socket';
 import { IMessage } from '@/types/message.type';
 import toast from 'react-hot-toast';
-
-function formatTime(dateStr?: string): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-}
+import { MessageList } from '@/components/chat/MessageList';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { ChatEndedBanner } from '@/components/chat/ChatEndedBanner';
 
 export default function ChatPage() {
   const { rescueRequestId } = useParams<{ rescueRequestId: string }>();
@@ -22,6 +19,9 @@ export default function ChatPage() {
   const [companyName, setCompanyName] = useState('Cứu hộ 247');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<string | null>(null);
+  const [customerName, setCustomerName] = useState('Khách hàng');
+  const [error, setError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -41,15 +41,23 @@ export default function ChatPage() {
     const fetchMessages = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const response = await messageService.getMessages(rescueRequestId);
         if (response.status === 'success' && response.data) {
           setMessages(response.data.messages);
           if (response.data.rescue_request?.company_name) {
             setCompanyName(response.data.rescue_request.company_name);
           }
+          if (response.data.rescue_request?.customer_name) {
+            setCustomerName(response.data.rescue_request.customer_name);
+          }
+          if (response.data.rescue_request?.status) {
+            setRequestStatus(response.data.rescue_request.status);
+          }
         }
       } catch (err: any) {
         const msg = err?.response?.data?.message || 'Không thể tải tin nhắn';
+        setError(msg);
         toast.error(msg);
       } finally {
         setIsLoading(false);
@@ -79,7 +87,11 @@ export default function ChatPage() {
     };
 
     const handleError = (err: { message: string }) => {
-      toast.error(err.message || 'Lỗi kết nối');
+      const msg = err.message || 'Lỗi kết nối';
+      toast.error(msg);
+      if (msg.includes('quyền truy cập')) {
+        setError(msg);
+      }
     };
 
     socket.on('receive_message', handleReceiveMessage);
@@ -111,85 +123,45 @@ export default function ChatPage() {
     inputRef.current?.focus();
   }, [inputText, isSending, rescueRequestId]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const chatTitle = myRole === 'company' ? `Nhắn tin với ${customerName}` : `Nhắn tin với ${companyName}`;
 
-  const chatTitle = myRole === 'company' ? 'Nhắn tin với khách hàng' : `Nhắn tin với ${companyName}`;
+  const isEnded = requestStatus === 'completed' || requestStatus === 'cancelled' || requestStatus === 'rejected';
 
   return (
     <MobileLayout>
-      <AppHeader title={chatTitle} onBack={() => navigate(-1)} />
+      <AppHeader title={error ? 'Lỗi truy cập' : chatTitle} onBack={() => navigate(-1)} />
 
-      {/* Message List */}
-      <div className="chat-messages-area">
-        {isLoading ? (
-          <div className="chat-loading">
-            <div className="chat-loading__spinner" />
-            <span>Đang tải tin nhắn...</span>
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="chat-empty">
-            <span className="chat-empty__icon">💬</span>
-            <p>Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
-          </div>
-        ) : (
-          messages.map((msg) => {
-            const isMine = msg.sender_type === mySenderType;
-            return (
-              <div key={msg._id} className={`chat-message-row ${isMine ? 'chat-message-row--mine' : ''}`}>
-                <div className={`chat-bubble ${isMine ? 'chat-bubble--mine' : 'chat-bubble--theirs'}`}>
-                  <p className="chat-bubble__text">{msg.content}</p>
-                  <span className="chat-bubble__time">{formatTime(msg.created_at)}</span>
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="chat-input-area">
-        <div className="chat-input-wrapper">
-          <textarea
-            ref={inputRef}
-            id="chat-message-input"
-            className="chat-input-field"
-            placeholder="Nhập tin nhắn..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={1}
-            autoComplete="off"
-          />
+      {error ? (
+        <div className="chat-error">
+          <span className="chat-error__icon">🔒</span>
+          <h2 className="chat-error__title">Từ chối truy cập</h2>
+          <p className="chat-error__text">{error}</p>
+          <button className="chat-error__btn" onClick={() => navigate(-1)}>
+            Quay lại
+          </button>
         </div>
-        <button
-          id="chat-send-btn"
-          type="button"
-          className={`chat-send-btn ${inputText.trim() ? 'chat-send-btn--active' : ''}`}
-          onClick={handleSend}
-          disabled={!inputText.trim() || isSending}
-          aria-label="Gửi tin nhắn"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        </button>
-      </div>
+      ) : (
+        <>
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            mySenderType={mySenderType}
+            messagesEndRef={messagesEndRef}
+          />
+
+          {isEnded ? (
+            <ChatEndedBanner />
+          ) : (
+            <MessageInput
+              inputText={inputText}
+              setInputText={setInputText}
+              isSending={isSending}
+              onSend={handleSend}
+              inputRef={inputRef}
+            />
+          )}
+        </>
+      )}
     </MobileLayout>
   );
 }

@@ -15,6 +15,7 @@ export interface IChatHistory {
   rescue_request: {
     _id: string;
     company_name?: string;
+    customer_name?: string;
     status?: string;
   };
 }

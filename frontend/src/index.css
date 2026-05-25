@@ -1022,3 +1022,78 @@ h4 {
 .chat-send-btn:disabled {
   cursor: not-allowed;
 }
+
+/* Chat ended banner for read-only status */
+.chat-ended-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--clr-bg-muted, #f8fafc);
+  border-top: 1px solid var(--clr-border);
+  color: var(--clr-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  text-align: center;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+/* Chat error state */
+.chat-error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  color: var(--clr-text-sub);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: var(--sp-8);
+}
+
+.chat-error__icon {
+  font-size: 56px;
+  line-height: 1;
+  color: var(--clr-error);
+}
+
+.chat-error__title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--clr-text);
+  margin-top: var(--sp-2);
+}
+
+.chat-error__text {
+  color: var(--clr-text-muted);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.chat-error__btn {
+  margin-top: var(--sp-2);
+  padding: 10px var(--sp-6);
+  background: var(--clr-navy);
+  color: white;
+  border: none;
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+
+.chat-error__btn:hover {
+  opacity: 0.9;
+}
+
+.chat-error__btn:active {
+  transform: scale(0.96);
+}
