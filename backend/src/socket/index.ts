@@ -1,6 +1,8 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { Message } from '../models/Message.model';
+import { RescueRequest } from '../models/RescueRequest.model';
+import { hasRequestAccess } from '../utils/rescueRequestAuth';
 
 interface SocketUser {
   id: string;
@@ -37,16 +39,37 @@ export function setupSocket(io: Server): void {
      * join_chat: Client joins a room for a specific rescue request
      * Payload: { rescue_request_id: string }
      */
-    socket.on('join_chat', ({ rescue_request_id }: { rescue_request_id: string }) => {
+    socket.on('join_chat', async ({ rescue_request_id }: { rescue_request_id: string }) => {
       if (!rescue_request_id) {
         socket.emit('error', { message: 'rescue_request_id is required' });
         return;
       }
 
-      const room = `chat:${rescue_request_id}`;
-      socket.join(room);
-      console.log(`[Socket] ${socket.user?.id} joined room: ${room}`);
-      socket.emit('joined_chat', { rescue_request_id, room });
+      if (!socket.user) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
+
+      try {
+        const rescueRequest = await RescueRequest.findById(rescue_request_id).lean();
+        if (!rescueRequest) {
+          socket.emit('error', { message: 'Yêu cầu cứu hộ không tồn tại' });
+          return;
+        }
+
+        if (!hasRequestAccess(rescueRequest, socket.user.id, socket.user.role)) {
+          socket.emit('error', { message: 'Không có quyền truy cập cuộc trò chuyện này' });
+          return;
+        }
+
+        const room = `chat:${rescue_request_id}`;
+        socket.join(room);
+        console.log(`[Socket] ${socket.user?.id} joined room: ${room}`);
+        socket.emit('joined_chat', { rescue_request_id, room });
+      } catch (err) {
+        console.error('[Socket] Error joining chat:', err);
+        socket.emit('error', { message: 'Failed to join chat' });
+      }
     });
 
     /**
@@ -67,6 +90,26 @@ export function setupSocket(io: Server): void {
         }
 
         try {
+          const rescueRequest = await RescueRequest.findById(rescue_request_id).lean();
+          if (!rescueRequest) {
+            socket.emit('error', { message: 'Yêu cầu cứu hộ không tồn tại' });
+            return;
+          }
+
+          if (!hasRequestAccess(rescueRequest, socket.user.id, socket.user.role)) {
+            socket.emit('error', { message: 'Không có quyền truy cập cuộc trò chuyện này' });
+            return;
+          }
+
+          if (
+            rescueRequest.status === 'completed' ||
+            rescueRequest.status === 'cancelled' ||
+            rescueRequest.status === 'rejected'
+          ) {
+            socket.emit('error', { message: 'Không thể gửi tin nhắn do yêu cầu cứu hộ đã kết thúc hoặc bị hủy' });
+            return;
+          }
+
           const senderType = socket.user.role === 'company' ? 'company' : 'user';
 
           const message = await Message.create({
@@ -109,6 +152,11 @@ export function setupSocket(io: Server): void {
       if (!socket.user || !rescue_request_id) return;
 
       try {
+        const rescueRequest = await RescueRequest.findById(rescue_request_id).lean();
+        if (!rescueRequest) return;
+
+        if (!hasRequestAccess(rescueRequest, socket.user.id, socket.user.role)) return;
+
         const senderType = socket.user.role === 'company' ? 'user' : 'company';
         await Message.updateMany(
           { rescue_request_id, sender_type: senderType, is_read: false },

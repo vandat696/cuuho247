@@ -23,6 +23,7 @@ const companySeed = {
   },
   license_url: 'https://example.com/license/company-license.jpg',
   status: 'active' as const,
+  is_verified: true,
   rating_avg: 4.8,
   rating_count: 124,
 };

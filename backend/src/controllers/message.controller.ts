@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { Message } from '../models/Message.model';
 import { RescueRequest } from '../models/RescueRequest.model';
+import { hasRequestAccess } from '../utils/rescueRequestAuth';
 
 class MessageController {
   /**
@@ -20,16 +21,13 @@ class MessageController {
       }
 
       // Verify user has access to this rescue request
-      const rescueRequest = await RescueRequest.findById(rescueRequestId).lean();
+      const rescueRequest = await RescueRequest.findById(rescueRequestId).populate('user_id', 'full_name');
       if (!rescueRequest) {
         res.status(404).json({ status: 'error', message: 'Yêu cầu cứu hộ không tồn tại' });
         return;
       }
 
-      const isCustomer = userRole === 'user' && rescueRequest.user_id.toString() === userId;
-      const isCompany = userRole === 'company' && rescueRequest.company.company_id.toString() === userId;
-
-      if (!isCustomer && !isCompany) {
+      if (!hasRequestAccess(rescueRequest, userId, userRole)) {
         res.status(403).json({ status: 'error', message: 'Không có quyền truy cập cuộc trò chuyện này' });
         return;
       }
@@ -43,6 +41,7 @@ class MessageController {
           rescue_request: {
             _id: rescueRequest._id,
             company_name: rescueRequest.company.company_name,
+            customer_name: (rescueRequest.user_id as any)?.full_name || 'Khách hàng',
             status: rescueRequest.status,
           },
         },
