@@ -4,8 +4,12 @@ import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Input } from '@/components/common/Input';
 import { Box, Typography } from '@mui/material';
+import { CancelButton } from '@/components/rescue/CancelButton';
+import { useState } from 'react';
+import { CancelRequestSheet } from '@/components/rescue/CancelRequestSheet';
 
 const ShowcasePage = () => {
+  const [showSheet, setShowSheet] = useState(false);
   return (
     <MobileLayout>
       <AppHeader title="Component Showcase" onBack={() => console.log('Back clicked')} />
@@ -114,6 +118,27 @@ const ShowcasePage = () => {
             </Box>
           </Box>
         </Box>
+        {/* Cancel Button */}
+        <Box component="section" sx={{ mb: 3 }}>
+          <Typography variant="h2" sx={{ fontSize: '1.125rem', mb: 1.5 }}>
+            Cancel Button
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <CancelButton status="pending" onCancel={() => setShowSheet(true)} />
+            <CancelButton status="accepted" onCancel={() => setShowSheet(true)} />
+            <CancelButton status="in_progress" onCancel={() => {}} />
+            <CancelButton status="completed" onCancel={() => {}} />
+          </Box>
+        </Box>
+        {/* Cancel Request Sheet */}
+        <CancelRequestSheet
+          isOpen={showSheet}
+          onClose={() => setShowSheet(false)}
+          onConfirm={(reason) => {
+            console.log('Reason:', reason);
+            setShowSheet(false);
+          }}
+        />
       </Box>
     </MobileLayout>
   );
