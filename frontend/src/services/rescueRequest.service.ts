@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/types/common.type';
 import { http as axiosInstance } from './http';
 
 export interface CreateRequestPayload {
@@ -7,6 +8,37 @@ export interface CreateRequestPayload {
   address?: string;
   service_types?: string[];
   incident_photos?: string[];
+}
+
+export type CustomerRescueRequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'rejected'
+  | 'timeout';
+
+export interface CustomerRescueRequest {
+  _id: string;
+  description: string;
+  company: {
+    company_id: string;
+    company_name?: string;
+  };
+  status?: CustomerRescueRequestStatus;
+  eta_minutes?: number;
+  created_at?: string;
+  updated_at?: string;
+  accepted_at?: string;
+  started_at?: string;
+  completed_at?: string;
+  cancelled_at?: string;
+}
+
+export interface MyRescueRequestsResult {
+  total: number;
+  requests: CustomerRescueRequest[];
 }
 
 export const rescueRequestService = {
@@ -20,9 +52,8 @@ export const rescueRequestService = {
     return response.data;
   },
 
-  // Lấy danh sách yêu cầu cứu hộ của user (có thể dùng chung endpoint GET /rescue-requests nếu có)
-  getMyRequests: async () => {
-    const response = await axiosInstance.get('/rescue-requests/my-requests');
+  getMyRequests: async (): Promise<ApiResponse<MyRescueRequestsResult>> => {
+    const response = await axiosInstance.get<ApiResponse<MyRescueRequestsResult>>('/rescue-requests/my-requests');
     return response.data;
   },
 };

@@ -1,9 +1,27 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import rescueRequestService from '../services/rescueRequest.service';
 import { createRequestSchema } from '../validators/rescueRequest.validator';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 class RescueRequestController {
-  async createRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getMyRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const requests = await rescueRequestService.getRequestsForUser(req.user.id);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy danh sách yêu cầu cứu hộ của bạn thành công',
+        data: {
+          total: requests.length,
+          requests,
+        },
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  async createRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { error, value } = createRequestSchema.validate(req.body, { abortEarly: false });
       if (error) {
@@ -18,8 +36,7 @@ class RescueRequestController {
         return;
       }
 
-      // Bypass auth in dev: use a fixed ObjectId so create & cancel both share the same user
-      const userId = (req as any).user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1';
+      const userId = req.user?.id || req.user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1';
 
       const requestData = {
         ...value,
@@ -38,11 +55,11 @@ class RescueRequestController {
     }
   }
 
-  async cancelRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async cancelRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
-      const userId = (req as any).user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1'; // Fallback for dev
+      const userId = req.user?.id || req.user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1';
 
       const updatedRequest = await rescueRequestService.cancelRescueRequest(id, userId);
 

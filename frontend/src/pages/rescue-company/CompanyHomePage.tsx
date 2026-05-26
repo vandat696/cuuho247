@@ -209,6 +209,7 @@ export default function CompanyHomePage() {
     localStorage.removeItem('role');
     localStorage.removeItem('accountId');
     localStorage.removeItem('accountPhone');
+    localStorage.removeItem('accountName');
     localStorage.removeItem('companyId');
     localStorage.removeItem('companyReadNotificationIds');
     toast.success('Đăng xuất thành công');

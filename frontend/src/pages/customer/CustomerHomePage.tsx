@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AccessTimeOutlined,
@@ -10,14 +10,29 @@ import {
   PhoneOutlined,
   SecurityOutlined,
 } from '@mui/icons-material';
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, IconButton, Typography } from '@mui/material';
 
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import {
+  CustomerRescueRequest,
+  CustomerRescueRequestStatus,
+  rescueRequestService,
+} from '@/services/rescueRequest.service';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';
 const CARD_RADIUS = '12px';
-const USER_NAME = 'Nguyễn Văn An';
+const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress'];
+
+const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
+  pending: 'Đang chờ công ty xác nhận',
+  accepted: 'Công ty đã nhận yêu cầu',
+  in_progress: 'Đội cứu hộ đang di chuyển',
+  completed: 'Đã hoàn thành',
+  cancelled: 'Đã hủy',
+  rejected: 'Bị từ chối',
+  timeout: 'Hết thời gian phản hồi',
+};
 
 function CustomerHeader() {
   return (
@@ -125,8 +140,86 @@ function QuickAction({ icon, label, onClick }: { icon: ReactNode; label: string;
   );
 }
 
+const getRequestTimestamp = (request: CustomerRescueRequest) => {
+  const value = request.updated_at || request.created_at;
+  const timestamp = value ? new Date(value).getTime() : 0;
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const getEtaText = (etaMinutes?: number) => {
+  if (!etaMinutes) return 'Chưa có ETA';
+  return `~${etaMinutes} phút`;
+};
+
+const formatTime = (dateValue?: string) => {
+  if (!dateValue) return 'Chưa rõ thời gian';
+
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return 'Chưa rõ thời gian';
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+};
+
+function RequestSummaryCard({ request }: { request: CustomerRescueRequest }) {
+  return (
+    <Box sx={{ p: 2, border: '2px solid #e5e7eb', borderRadius: CARD_RADIUS, bgcolor: '#fff' }}>
+      <Typography sx={{ mb: 0.75, fontSize: 15, fontWeight: 800, color: NAVY, lineHeight: 1.25 }} noWrap>
+        {request.company.company_name || 'Chưa có thông tin công ty'}
+      </Typography>
+      <Typography sx={{ mb: 0.75, fontSize: 13, color: '#4b5563', lineHeight: 1.35 }} noWrap>
+        {request.description}
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
+        <Typography sx={{ fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>
+          {formatTime(request.created_at)}
+        </Typography>
+        <Typography sx={{ fontSize: 12, fontWeight: 800, color: ORANGE, lineHeight: 1.25 }}>
+          {request.status ? statusTextByValue[request.status] : 'Đang xử lý'}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
 export default function CustomerHomePage() {
   const navigate = useNavigate();
+  const [requests, setRequests] = useState<CustomerRescueRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+
+  useEffect(() => {
+    fetchMyRequests();
+  }, []);
+
+  const fetchMyRequests = async () => {
+    try {
+      const response = await rescueRequestService.getMyRequests();
+      if (response.status === 'success') {
+        setRequests(response.data.requests);
+      }
+    } catch (error) {
+      console.error('Error fetching customer rescue requests:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const activeRequest = useMemo(() => {
+    return requests
+      .filter((request) => request.status && ACTIVE_STATUSES.includes(request.status))
+      .sort((a, b) => getRequestTimestamp(b) - getRequestTimestamp(a))[0];
+  }, [requests]);
+
+  const recentRequests = useMemo(() => {
+    return [...requests].sort((a, b) => getRequestTimestamp(b) - getRequestTimestamp(a)).slice(0, 3);
+  }, [requests]);
+
+  const userName = localStorage.getItem('accountName') || 'Khách hàng';
 
   return (
     <MobileLayout>
@@ -158,7 +251,7 @@ export default function CustomerHomePage() {
               <PersonOutlineOutlined sx={{ fontSize: 34 }} />
             </Box>
             <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#fff', lineHeight: 1.25 }} noWrap>
-              {USER_NAME}
+              {userName}
             </Typography>
           </Box>
         </Box>
@@ -174,26 +267,38 @@ export default function CustomerHomePage() {
         >
           <Typography sx={{ mb: 1.5, fontSize: 16, fontWeight: 800, color: ORANGE }}>Cứu hộ đang thực hiện</Typography>
 
-          <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <RescueInfoRow
-              icon={<LocationOnOutlined sx={{ fontSize: 18 }} />}
-              label="Trạng thái hiện tại"
-              value="Xe đang di chuyển"
-            />
-            <RescueInfoRow
-              icon={<SecurityOutlined sx={{ fontSize: 18 }} />}
-              label="Công ty cứu hộ"
-              value="Cứu hộ Minh Anh"
-            />
-            <RescueInfoRow
-              icon={<AccessTimeOutlined sx={{ fontSize: 18 }} />}
-              label="Thời gian dự kiến đến"
-              value="~8 phút"
-              accent
-            />
-          </Box>
+          {loadingRequests ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : activeRequest ? (
+            <>
+              <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <RescueInfoRow
+                  icon={<LocationOnOutlined sx={{ fontSize: 18 }} />}
+                  label="Trạng thái hiện tại"
+                  value={activeRequest.status ? statusTextByValue[activeRequest.status] : 'Đang xử lý'}
+                />
+                <RescueInfoRow
+                  icon={<SecurityOutlined sx={{ fontSize: 18 }} />}
+                  label="Công ty cứu hộ"
+                  value={activeRequest.company.company_name || 'Chưa có thông tin công ty'}
+                />
+                <RescueInfoRow
+                  icon={<AccessTimeOutlined sx={{ fontSize: 18 }} />}
+                  label="Thời gian dự kiến đến"
+                  value={getEtaText(activeRequest.eta_minutes)}
+                  accent
+                />
+              </Box>
 
-          <PrimaryButton onClick={() => navigate('/rescue/search')}>Theo dõi cứu hộ</PrimaryButton>
+              <PrimaryButton onClick={() => navigate('/customer/history')}>Theo dõi cứu hộ</PrimaryButton>
+            </>
+          ) : (
+            <Typography sx={{ fontSize: 14, color: '#374151', lineHeight: 1.45 }}>
+              Bạn chưa có yêu cầu cứu hộ nào đang xử lý.
+            </Typography>
+          )}
         </Box>
 
         <Box sx={{ mb: 3 }}>
@@ -201,6 +306,40 @@ export default function CustomerHomePage() {
             <PhoneOutlined sx={{ mr: 1, fontSize: 22 }} />
             Gửi yêu cầu cứu hộ
           </PrimaryButton>
+        </Box>
+
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 800, color: NAVY }}>Yêu cầu đã gửi gần đây</Typography>
+            {requests.length > 0 && (
+              <Box
+                component="button"
+                type="button"
+                onClick={() => navigate('/customer/history')}
+                sx={{ color: ORANGE, fontSize: 13, fontWeight: 700 }}
+              >
+                Xem tất cả
+              </Box>
+            )}
+          </Box>
+
+          {loadingRequests ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : recentRequests.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+              {recentRequests.map((request) => (
+                <RequestSummaryCard key={request._id} request={request} />
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ p: 2, borderRadius: CARD_RADIUS, bgcolor: '#f9fafb', border: '1px dashed #d1d5db' }}>
+              <Typography sx={{ fontSize: 14, color: '#6b7280', textAlign: 'center' }}>
+                Bạn chưa gửi yêu cầu cứu hộ nào.
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 2 }}>

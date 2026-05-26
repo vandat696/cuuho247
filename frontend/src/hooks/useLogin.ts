@@ -49,6 +49,12 @@ export const useLogin = () => {
           localStorage.setItem('role', response.data.role);
           localStorage.setItem('accountId', response.data.user._id);
           localStorage.setItem('accountPhone', response.data.user.phone || '');
+          localStorage.setItem(
+            'accountName',
+            response.data.role === 'company'
+              ? response.data.user.company_name || ''
+              : response.data.user.full_name || ''
+          );
           if (response.data.role === 'company') {
             localStorage.setItem('companyId', response.data.user._id);
           } else {

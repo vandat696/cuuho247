@@ -17,6 +17,10 @@ export interface CreateRequestData {
 }
 
 class RescueRequestService {
+  async getRequestsForUser(userId: string): Promise<IRescueRequest[]> {
+    return rescueRequestRepository.findByUserId(userId);
+  }
+
   async createRescueRequest(data: CreateRequestData): Promise<IRescueRequest> {
     const { user_id, company_id, description, location, address, service_types, incident_photos } = data;
 

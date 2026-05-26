@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import rescueRequestController from '../controllers/rescueRequest.controller';
+import { authenticate } from '../middleware/auth.middleware';
+import { authorize } from '../middleware/authorize.middleware';
 
 const router = Router();
 
-// Endpoint tạo yêu cầu cứu hộ
-router.post('/', rescueRequestController.createRequest);
-
-// Endpoint hủy yêu cầu cứu hộ
-router.patch('/:id/cancel', rescueRequestController.cancelRequest);
+router.get('/my-requests', authenticate, authorize(['customer']), rescueRequestController.getMyRequests);
+router.post('/', authenticate, authorize(['customer']), rescueRequestController.createRequest);
+router.patch('/:id/cancel', authenticate, authorize(['customer']), rescueRequestController.cancelRequest);
 
 export default router;

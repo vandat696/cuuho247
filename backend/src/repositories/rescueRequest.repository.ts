@@ -10,6 +10,10 @@ class RescueRequestRepository {
     return await RescueRequest.findById(id);
   }
 
+  async findByUserId(userId: string): Promise<IRescueRequest[]> {
+    return await RescueRequest.find({ user_id: userId }).sort({ created_at: -1 });
+  }
+
   async updateStatus(
     id: string,
     status: IRescueRequest['status'],
