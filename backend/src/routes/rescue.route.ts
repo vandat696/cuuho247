@@ -6,17 +6,17 @@ import { authorize } from '@/middleware/authorize.middleware';
 const router = Router();
 
 router.get('/company/active', authenticate, authorize(['company']), rescueController.getCompanyActiveRequests);
-router.get(
-  '/company/active/:requestId',
-  authenticate,
-  authorize(['company']),
-  rescueController.getCompanyActiveRequestDetail
-);
 router.patch(
   '/company/active/:requestId/complete',
   authenticate,
   authorize(['company']),
   rescueController.completeCompanyActiveRequest
+);
+router.get(
+  '/company/active/:requestId',
+  authenticate,
+  authorize(['company']),
+  rescueController.getCompanyActiveRequestDetail
 );
 router.get('/company/completed', authenticate, authorize(['company']), rescueController.getCompanyCompletedRequests);
 router.get(
