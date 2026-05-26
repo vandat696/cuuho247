@@ -22,6 +22,8 @@ export default function ChatPage() {
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState('Khách hàng');
   const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(true);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -72,9 +74,21 @@ export default function ChatPage() {
     if (!rescueRequestId) return;
 
     const socket = getSocket();
+    setIsConnected(socket.connected);
 
     // Join the chat room
     socket.emit('join_chat', { rescue_request_id: rescueRequestId });
+    socket.emit('mark_read', { rescue_request_id: rescueRequestId });
+
+    const handleConnect = () => {
+      setIsConnected(true);
+      socket.emit('join_chat', { rescue_request_id: rescueRequestId });
+      socket.emit('mark_read', { rescue_request_id: rescueRequestId });
+    };
+
+    const handleDisconnect = () => {
+      setIsConnected(false);
+    };
 
     // Listen for incoming messages
     const handleReceiveMessage = (message: IMessage) => {
@@ -84,8 +98,17 @@ export default function ChatPage() {
         if (isDuplicate) return prev;
         return [...prev, message];
       });
-    };
 
+      // Mark as read if message is from the other party
+      if (message.sender_type !== mySenderType) {
+        socket.emit('mark_read', { rescue_request_id: rescueRequestId });
+      }
+    };
+    // Listen for messages read event
+    const handleMessagesRead = () => {
+      // Mark all my sent messages as read
+      setMessages((prev) => prev.map((msg) => (msg.sender_type === mySenderType ? { ...msg, is_read: true } : msg)));
+    };
     const handleError = (err: { message: string }) => {
       const msg = err.message || 'Lỗi kết nối';
       toast.error(msg);
@@ -94,17 +117,20 @@ export default function ChatPage() {
       }
     };
 
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
     socket.on('receive_message', handleReceiveMessage);
+    socket.on('messages_read', handleMessagesRead);
     socket.on('error', handleError);
 
-    // Mark messages as read when entering the chat
-    socket.emit('mark_read', { rescue_request_id: rescueRequestId });
-
     return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
       socket.off('receive_message', handleReceiveMessage);
+      socket.off('messages_read', handleMessagesRead);
       socket.off('error', handleError);
     };
-  }, [rescueRequestId]);
+  }, [rescueRequestId, mySenderType]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -115,13 +141,41 @@ export default function ChatPage() {
     const content = inputText.trim();
     if (!content || isSending || !rescueRequestId) return;
 
-    setIsSending(true);
     const socket = getSocket();
+    if (!socket.connected) {
+      toast.error('Mất kết nối server. Vui lòng kiểm tra lại mạng.');
+      return;
+    }
+
+    setIsSending(true);
     socket.emit('send_message', { rescue_request_id: rescueRequestId, content });
     setInputText('');
     setIsSending(false);
     inputRef.current?.focus();
   }, [inputText, isSending, rescueRequestId]);
+
+  const handleSendImage = useCallback(
+    async (file: File) => {
+      if (isSending || !rescueRequestId) return;
+
+      const socket = getSocket();
+      if (!socket.connected) {
+        toast.error('Mất kết nối server. Vui lòng kiểm tra lại mạng.');
+        return;
+      }
+
+      try {
+        setIsSending(true);
+        await messageService.sendImage(rescueRequestId, file);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message || 'Không thể gửi ảnh';
+        toast.error(msg);
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [isSending, rescueRequestId]
+  );
 
   const chatTitle = myRole === 'company' ? `Nhắn tin với ${customerName}` : `Nhắn tin với ${companyName}`;
 
@@ -142,11 +196,19 @@ export default function ChatPage() {
         </div>
       ) : (
         <>
+          {!isConnected && (
+            <div className="chat-connection-banner">
+              <span className="chat-connection-banner__icon">⚠️</span>
+              <span>Đang kết nối lại... Tin nhắn có thể bị gián đoạn.</span>
+            </div>
+          )}
+
           <MessageList
             messages={messages}
             isLoading={isLoading}
             mySenderType={mySenderType}
             messagesEndRef={messagesEndRef}
+            onImageClick={setActiveImage}
           />
 
           {isEnded ? (
@@ -157,8 +219,18 @@ export default function ChatPage() {
               setInputText={setInputText}
               isSending={isSending}
               onSend={handleSend}
+              onSendImage={handleSendImage}
               inputRef={inputRef}
             />
+          )}
+
+          {activeImage && (
+            <div className="chat-image-modal" onClick={() => setActiveImage(null)}>
+              <button className="chat-image-modal__close" onClick={() => setActiveImage(null)}>
+                &times;
+              </button>
+              <img src={activeImage} alt="Hình ảnh phóng to" className="chat-image-modal__content" />
+            </div>
           )}
         </>
       )}

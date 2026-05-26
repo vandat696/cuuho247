@@ -6,6 +6,7 @@ interface MessageListProps {
   isLoading: boolean;
   mySenderType: 'user' | 'company';
   messagesEndRef: RefObject<HTMLDivElement>;
+  onImageClick?: (url: string) => void;
 }
 
 function formatTime(dateStr?: string): string {
@@ -14,7 +15,7 @@ function formatTime(dateStr?: string): string {
   return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
-export function MessageList({ messages, isLoading, mySenderType, messagesEndRef }: MessageListProps) {
+export function MessageList({ messages, isLoading, mySenderType, messagesEndRef, onImageClick }: MessageListProps) {
   return (
     <div className="chat-messages-area">
       {isLoading ? (
@@ -30,11 +31,27 @@ export function MessageList({ messages, isLoading, mySenderType, messagesEndRef 
       ) : (
         messages.map((msg) => {
           const isMine = msg.sender_type === mySenderType;
+          const isImage = msg.content_type === 'image';
           return (
             <div key={msg._id} className={`chat-message-row ${isMine ? 'chat-message-row--mine' : ''}`}>
-              <div className={`chat-bubble ${isMine ? 'chat-bubble--mine' : 'chat-bubble--theirs'}`}>
-                <p className="chat-bubble__text">{msg.content}</p>
-                <span className="chat-bubble__time">{formatTime(msg.created_at)}</span>
+              <div
+                className={`chat-bubble ${isImage ? 'chat-bubble--image' : ''} ${
+                  isMine ? 'chat-bubble--mine' : 'chat-bubble--theirs'
+                }`}
+              >
+                {isImage ? (
+                  <img
+                    src={msg.content}
+                    alt="Ảnh đính kèm"
+                    className="chat-bubble__img"
+                    onClick={() => onImageClick && onImageClick(msg.content)}
+                  />
+                ) : (
+                  <p className="chat-bubble__text">{msg.content}</p>
+                )}
+                <div className="chat-bubble__meta">
+                  <span className="chat-bubble__time">{formatTime(msg.created_at)}</span>
+                </div>
               </div>
             </div>
           );
