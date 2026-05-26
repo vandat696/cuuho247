@@ -81,7 +81,7 @@ export default function VehicleListPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Danh sach xe cuu ho" />
+      <AppHeader title="Danh sach xe cuu ho" backFallback="/company/home" />
 
       <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: 'secondary.main' }}>

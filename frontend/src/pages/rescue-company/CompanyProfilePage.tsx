@@ -93,7 +93,7 @@ const CompanyProfilePage = () => {
   if (!company) {
     return (
       <MobileLayout>
-        <AppHeader title="Thông tin công ty" onBack={() => navigate(-1)} />
+        <AppHeader title="Thông tin công ty" backFallback="/company/home" />
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
           <Typography>Không tìm thấy thông tin công ty</Typography>
         </Box>
@@ -109,7 +109,7 @@ const CompanyProfilePage = () => {
 
   return (
     <MobileLayout>
-      <AppHeader title="Thông tin công ty" onBack={() => navigate(-1)} />
+      <AppHeader title="Thông tin công ty" backFallback="/company/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         <Box

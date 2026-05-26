@@ -142,7 +142,7 @@ export default function CompletedRescueRequestsPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Đã hoàn thành" onBack={() => navigate('/company/home')} />
+      <AppHeader title="Đã hoàn thành" backFallback="/company/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>

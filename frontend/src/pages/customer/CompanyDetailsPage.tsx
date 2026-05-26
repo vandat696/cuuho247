@@ -21,7 +21,7 @@ export default function CompanyDetailsPage() {
   if (!locationState) {
     return (
       <MobileLayout>
-        <AppHeader title="Chi tiết công ty" onBack={() => navigate('/rescue/search')} />
+        <AppHeader title="Chi tiết công ty" backFallback="/rescue/request" />
         <Box sx={{ p: 4, textAlign: 'center' }}>
           <Typography>Không tìm thấy dữ liệu.</Typography>
           <Button variant="primary" onClick={() => navigate('/rescue/request')} sx={{ mt: 2 }}>
@@ -49,7 +49,7 @@ export default function CompanyDetailsPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết công ty" onBack={() => navigate(-1)} />
+      <AppHeader title="Chi tiết công ty" backFallback="/rescue/request" />
 
       <Box
         component="main"

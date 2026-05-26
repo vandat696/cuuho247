@@ -1,22 +1,26 @@
 import { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ApartmentOutlined as ApartmentIcon } from '@mui/icons-material';
 
 interface AppHeaderProps {
   title: string;
-  onBack?: () => void; // override default navigate(-1)
+  onBack?: () => void;
+  backFallback?: string;
   showBack?: boolean;
-  rightSlot?: ReactNode; // e.g. notification icon
+  rightSlot?: ReactNode;
 }
 
-export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHeaderProps) {
+export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot }: AppHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
     if (onBack) {
       onBack();
-    } else {
+    } else if (location.key !== 'default') {
       navigate(-1);
+    } else {
+      navigate(backFallback, { replace: true });
     }
   };
 

@@ -5,6 +5,7 @@ import {
   ApartmentOutlined as ApartmentIcon,
   DescriptionOutlined as ServicesIcon,
   LocalShippingOutlined as VehiclesIcon,
+  LogoutRounded as LogoutIcon,
   NotificationsNoneRounded as NotificationsIcon,
 } from '@mui/icons-material';
 
@@ -203,6 +204,17 @@ export default function CompanyHomePage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('role');
+    localStorage.removeItem('accountId');
+    localStorage.removeItem('accountPhone');
+    localStorage.removeItem('companyId');
+    localStorage.removeItem('companyReadNotificationIds');
+    toast.success('Đăng xuất thành công');
+    navigate('/login', { replace: true });
+  };
+
   const companyName = company?.company_name || 'Cứu hộ Minh Anh';
 
   return (
@@ -309,6 +321,34 @@ export default function CompanyHomePage() {
             description="Quản lý xe cứu hộ"
             onClick={() => navigate('/company/vehicles')}
           />
+        </Box>
+
+        <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e5e7eb' }}>
+          <Box
+            component="button"
+            type="button"
+            onClick={handleLogout}
+            sx={{
+              width: '100%',
+              p: 2,
+              border: '2px solid #fee2e2',
+              borderRadius: CARD_RADIUS,
+              bgcolor: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              color: '#dc2626',
+              fontSize: 16,
+              fontWeight: 700,
+              transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
+              '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
+              '&:active': { transform: 'scale(0.99)' },
+            }}
+          >
+            <LogoutIcon sx={{ fontSize: 22 }} />
+            Đăng xuất
+          </Box>
         </Box>
       </Box>
     </MobileLayout>

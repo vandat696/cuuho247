@@ -106,7 +106,7 @@ export default function ActiveRescueRequestDetailPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết cứu hộ" onBack={() => navigate('/company/rescue/active')} />
+      <AppHeader title="Chi tiết cứu hộ" backFallback="/company/rescue/active" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {loading ? (

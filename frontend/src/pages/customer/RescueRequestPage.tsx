@@ -1,12 +1,10 @@
 import Box from '@mui/material/Box';
-import { useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { RescueFormCard } from '@/components/rescue/RescueFormCard';
 import { useRescueRequest } from '@/hooks/useRescueRequest';
 
 export default function RescueRequestPage() {
-  const navigate = useNavigate();
   const {
     form,
     errors,
@@ -23,7 +21,7 @@ export default function RescueRequestPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Tìm kiếm cứu hộ" onBack={() => navigate('/')} />
+      <AppHeader title="Tìm kiếm cứu hộ" backFallback="/" />
 
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', px: 2, py: 3 }}>
         <RescueFormCard

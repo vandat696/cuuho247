@@ -105,7 +105,7 @@ export default function CanceledRescueRequestDetailPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết cứu hộ" onBack={() => navigate('/company/rescue/canceled')} />
+      <AppHeader title="Chi tiết cứu hộ" backFallback="/company/rescue/canceled" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {loading ? (

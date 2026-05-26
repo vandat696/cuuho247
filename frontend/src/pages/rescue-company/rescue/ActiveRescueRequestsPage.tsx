@@ -153,7 +153,7 @@ export default function ActiveRescueRequestsPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Nhiệm vụ đang thực hiện" onBack={() => navigate('/company/home')} />
+      <AppHeader title="Nhiệm vụ đang thực hiện" backFallback="/company/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>

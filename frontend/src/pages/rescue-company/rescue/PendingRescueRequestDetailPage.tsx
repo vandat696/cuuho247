@@ -174,7 +174,7 @@ export default function PendingRescueRequestDetailPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết yêu cầu" onBack={() => navigate('/company/rescue/pending')} />
+      <AppHeader title="Chi tiết yêu cầu" backFallback="/company/rescue/pending" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {loading ? (

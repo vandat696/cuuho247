@@ -71,7 +71,7 @@ export default function ServiceDetailPage() {
   if (error || !service) {
     return (
       <MobileLayout>
-        <AppHeader title="Chi tiết dịch vụ" />
+        <AppHeader title="Chi tiết dịch vụ" backFallback="/company/services" />
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography color="error">{error || 'Không tìm thấy dịch vụ'}</Typography>
         </Box>
@@ -81,7 +81,7 @@ export default function ServiceDetailPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết dịch vụ" />
+      <AppHeader title="Chi tiết dịch vụ" backFallback="/company/services" />
 
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
         <CompanyInfoCard

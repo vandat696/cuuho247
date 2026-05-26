@@ -12,14 +12,23 @@ import toast from 'react-hot-toast';
 
 export default function ConfirmRequestPage() {
   const navigate = useNavigate();
-  const locationState = useLocation().state as { formData: RescueFormData; company: CompanyResult } | null;
+  const location = useLocation();
+  const locationState = location.state as { formData: RescueFormData; company: CompanyResult } | null;
 
   const [loading, setLoading] = useState(false);
+
+  const handleBack = () => {
+    if (location.key !== 'default') {
+      navigate(-1);
+    } else {
+      navigate('/rescue/request', { replace: true });
+    }
+  };
 
   if (!locationState) {
     return (
       <MobileLayout>
-        <AppHeader title="Xác nhận yêu cầu" onBack={() => navigate(-1)} />
+        <AppHeader title="Xác nhận yêu cầu" backFallback="/rescue/request" />
         <Box sx={{ p: 4, textAlign: 'center' }}>
           <Typography>Không tìm thấy dữ liệu.</Typography>
           <Button variant="primary" onClick={() => navigate('/rescue/request')} sx={{ mt: 2 }}>
@@ -59,7 +68,7 @@ export default function ConfirmRequestPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Xác nhận yêu cầu" onBack={() => navigate(-1)} />
+      <AppHeader title="Xác nhận yêu cầu" backFallback="/rescue/request" />
 
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff', p: 2 }}>
         <ConfirmRequestCard
@@ -78,7 +87,7 @@ export default function ConfirmRequestPage() {
             maxPrice: company.max_price,
           }}
           onConfirm={handleConfirm}
-          onBack={() => navigate(-1)}
+          onBack={handleBack}
           loading={loading}
         />
       </Box>
