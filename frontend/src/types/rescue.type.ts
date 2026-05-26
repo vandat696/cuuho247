@@ -56,6 +56,8 @@ export interface RescueFormErrors {
 export interface CompanyResult {
   _id: string;
   company_name: string;
+  director_name: string;
+  email: string;
   phone: string;
   address: {
     province?: string;
@@ -72,6 +74,9 @@ export interface CompanyResult {
   rating_count: number;
   status: string;
   service_names: string[];
+  min_price: number | null;
+  max_price: number | null;
+  eta_minutes: number | null;
 }
 
 // ─── Search Params & Result ────────────────────────────────────────────────────

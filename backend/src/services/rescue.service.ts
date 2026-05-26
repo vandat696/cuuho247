@@ -15,6 +15,8 @@ export interface SearchParams {
 export interface CompanyResult {
   _id: string;
   company_name: string;
+  director_name: string;
+  email: string;
   phone: string;
   address: {
     province?: string;
@@ -31,6 +33,9 @@ export interface CompanyResult {
   rating_count: number;
   status: string;
   service_names: string[];
+  min_price: number | null;
+  max_price: number | null;
+  eta_minutes: number | null;
 }
 
 export interface PendingRescueRequestResult {
@@ -98,6 +103,15 @@ export interface AcceptRescueRequestData {
   vehicle_id: string;
   eta_minutes: number;
   note?: string | null;
+}
+
+export interface RouteEstimateResult {
+  distance_km: number | null;
+  eta_minutes: number | null;
+  origin: {
+    lat: number;
+    lng: number;
+  } | null;
 }
 
 class RescueService {
@@ -379,54 +393,119 @@ class RescueService {
     };
   }
 
+  async estimateRequestRouteForCompany(
+    companyId: string,
+    requestId: string,
+    origin?: { lat: number; lng: number }
+  ): Promise<RouteEstimateResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const [company, request] = await Promise.all([
+      companyRepository.findById(companyId),
+      RescueRequest.findOne({
+        _id: requestId,
+        'company.company_id': companyId,
+      })
+        .select('location')
+        .lean()
+        .exec(),
+    ]);
+
+    if (!request) {
+      return null;
+    }
+
+    const companyCoords = company?.location?.coordinates;
+    const originCoords = origin ? [origin.lng, origin.lat] : companyCoords;
+    const distanceKm = this.getDistanceFromCoordinates(originCoords, (request as any).location?.coordinates);
+
+    return {
+      distance_km: distanceKm,
+      eta_minutes: distanceKm === null ? null : this.estimateEtaMinutes(distanceKm),
+      origin: originCoords
+        ? {
+            lng: originCoords[0],
+            lat: originCoords[1],
+          }
+        : null,
+    };
+  }
+
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {
     const { lat, lng, incident_type, max_distance_km = 50 } = params;
 
     let categoryId: string | undefined = undefined;
     if (incident_type) {
       const category = await serviceCategoryRepository.findBySlug(incident_type);
-      if (!category) {
-        return [];
+      if (category) {
+        categoryId = category._id.toString();
       }
-      categoryId = category._id.toString();
     }
 
-    const companies = await companyRepository.findNearby(lng, lat, max_distance_km);
+    let companies = await companyRepository.findNearby(lng, lat, max_distance_km);
+    if (companies.length === 0) {
+      companies = await companyRepository.findSearchable();
+    }
+
     if (companies.length === 0) {
       return [];
     }
 
     const companyIds = companies.map((company) => (company._id as any).toString());
-    const matchingServices = await serviceRepository.findByCompanyIdsAndCategory(companyIds, categoryId);
+    const [displayServices, matchingServices] = await Promise.all([
+      serviceRepository.findByCompanyIdsAndCategory(companyIds),
+      categoryId ? serviceRepository.findByCompanyIdsAndCategory(companyIds, categoryId) : Promise.resolve([]),
+    ]);
     const servicesByCompany = new Map<string, string[]>();
+    const pricesByCompany = new Map<string, number[]>();
+    const matchingCompanyIds = new Set(matchingServices.map((service) => service.company_id.toString()));
 
-    for (const service of matchingServices) {
+    for (const service of displayServices) {
       const companyId = service.company_id.toString();
       if (!servicesByCompany.has(companyId)) {
         servicesByCompany.set(companyId, []);
       }
+      if (!pricesByCompany.has(companyId)) {
+        pricesByCompany.set(companyId, []);
+      }
       servicesByCompany.get(companyId)!.push(service.name);
+      pricesByCompany.get(companyId)!.push(service.price);
     }
 
     const resultCompanies = categoryId
-      ? companies.filter((company) => servicesByCompany.has((company._id as any).toString()))
+      ? [...companies].sort((a, b) => {
+          const aMatches = matchingCompanyIds.has((a._id as any).toString());
+          const bMatches = matchingCompanyIds.has((b._id as any).toString());
+          if (aMatches === bMatches) return 0;
+          return aMatches ? -1 : 1;
+        })
       : companies;
 
     return resultCompanies.map((company) => {
+      const companyId = (company._id as any).toString();
       const coords = company.location?.coordinates ?? [0, 0];
       const distanceKm = this.calcDistanceKm(lat, lng, coords[1], coords[0]);
+      const roundedDistanceKm = Math.round(distanceKm * 10) / 10;
+      const prices = pricesByCompany.get(companyId) ?? [];
 
       return {
-        _id: (company._id as any).toString(),
+        _id: companyId,
         company_name: company.company_name,
+        director_name: company.director_name,
+        email: company.email,
         phone: company.phone,
         address: company.address ?? {},
         location: company.location,
-        distance_km: Math.round(distanceKm * 10) / 10,
+        distance_km: roundedDistanceKm,
         rating_avg: company.rating_avg ?? 0,
         rating_count: company.rating_count ?? 0,
         status: company.status ?? 'active',
-        service_names: servicesByCompany.get((company._id as any).toString()) ?? [],
+        service_names: servicesByCompany.get(companyId) ?? [],
+        min_price: prices.length > 0 ? Math.min(...prices) : null,
+        max_price: prices.length > 0 ? Math.max(...prices) : null,
+        eta_minutes: this.estimateEtaMinutes(roundedDistanceKm),
       };
     });
   }
@@ -480,6 +559,12 @@ class RescueService {
     const a =
       Math.sin(dLat / 2) ** 2 + Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     return radiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  private estimateEtaMinutes(distanceKm: number): number {
+    const averageUrbanSpeedKmH = 30;
+    const dispatchBufferMinutes = 5;
+    return Math.max(5, Math.ceil((distanceKm / averageUrbanSpeedKmH) * 60 + dispatchBufferMinutes));
   }
 
   private toRad(deg: number): number {

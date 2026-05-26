@@ -35,6 +35,7 @@ http.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('role');
+      localStorage.removeItem('accountPhone');
       window.location.href = '/login';
     }
     return Promise.reject(error);

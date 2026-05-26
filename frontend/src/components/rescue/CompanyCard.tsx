@@ -12,9 +12,12 @@ interface CompanyCardProps {
 }
 
 export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
-  // Mock data for price and time as they are not in the current API schema
-  const mockPrice = '150,000 - 300,000đ';
-  const mockTime = '~15 phút';
+  const formatPrice = (price: number | null) => (price === null ? null : new Intl.NumberFormat('vi-VN').format(price));
+  const priceText =
+    company.min_price !== null && company.max_price !== null
+      ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
+      : 'Chưa cập nhật giá';
+  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có ETA';
 
   return (
     <Box
@@ -50,21 +53,19 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
       {/* Rating Row */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <StarIcon sx={{ color: '#ffb400', fontSize: 20, mr: 0.5 }} />
-        <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>
-          {company.rating_avg || '4.8'}
-        </Typography>
-        <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count || '342'} đánh giá)</Typography>
+        <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>{company.rating_avg}</Typography>
+        <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
       </Box>
 
       {/* Price and Time Info */}
       <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
           <PaidIcon sx={{ color: '#a0aec0', fontSize: 20, mr: 1, mt: 0.2 }} />
-          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500, lineHeight: 1.2 }}>{mockPrice}</Typography>
+          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500, lineHeight: 1.2 }}>{priceText}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <AccessTimeIcon sx={{ color: '#a0aec0', fontSize: 20, mr: 1 }} />
-          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500 }}>{mockTime}</Typography>
+          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500 }}>{etaText}</Typography>
         </Box>
       </Box>
 

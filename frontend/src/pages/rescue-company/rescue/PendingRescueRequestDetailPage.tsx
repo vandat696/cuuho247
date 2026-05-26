@@ -11,6 +11,7 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
+import { MiniMap } from '@/components/location/MiniMap';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { rescueService } from '@/services/rescue.service';
@@ -30,13 +31,13 @@ interface InfoRowProps {
 }
 
 const formatAddress = (address?: Record<string, unknown>) => {
-  if (!address) return 'Chua co dia chi';
+  if (!address) return 'Chưa có địa chỉ';
 
   const orderedParts = ['detail', 'ward', 'district', 'province']
     .map((key) => address[key])
     .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
 
-  return orderedParts.length > 0 ? orderedParts.join(', ') : 'Chua co dia chi';
+  return orderedParts.length > 0 ? orderedParts.join(', ') : 'Chưa có địa chỉ';
 };
 
 const formatDistance = (distanceKm: number | null) => {
@@ -45,15 +46,25 @@ const formatDistance = (distanceKm: number | null) => {
 };
 
 const formatRequestTime = (dateValue?: string) => {
-  if (!dateValue) return 'Chua co thoi gian';
+  if (!dateValue) return 'Chưa có thời gian';
 
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return 'Chua co thoi gian';
+  if (Number.isNaN(date.getTime())) return 'Chưa có thời gian';
 
   const pad = (value: number) => value.toString().padStart(2, '0');
   return `${pad(date.getHours())}:${pad(date.getMinutes())} - ${pad(date.getDate())}/${pad(
     date.getMonth() + 1
   )}/${date.getFullYear()}`;
+};
+
+const getRequestCoordinates = (request: PendingRescueRequestDetail) => {
+  const [lng, lat] = request.location?.coordinates ?? [];
+
+  if (typeof lat !== 'number' || typeof lng !== 'number') {
+    return null;
+  }
+
+  return { lat, lng };
 };
 
 const InfoCard = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -106,7 +117,7 @@ export default function PendingRescueRequestDetailPage() {
         }
       } catch (error) {
         console.error('Error fetching pending rescue request detail:', error);
-        toast.error('Khong the tai chi tiet yeu cau');
+        toast.error('Không thể tải chi tiết yêu cầu');
       } finally {
         setLoading(false);
       }
@@ -133,12 +144,12 @@ export default function PendingRescueRequestDetailPage() {
 
     const eta = Number(etaMinutes);
     if (!vehicleId) {
-      toast.error('Vui long chon xe cuu ho');
+      toast.error('Vui lòng chọn xe cứu hộ');
       return;
     }
 
     if (!Number.isInteger(eta) || eta <= 0) {
-      toast.error('Vui long nhap thoi gian du kien den hop le');
+      toast.error('Vui lòng nhập thời gian dự kiến đến hợp lệ');
       return;
     }
 
@@ -149,19 +160,21 @@ export default function PendingRescueRequestDetailPage() {
         eta_minutes: eta,
         note: note.trim() || undefined,
       });
-      toast.success('Da nhan yeu cau cuu ho');
+      toast.success('Đã nhận yêu cầu cứu hộ');
       navigate('/company/rescue/active');
     } catch (error) {
       console.error('Error accepting request:', error);
-      toast.error('Khong the nhan yeu cau');
+      toast.error('Không thể nhận yêu cầu');
     } finally {
       setAccepting(false);
     }
   };
 
+  const requestCoordinates = request ? getRequestCoordinates(request) : null;
+
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiet yeu cau" onBack={() => navigate('/company/rescue/pending')} />
+      <AppHeader title="Chi tiết yêu cầu" onBack={() => navigate('/company/rescue/pending')} />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {loading ? (
@@ -170,39 +183,61 @@ export default function PendingRescueRequestDetailPage() {
           </Box>
         ) : !request ? (
           <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography sx={{ fontSize: 14 }}>Khong tim thay yeu cau</Typography>
+            <Typography sx={{ fontSize: 14 }}>Không tìm thấy yêu cầu</Typography>
           </Box>
         ) : (
           <>
-            <InfoCard title="Thong tin khach hang">
-              <InfoRow icon={<UserIcon />} label="Ten khach hang" value={request.customer.full_name || 'Khach hang'} />
-              <InfoRow icon={<PhoneIcon />} label="So dien thoai" value={request.customer.phone || 'Chua co so'} />
+            <InfoCard title="Thông tin khách hàng">
+              <InfoRow icon={<UserIcon />} label="Tên khách hàng" value={request.customer.full_name || 'Khách hàng'} />
+              <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={request.customer.phone || 'Chưa có số'} />
             </InfoCard>
 
-            <InfoCard title="Thong tin su co">
-              <InfoRow icon={<AlertIcon />} label="Loai su co" value={request.title} />
-              <InfoRow icon={<FileIcon />} label="Mo ta" value={request.description || 'Chua co mo ta'} />
+            <InfoCard title="Thông tin sự cố">
+              <InfoRow icon={<AlertIcon />} label="Loại sự cố" value={request.title} />
+              <InfoRow icon={<FileIcon />} label="Mô tả" value={request.description || 'Chưa có mô tả'} />
               <InfoRow
                 icon={<LocationIcon />}
-                label="Vi tri"
+                label="Vị trí"
                 value={
                   <>
                     <Typography component="span" sx={{ display: 'block', fontSize: 16, fontWeight: 500 }}>
                       {formatAddress(request.address)}
                     </Typography>
                     <Typography sx={{ mt: 0.5, fontSize: 14, color: ORANGE, lineHeight: 1.35 }}>
-                      Khoang cach: {formatDistance(request.distance_km)}
+                      Khoảng cách: {formatDistance(request.distance_km)}
                     </Typography>
                   </>
                 }
               />
-              <InfoRow icon={<ClockIcon />} label="Thoi gian yeu cau" value={formatRequestTime(request.created_at)} />
+              <InfoRow icon={<ClockIcon />} label="Thời gian yêu cầu" value={formatRequestTime(request.created_at)} />
             </InfoCard>
 
-            <InfoCard title="Nhan yeu cau">
+            <InfoCard title="Nhận yêu cầu">
+              <Box>
+                <Typography sx={{ mb: 1, fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>
+                  Bản đồ vị trí khách hàng
+                </Typography>
+                {requestCoordinates ? (
+                  <MiniMap lat={requestCoordinates.lat} lng={requestCoordinates.lng} zoom={15} />
+                ) : (
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: '#f9fafb',
+                      border: '1px dashed #d1d5db',
+                      borderRadius: CARD_RADIUS,
+                      color: '#6b7280',
+                      fontSize: 14,
+                      textAlign: 'center',
+                    }}
+                  >
+                    Chưa có tọa độ để hiển thị bản đồ
+                  </Box>
+                )}
+              </Box>
               <TextField
                 select
-                label="Xe cuu ho"
+                label="Xe cứu hộ"
                 value={vehicleId}
                 onChange={(event) => setVehicleId(event.target.value)}
                 fullWidth
@@ -215,7 +250,7 @@ export default function PendingRescueRequestDetailPage() {
                 ))}
               </TextField>
               <TextField
-                label="Thoi gian du kien den (phut)"
+                label="Thời gian dự kiến đến (phút)"
                 type="number"
                 value={etaMinutes}
                 onChange={(event) => setEtaMinutes(event.target.value)}
@@ -224,7 +259,7 @@ export default function PendingRescueRequestDetailPage() {
                 inputProps={{ min: 1 }}
               />
               <TextField
-                label="Ghi chu"
+                label="Ghi chú"
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 fullWidth
@@ -257,12 +292,12 @@ export default function PendingRescueRequestDetailPage() {
                   '&:active': { transform: 'scale(0.99)' },
                 }}
               >
-                {accepting ? 'Dang nhan...' : 'Chap nhan yeu cau'}
+                {accepting ? 'Đang nhận...' : 'Chấp nhận yêu cầu'}
               </Box>
               <Box
                 component="button"
                 type="button"
-                onClick={() => toast('Da nhan thao tac tu choi')}
+                onClick={() => toast('Đã nhận thao tác từ chối')}
                 sx={{
                   width: '100%',
                   px: 3,
@@ -279,7 +314,7 @@ export default function PendingRescueRequestDetailPage() {
                   '&:active': { transform: 'scale(0.99)' },
                 }}
               >
-                Tu choi
+                Từ chối
               </Box>
             </Box>
           </>

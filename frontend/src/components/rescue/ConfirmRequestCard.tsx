@@ -1,21 +1,26 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/common/Button';
+import { MiniMap } from '@/components/location/MiniMap';
 
 interface CompanyData {
   id: string;
   name: string;
   rating: number;
   reviews: number;
-  etaMinutes: number;
-  minPrice: number;
-  maxPrice: number;
+  etaMinutes: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
 }
 
 interface ConfirmRequestCardProps {
   incidentTypeName: string;
   description: string;
   locationText: string;
+  location: {
+    lat: number;
+    lng: number;
+  } | null;
   phone: string;
   company: CompanyData;
   onConfirm: () => void;
@@ -27,6 +32,7 @@ export function ConfirmRequestCard({
   incidentTypeName,
   description,
   locationText,
+  location,
   phone,
   company,
   onConfirm,
@@ -34,6 +40,11 @@ export function ConfirmRequestCard({
   loading = false,
 }: ConfirmRequestCardProps) {
   const formatPrice = (price: number) => new Intl.NumberFormat('vi-VN').format(price);
+  const priceText =
+    company.minPrice !== null && company.maxPrice !== null
+      ? `${formatPrice(company.minPrice)} - ${formatPrice(company.maxPrice)}đ`
+      : 'Chưa cập nhật giá';
+  const etaText = company.etaMinutes ? `~${company.etaMinutes} phút` : 'Chưa có ETA';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -93,9 +104,28 @@ export function ConfirmRequestCard({
 
         <Box>
           <Typography sx={{ fontSize: 13, color: '#64748b', mb: 0.5 }}>Vị trí</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <span style={{ color: '#94a3b8', marginTop: 2 }}>📍</span>
-            <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{locationText}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <span style={{ color: '#94a3b8', marginTop: 2 }}>📍</span>
+              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{locationText}</Typography>
+            </Box>
+            {location ? (
+              <MiniMap lat={location.lat} lng={location.lng} zoom={15} />
+            ) : (
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: '#f9fafb',
+                  border: '1px dashed #d1d5db',
+                  borderRadius: '12px',
+                  color: '#6b7280',
+                  fontSize: 14,
+                  textAlign: 'center',
+                }}
+              >
+                Chưa có tọa độ để hiển thị bản đồ
+              </Box>
+            )}
           </Box>
         </Box>
 
@@ -136,13 +166,11 @@ export function ConfirmRequestCard({
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #cbd5e1', pt: 2, mb: 1.5 }}>
           <Typography sx={{ color: '#64748b', fontSize: 14 }}>Thời gian đến</Typography>
-          <Typography sx={{ color: '#ea580c', fontWeight: 600 }}>~{company.etaMinutes} phút</Typography>
+          <Typography sx={{ color: '#ea580c', fontWeight: 600 }}>{etaText}</Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography sx={{ color: '#64748b', fontSize: 14 }}>Giá dự kiến</Typography>
-          <Typography sx={{ color: '#1e293b', fontWeight: 700 }}>
-            {formatPrice(company.minPrice)} - {formatPrice(company.maxPrice)}đ
-          </Typography>
+          <Typography sx={{ color: '#1e293b', fontWeight: 700 }}>{priceText}</Typography>
         </Box>
       </Box>
 

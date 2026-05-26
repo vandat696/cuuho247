@@ -34,11 +34,12 @@ export default function CompanyDetailsPage() {
 
   const { formData, company } = locationState;
 
-  // Mock data for missing fields
-  const mockDirector = 'Trần Minh Anh';
-  const mockEmail = 'cuuhominhanh@email.com';
-  const mockPrice = '150,000 - 300,000đ';
-  const mockTime = '~15 phút';
+  const formatPrice = (price: number | null) => (price === null ? null : new Intl.NumberFormat('vi-VN').format(price));
+  const priceText =
+    company.min_price !== null && company.max_price !== null
+      ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
+      : 'Chưa cập nhật giá';
+  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có ETA';
 
   const handleNext = () => {
     navigate('/rescue/confirm', {
@@ -61,8 +62,8 @@ export default function CompanyDetailsPage() {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <StarIcon sx={{ color: '#fbbf24', fontSize: 18, mr: 0.5 }} />
-            <Typography sx={{ fontWeight: 700, mr: 1 }}>{company.rating_avg || '4.8'}</Typography>
-            <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>({company.rating_count || 342} đánh giá)</Typography>
+            <Typography sx={{ fontWeight: 700, mr: 1 }}>{company.rating_avg}</Typography>
+            <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
           </Box>
           <Typography sx={{ color: '#bfdbfe', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}>
             Xem tất cả đánh giá
@@ -79,7 +80,7 @@ export default function CompanyDetailsPage() {
             <PersonIcon sx={{ color: '#64748b', fontSize: 20 }} />
             <Box>
               <Typography sx={{ fontSize: 12, color: '#64748b' }}>Giám đốc</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{mockDirector}</Typography>
+              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.director_name}</Typography>
             </Box>
           </Box>
 
@@ -95,7 +96,7 @@ export default function CompanyDetailsPage() {
             <EmailIcon sx={{ color: '#64748b', fontSize: 20 }} />
             <Box>
               <Typography sx={{ fontSize: 12, color: '#64748b' }}>Email</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{mockEmail}</Typography>
+              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.email}</Typography>
             </Box>
           </Box>
 
@@ -124,7 +125,7 @@ export default function CompanyDetailsPage() {
               <PaidIcon sx={{ fontSize: 18, mr: 1 }} />
               <Typography sx={{ fontSize: 14 }}>Giá dự kiến</Typography>
             </Box>
-            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{mockPrice}</Typography>
+            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{priceText}</Typography>
           </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
@@ -132,7 +133,7 @@ export default function CompanyDetailsPage() {
               <AccessTimeIcon sx={{ fontSize: 18, mr: 1 }} />
               <Typography sx={{ fontSize: 14 }}>Thời gian đến</Typography>
             </Box>
-            <Typography sx={{ fontWeight: 700, color: '#ea580c' }}>{mockTime}</Typography>
+            <Typography sx={{ fontWeight: 700, color: '#ea580c' }}>{etaText}</Typography>
           </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

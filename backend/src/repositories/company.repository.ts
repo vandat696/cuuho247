@@ -38,6 +38,16 @@ class CompanyRepository {
       .limit(20)
       .exec();
   }
+
+  async findSearchable(): Promise<ICompany[]> {
+    return Company.find({
+      status: 'active',
+      location: { $exists: true },
+    })
+      .select('-password_hash')
+      .limit(20)
+      .exec();
+  }
 }
 
 export default new CompanyRepository();

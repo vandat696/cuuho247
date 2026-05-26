@@ -31,6 +31,7 @@ export default function ConfirmRequestPage() {
   }
 
   const { formData, company } = locationState;
+  const customerPhone = localStorage.getItem('accountPhone') || 'Chưa có số điện thoại';
 
   const handleConfirm = async () => {
     setLoading(true);
@@ -65,15 +66,16 @@ export default function ConfirmRequestPage() {
           incidentTypeName={formData.incident_type?.label || 'Chưa rõ'}
           description={formData.description}
           locationText={formData.location?.address || 'Tọa độ GPS'}
-          phone="0912 345 678" // Mock data for user's phone
+          location={formData.location}
+          phone={customerPhone}
           company={{
             id: company._id,
             name: company.company_name,
-            rating: company.rating_avg || 4.8,
-            reviews: company.rating_count || 342,
-            etaMinutes: 15,
-            minPrice: 150000,
-            maxPrice: 300000,
+            rating: company.rating_avg,
+            reviews: company.rating_count,
+            etaMinutes: company.eta_minutes,
+            minPrice: company.min_price,
+            maxPrice: company.max_price,
           }}
           onConfirm={handleConfirm}
           onBack={() => navigate(-1)}

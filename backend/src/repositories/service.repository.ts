@@ -11,7 +11,7 @@ class ServiceRepository {
       query.category_id = categoryId;
     }
 
-    return Service.find(query).select('company_id name').exec();
+    return Service.find(query).select('company_id name price').exec();
   }
 
   // Create new service
