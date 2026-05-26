@@ -6,6 +6,7 @@ import {
   AcceptPendingRescueRequestPayload,
   CanceledRescueRequestDetailResult,
   CanceledRescueRequestsResult,
+  CompleteActiveRescueRequestPayload,
   CompletedRescueRequestDetailResult,
   CompletedRescueRequestsResult,
   PendingRescueRequestDetailResult,
@@ -88,6 +89,17 @@ export const rescueService = {
   ): Promise<ApiResponse<ActiveRescueRequestDetailResult>> => {
     const response = await http.patch<ApiResponse<ActiveRescueRequestDetailResult>>(
       `/rescue/company/pending/${requestId}/accept`,
+      payload
+    );
+    return response.data;
+  },
+
+  completeCompanyActiveRequest: async (
+    requestId: string,
+    payload: CompleteActiveRescueRequestPayload
+  ): Promise<ApiResponse<CompletedRescueRequestDetailResult>> => {
+    const response = await http.patch<ApiResponse<CompletedRescueRequestDetailResult>>(
+      `/rescue/company/active/${requestId}/complete`,
       payload
     );
     return response.data;

@@ -31,6 +31,7 @@ export const INCIDENT_TYPES: IncidentType[] = [
 // ─── Request Status ────────────────────────────────────────────────────────────
 
 export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'rejected' | 'timeout';
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'e_wallet';
 
 // ─── Form Data ─────────────────────────────────────────────────────────────────
 
@@ -143,6 +144,18 @@ export interface AcceptPendingRescueRequestPayload {
   note?: string;
 }
 
+export interface RequestPayment {
+  amount?: number;
+  method?: PaymentMethod;
+  paid_at?: string;
+}
+
+export interface CompleteActiveRescueRequestPayload {
+  amount: number;
+  method?: PaymentMethod;
+  note?: string;
+}
+
 export interface ActiveRescueRequestsResult {
   total: number;
   requests: ActiveRescueRequest[];
@@ -161,6 +174,7 @@ export interface ActiveRescueRequestDetailResult {
 
 export interface CompletedRescueRequest extends ActiveRescueRequest {
   completed_at?: string;
+  payment?: RequestPayment;
 }
 
 export interface CompletedRescueRequestsResult {

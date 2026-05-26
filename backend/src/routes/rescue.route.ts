@@ -12,6 +12,12 @@ router.get(
   authorize(['company']),
   rescueController.getCompanyActiveRequestDetail
 );
+router.patch(
+  '/company/active/:requestId/complete',
+  authenticate,
+  authorize(['company']),
+  rescueController.completeCompanyActiveRequest
+);
 router.get('/company/completed', authenticate, authorize(['company']), rescueController.getCompanyCompletedRequests);
 router.get(
   '/company/completed/:requestId',

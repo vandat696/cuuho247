@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, MenuItem, TextField, Typography } from '@mui/material';
 import {
   AccessTimeOutlined as ClockIcon,
   ArticleOutlined as FileIcon,
@@ -80,6 +80,10 @@ export default function ActiveRescueRequestDetailPage() {
   const { requestId } = useParams<{ requestId: string }>();
   const [request, setRequest] = useState<ActiveRescueRequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [finalAmount, setFinalAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'e_wallet'>('cash');
+  const [completionNote, setCompletionNote] = useState('');
+  const [completeLoading, setCompleteLoading] = useState(false);
 
   useEffect(() => {
     const fetchRequestDetail = async () => {
@@ -103,6 +107,35 @@ export default function ActiveRescueRequestDetailPage() {
 
     fetchRequestDetail();
   }, [navigate, requestId]);
+
+  const handleCompleteRequest = async () => {
+    if (!requestId) return;
+
+    const amount = Number(finalAmount);
+    if (!finalAmount.trim() || Number.isNaN(amount) || amount < 0) {
+      toast.error('Vui lòng nhập số tiền thanh toán thực tế');
+      return;
+    }
+
+    try {
+      setCompleteLoading(true);
+      const response = await rescueService.completeCompanyActiveRequest(requestId, {
+        amount,
+        method: paymentMethod,
+        note: completionNote.trim() || undefined,
+      });
+
+      if (response.status === 'success') {
+        toast.success('Đã hoàn tất nhiệm vụ và chốt thanh toán');
+        navigate(`/company/rescue/completed/detail/${requestId}`, { replace: true });
+      }
+    } catch (error) {
+      console.error('Error completing rescue request:', error);
+      toast.error('Không thể hoàn tất nhiệm vụ');
+    } finally {
+      setCompleteLoading(false);
+    }
+  };
 
   return (
     <MobileLayout>
@@ -172,10 +205,43 @@ export default function ActiveRescueRequestDetailPage() {
               </Box>
             </Box>
 
+            <InfoCard title="Chốt thanh toán">
+              <TextField
+                fullWidth
+                label="Số tiền thực tế"
+                type="number"
+                value={finalAmount}
+                onChange={(event) => setFinalAmount(event.target.value)}
+                inputProps={{ min: 0, step: 1000 }}
+                InputProps={{ endAdornment: <Typography sx={{ color: '#6b7280' }}>VND</Typography> }}
+              />
+              <TextField
+                select
+                fullWidth
+                label="Phương thức thanh toán"
+                value={paymentMethod}
+                onChange={(event) => setPaymentMethod(event.target.value as 'cash' | 'bank_transfer' | 'e_wallet')}
+              >
+                <MenuItem value="cash">Tiền mặt</MenuItem>
+                <MenuItem value="bank_transfer">Chuyển khoản</MenuItem>
+                <MenuItem value="e_wallet">Ví điện tử</MenuItem>
+              </TextField>
+              <TextField
+                fullWidth
+                multiline
+                minRows={3}
+                label="Ghi chú"
+                value={completionNote}
+                onChange={(event) => setCompletionNote(event.target.value)}
+                placeholder="Ví dụ: phát sinh thêm phí kéo xe, giảm giá, khách đã thanh toán..."
+              />
+            </InfoCard>
+
             <Box
               component="button"
               type="button"
-              onClick={() => toast.success('Đã ghi nhận thao tác hoàn thành nhiệm vụ')}
+              onClick={handleCompleteRequest}
+              disabled={completeLoading}
               sx={{
                 width: '100%',
                 px: 3,
@@ -183,16 +249,19 @@ export default function ActiveRescueRequestDetailPage() {
                 borderRadius: BUTTON_RADIUS,
                 bgcolor: ORANGE,
                 color: '#fff',
+                border: 0,
                 fontSize: 16,
                 fontWeight: 500,
                 lineHeight: 1.5,
+                cursor: completeLoading ? 'not-allowed' : 'pointer',
+                opacity: completeLoading ? 0.75 : 1,
                 boxShadow: '0 10px 15px -3px rgba(255, 107, 0, 0.25)',
                 transition: 'background 0.15s, transform 0.1s',
                 '&:hover': { bgcolor: '#ff8533' },
                 '&:active': { transform: 'scale(0.99)' },
               }}
             >
-              Hoàn thành nhiệm vụ
+              {completeLoading ? 'Đang hoàn tất...' : 'Hoàn thành và chốt thanh toán'}
             </Box>
           </>
         )}

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import rescueService from '../services/rescue.service';
 import { AuthRequest } from '../middleware/auth.middleware';
-import { acceptRequestSchema } from '../validators/rescueRequest.validator';
+import { acceptRequestSchema, completeRequestSchema } from '../validators/rescueRequest.validator';
 
 class RescueController {
   async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -220,6 +220,46 @@ class RescueController {
         res.status(400).json({ status: 'error', message: error.message });
         return;
       }
+      next(error);
+    }
+  }
+
+  async completeCompanyActiveRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const { error, value } = completeRequestSchema.validate(req.body, { abortEarly: false });
+
+      if (error) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: error.details.map((err) => ({
+            field: err.context?.key,
+            message: err.message,
+          })),
+        });
+        return;
+      }
+
+      const request = await rescueService.completeActiveRequestForCompany(companyId, requestId, value);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy nhiệm vụ để hoàn tất',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Hoàn tất và chốt thanh toán thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error) {
       next(error);
     }
   }

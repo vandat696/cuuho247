@@ -38,6 +38,18 @@ export const acceptRequestSchema = Joi.object({
   note: Joi.string().allow('', null).optional(),
 });
 
+export const completeRequestSchema = Joi.object({
+  amount: Joi.number().min(0).required().messages({
+    'number.base': 'Số tiền thanh toán phải là số',
+    'number.min': 'Số tiền thanh toán không được nhỏ hơn 0',
+    'any.required': 'Vui lòng nhập số tiền thanh toán thực tế',
+  }),
+  method: Joi.string().valid('cash', 'bank_transfer', 'e_wallet').default('cash').messages({
+    'any.only': 'Phương thức thanh toán không hợp lệ',
+  }),
+  note: Joi.string().allow('', null).optional(),
+});
+
 export const cancelRequestSchema = Joi.object({
   reason: Joi.string().trim().min(1).required().messages({
     'string.empty': 'Lý do hủy không được để trống',

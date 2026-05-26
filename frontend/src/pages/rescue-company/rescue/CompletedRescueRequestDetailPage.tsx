@@ -7,6 +7,7 @@ import {
   ErrorOutline as AlertIcon,
   LocalShippingOutlined as TruckIcon,
   LocationOnOutlined as LocationIcon,
+  PaidOutlined as PaymentIcon,
   PersonOutline as UserIcon,
   PhoneOutlined as PhoneIcon,
 } from '@mui/icons-material';
@@ -47,6 +48,21 @@ const formatDateTime = (dateValue?: string) => {
   return `${pad(date.getHours())}:${pad(date.getMinutes())} - ${pad(date.getDate())}/${pad(
     date.getMonth() + 1
   )}/${date.getFullYear()}`;
+};
+
+const formatCurrency = (amount?: number) => {
+  if (typeof amount !== 'number') return 'Chưa có số tiền';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+const paymentMethodLabel: Record<string, string> = {
+  cash: 'Tiền mặt',
+  bank_transfer: 'Chuyển khoản',
+  e_wallet: 'Ví điện tử',
 };
 
 const InfoCard = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -170,6 +186,24 @@ export default function CompletedRescueRequestDetailPage() {
                 </Typography>
               </Box>
             </Box>
+
+            <InfoCard title="Thanh toán">
+              <InfoRow icon={<PaymentIcon />} label="Số tiền thực tế" value={formatCurrency(request.payment?.amount)} />
+              <InfoRow
+                icon={<PaymentIcon />}
+                label="Phương thức"
+                value={
+                  request.payment?.method
+                    ? paymentMethodLabel[request.payment.method] || request.payment.method
+                    : 'Chưa có'
+                }
+              />
+              <InfoRow
+                icon={<ClockIcon />}
+                label="Thời gian thanh toán"
+                value={formatDateTime(request.payment?.paid_at)}
+              />
+            </InfoCard>
 
             <Box
               sx={{

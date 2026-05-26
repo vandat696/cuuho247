@@ -3,6 +3,7 @@ import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
 import { RescueRequest } from '../models/RescueRequest.model';
+import type { IPayment, PaymentMethod } from '../models/RescueRequest.model';
 import { Vehicle } from '../models/Vehicle.model';
 
 export interface SearchParams {
@@ -71,6 +72,7 @@ export interface ActiveRescueRequestResult extends PendingRescueRequestResult {
 
 export interface CompletedRescueRequestResult extends ActiveRescueRequestResult {
   completed_at?: Date;
+  payment?: IPayment;
 }
 
 export interface CompletedRescueRequestDetailResult extends CompletedRescueRequestResult {
@@ -102,6 +104,12 @@ export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResu
 export interface AcceptRescueRequestData {
   vehicle_id: string;
   eta_minutes: number;
+  note?: string | null;
+}
+
+export interface CompleteRescueRequestData {
+  amount: number;
+  method?: PaymentMethod;
   note?: string | null;
 }
 
@@ -349,6 +357,71 @@ class RescueService {
     };
   }
 
+  async completeActiveRequestForCompany(
+    companyId: string,
+    requestId: string,
+    data: CompleteRescueRequestData
+  ): Promise<CompletedRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const completedAt = new Date();
+    const request = (await RescueRequest.findOneAndUpdate(
+      {
+        _id: requestId,
+        'company.company_id': companyId,
+        status: { $in: ['accepted', 'in_progress'] },
+      },
+      {
+        $set: {
+          status: 'completed',
+          completed_at: completedAt,
+          payment: {
+            amount: data.amount,
+            method: data.method || 'cash',
+            paid_at: completedAt,
+          },
+        },
+        $push: {
+          status_history: {
+            status: 'completed',
+            changed_by: 'company',
+            changed_at: completedAt,
+            note: data.note || `Thanh toán thực tế: ${data.amount}`,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    )
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    if (request.vehicle?.vehicle_id) {
+      await Vehicle.findOneAndUpdate(
+        {
+          _id: request.vehicle.vehicle_id,
+          company_id: companyId,
+        },
+        { status: 'available' }
+      ).exec();
+    }
+
+    return {
+      ...(await this.mapRequestWithVehicle(request)),
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+    };
+  }
+
   async getCanceledRequestsForCompany(companyId: string): Promise<CanceledRescueRequestResult[]> {
     const requests = await RescueRequest.find({
       'company.company_id': companyId,
@@ -387,7 +460,7 @@ class RescueService {
     return {
       ...(await this.mapRequestWithVehicle(request)),
       customer: {
-        full_name: request.user_id?.full_name || 'Khach hang',
+        full_name: request.user_id?.full_name || 'Khách hàng',
         phone: request.user_id?.phone || '',
       },
     };
@@ -531,9 +604,10 @@ class RescueService {
       cancellation: request.cancellation,
       address: request.address,
       status: request.status,
+      payment: request.payment,
       vehicle: {
-        vehicle_type: vehicle?.vehicle_type || 'Xe cuu ho',
-        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chua co bien so',
+        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
+        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
       },
     } as ActiveRescueRequestResult;
   }
