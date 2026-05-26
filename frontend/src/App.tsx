@@ -18,6 +18,7 @@ import RescueRequestPage from '@/pages/customer/RescueRequestPage';
 import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 import CompanyDetailsPage from '@/pages/customer/CompanyDetailsPage';
 import ConfirmRequestPage from '@/pages/customer/ConfirmRequestPage';
+import CustomerHomePage from '@/pages/customer/CustomerHomePage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
 import ActiveRescueRequestDetailPage from './pages/rescue-company/rescue/ActiveRescueRequestDetailPage';
 import ActiveRescueRequestsPage from './pages/rescue-company/rescue/ActiveRescueRequestsPage';
@@ -61,6 +62,9 @@ function App() {
         <Route path="/register" element={<RoleSelectionPage />} />
         <Route path="/register/customer" element={<CustomerRegisterPage />} />
         <Route path="/register/company" element={<CompanyRegisterPage />} />
+
+        <Route path="/customer" element={<Navigate to="/customer/home" replace />} />
+        <Route path="/customer/home" element={<CustomerHomePage />} />
 
         <Route path="/company" element={<Navigate to="/company/home" replace />} />
         <Route path="/company/home" element={<CompanyHomePage />} />

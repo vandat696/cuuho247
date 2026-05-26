@@ -56,7 +56,7 @@ export const useLogin = () => {
           // Success
           toast.success('Đăng nhập thành công!');
           if (response.data.role === 'customer') {
-            navigate('/', { replace: true });
+            navigate('/customer/home', { replace: true });
           } else if (response.data.role === 'company') {
             navigate('/company/home', { replace: true });
           }
