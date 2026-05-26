@@ -58,7 +58,7 @@ export default function ConfirmRequestPage() {
       await rescueRequestService.createRequest(payload);
 
       toast.success('Gửi yêu cầu thành công!');
-      navigate('/'); // Redirect to home immediately
+      navigate('/customer/home', { replace: true });
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra khi gửi yêu cầu');
     } finally {
