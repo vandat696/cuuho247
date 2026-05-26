@@ -43,17 +43,17 @@ export interface MyRescueRequestsResult {
 
 export const rescueRequestService = {
   createRequest: async (payload: CreateRequestPayload) => {
-    const response = await axiosInstance.post('/rescue-requests', payload);
+    const response = await axiosInstance.post('/rescue/requests', payload);
     return response.data;
   },
 
   cancelRequest: async (requestId: string) => {
-    const response = await axiosInstance.patch(`/rescue-requests/${requestId}/cancel`);
+    const response = await axiosInstance.patch(`/rescue/requests/${requestId}/cancel`);
     return response.data;
   },
 
   getMyRequests: async (): Promise<ApiResponse<MyRescueRequestsResult>> => {
-    const response = await axiosInstance.get<ApiResponse<MyRescueRequestsResult>>('/rescue-requests/my-requests');
+    const response = await axiosInstance.get<ApiResponse<MyRescueRequestsResult>>('/rescue/requests/my-requests');
     return response.data;
   },
 };

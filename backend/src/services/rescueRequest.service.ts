@@ -29,7 +29,7 @@ class RescueRequestService {
 
     const company = await companyRepository.findById(company_id);
     if (!company) {
-      throw new ApiError(404, 'Cong ty cuu ho khong ton tai');
+      throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
     }
 
     const payload: Partial<IRescueRequest> = {
@@ -71,20 +71,20 @@ class RescueRequestService {
   async cancelRequest(requestId: string, userId: string, reason: string): Promise<IRescueRequest> {
     const request = await rescueRequestRepository.findById(requestId);
     if (!request) {
-      throw new ApiError(404, 'Khong tim thay yeu cau cuu ho');
+      throw new ApiError(404, 'Không tìm thấy yêu cầu cứu hộ');
     }
 
     if (request.user_id.toString() !== userId) {
-      throw new ApiError(403, 'Ban khong co quyen huy yeu cau nay');
+      throw new ApiError(403, 'Bạn không có quyền hủy yêu cầu này');
     }
 
     if (!request.status || !CANCELLABLE_STATUSES.includes(request.status)) {
-      throw new ApiError(400, 'Khong the huy yeu cau o trang thai hien tai');
+      throw new ApiError(400, 'Không thể hủy yêu cầu ở trạng thái hiện tại');
     }
 
     const updated = await rescueRequestRepository.cancelById(requestId, 'user', reason);
     if (!updated) {
-      throw new ApiError(500, 'Huy yeu cau that bai, vui long thu lai');
+      throw new ApiError(500, 'Hủy yêu cầu thất bại, vui lòng thử lại');
     }
 
     return updated;

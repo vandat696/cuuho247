@@ -10,7 +10,7 @@ class RescueRequestController {
 
       res.status(200).json({
         status: 'success',
-        message: 'Lay danh sach yeu cau cuu ho cua ban thanh cong',
+        message: 'Lấy danh sách yêu cầu cứu hộ của bạn thành công',
         data: {
           total: requests.length,
           requests,
@@ -27,7 +27,7 @@ class RescueRequestController {
       if (error) {
         res.status(400).json({
           status: 'error',
-          message: 'Du lieu khong hop le',
+          message: 'Dữ liệu không hợp lệ',
           errors: error.details.map((err) => ({
             field: err.context?.key,
             message: err.message,
@@ -43,7 +43,7 @@ class RescueRequestController {
 
       res.status(201).json({
         status: 'success',
-        message: 'Tao yeu cau cuu ho thanh cong',
+        message: 'Tạo yêu cầu cứu hộ thành công',
         data: newRequest,
       });
     } catch (error) {
@@ -64,7 +64,7 @@ class RescueRequestController {
 
       res.status(200).json({
         status: 'success',
-        message: 'Yeu cau cuu ho da duoc huy',
+        message: 'Yêu cầu cứu hộ đã được hủy',
         data: updated,
       });
     } catch (error) {
