@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
-import rescueRequestRepository from '../repositories/rescueRequest.repository';
 import companyRepository from '../repositories/company.repository';
-import type { IRescueRequest } from '../models/RescueRequest.model';
+import rescueRequestRepository from '../repositories/rescueRequest.repository';
+import type { IRescueRequest, RequestStatus } from '../models/RescueRequest.model';
+import { ApiError } from '../utils/apiError.util';
 
 export interface CreateRequestData {
   user_id: string;
@@ -16,6 +17,8 @@ export interface CreateRequestData {
   incident_photos?: string[];
 }
 
+const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
+
 class RescueRequestService {
   async getRequestsForUser(userId: string): Promise<IRescueRequest[]> {
     return rescueRequestRepository.findByUserId(userId);
@@ -26,7 +29,7 @@ class RescueRequestService {
 
     const company = await companyRepository.findById(company_id);
     if (!company) {
-      throw new Error('Công ty cứu hộ không tồn tại');
+      throw new ApiError(404, 'Cong ty cuu ho khong ton tai');
     }
 
     const payload: Partial<IRescueRequest> = {
@@ -62,50 +65,29 @@ class RescueRequestService {
       payload.incident_photos = incident_photos;
     }
 
-    const newRequest = await rescueRequestRepository.create(payload);
-
-    // TODO: Emit event via Socket.io when Socket server is setup
-    // const io = getSocketServer();
-    // if (io) {
-    //   io.to(`company_${company_id}`).emit('rescueRequest:new', newRequest);
-    // }
-
-    return newRequest;
+    return rescueRequestRepository.create(payload);
   }
 
-  async cancelRescueRequest(requestId: string, userId: string): Promise<IRescueRequest> {
+  async cancelRequest(requestId: string, userId: string, reason: string): Promise<IRescueRequest> {
     const request = await rescueRequestRepository.findById(requestId);
     if (!request) {
-      throw new Error('Yêu cầu không tồn tại');
+      throw new ApiError(404, 'Khong tim thay yeu cau cuu ho');
     }
 
     if (request.user_id.toString() !== userId) {
-      throw new Error('Bạn không có quyền hủy yêu cầu này');
+      throw new ApiError(403, 'Ban khong co quyen huy yeu cau nay');
     }
 
-    if (request.status !== 'pending' && request.status !== 'accepted') {
-      throw new Error('Chỉ có thể hủy khi yêu cầu đang ở trạng thái Chờ hoặc Đã nhận');
+    if (!request.status || !CANCELLABLE_STATUSES.includes(request.status)) {
+      throw new ApiError(400, 'Khong the huy yeu cau o trang thai hien tai');
     }
 
-    const updatedRequest = await rescueRequestRepository.updateStatus(
-      requestId,
-      'cancelled',
-      'user',
-      'Người dùng tự hủy',
-      { cancelled_by: 'user' }
-    );
-
-    if (!updatedRequest) {
-      throw new Error('Không thể cập nhật trạng thái yêu cầu');
+    const updated = await rescueRequestRepository.cancelById(requestId, 'user', reason);
+    if (!updated) {
+      throw new ApiError(500, 'Huy yeu cau that bai, vui long thu lai');
     }
 
-    // TODO: Gửi thông báo socket cho công ty để họ dừng xử lý
-    // const io = getSocketServer();
-    // if (io) {
-    //   io.to(`company_${request.company.company_id.toString()}`).emit('rescueRequest:cancelled', updatedRequest);
-    // }
-
-    return updatedRequest;
+    return updated;
   }
 }
 

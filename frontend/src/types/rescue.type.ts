@@ -28,6 +28,10 @@ export const INCIDENT_TYPES: IncidentType[] = [
   { label: 'Sự cố khác', slug: 'su-co-khac' },
 ];
 
+// ─── Request Status ────────────────────────────────────────────────────────────
+
+export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'rejected' | 'timeout';
+
 // ─── Form Data ─────────────────────────────────────────────────────────────────
 
 export interface RescueLocation {

@@ -5,8 +5,11 @@ import { authorize } from '../middleware/authorize.middleware';
 
 const router = Router();
 
-router.get('/my-requests', authenticate, authorize(['customer']), rescueRequestController.getMyRequests);
-router.post('/', authenticate, authorize(['customer']), rescueRequestController.createRequest);
-router.patch('/:id/cancel', authenticate, authorize(['customer']), rescueRequestController.cancelRequest);
+router.use(authenticate);
+router.use(authorize(['customer']));
+
+router.get('/my-requests', rescueRequestController.getMyRequests);
+router.post('/', rescueRequestController.createRequest);
+router.patch('/:id/cancel', rescueRequestController.cancelRequest);
 
 export default router;

@@ -739,3 +739,64 @@ h4 {
   background: var(--clr-border);
   border-radius: var(--r-full);
 }
+
+/* Cancel button */
+.btn--cancel {
+  background: transparent;
+  color: var(--clr-error);
+  border: 1.5px solid var(--clr-error);
+}
+.btn--cancel:hover:not(:disabled) {
+  background: var(--clr-error-light);
+}
+
+/* ═══════════════════════════════════════════════
+   Component: Bottom Sheet
+═══════════════════════════════════════════════ */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--mobile-max);
+  background: var(--clr-surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: var(--sp-6) var(--sp-4);
+  z-index: 201;
+  animation: slideUp 0.25s ease;
+}
+
+.sheet__handle {
+  width: 40px;
+  height: 4px;
+  background: var(--clr-border);
+  border-radius: var(--r-full);
+  margin: 0 auto var(--sp-6);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}

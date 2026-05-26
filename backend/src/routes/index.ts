@@ -27,5 +27,6 @@ router.use('/vehicles', vehicleRoutes);
 // Rescue Routes
 router.use('/rescue', rescueRoutes);
 router.use('/rescue-requests', rescueRequestRoutes);
+router.use('/rescue/requests', rescueRequestRoutes);
 
 export default router;

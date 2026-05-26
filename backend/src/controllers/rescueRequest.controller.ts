@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import rescueRequestService from '../services/rescueRequest.service';
-import { createRequestSchema } from '../validators/rescueRequest.validator';
 import { AuthRequest } from '../middleware/auth.middleware';
+import rescueRequestService from '../services/rescueRequest.service';
+import { cancelRequestSchema, createRequestSchema } from '../validators/rescueRequest.validator';
 
 class RescueRequestController {
   async getMyRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -10,13 +10,13 @@ class RescueRequestController {
 
       res.status(200).json({
         status: 'success',
-        message: 'Lấy danh sách yêu cầu cứu hộ của bạn thành công',
+        message: 'Lay danh sach yeu cau cuu ho cua ban thanh cong',
         data: {
           total: requests.length,
           requests,
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       next(error);
     }
   }
@@ -27,7 +27,7 @@ class RescueRequestController {
       if (error) {
         res.status(400).json({
           status: 'error',
-          message: 'Dữ liệu không hợp lệ',
+          message: 'Du lieu khong hop le',
           errors: error.details.map((err) => ({
             field: err.context?.key,
             message: err.message,
@@ -36,21 +36,17 @@ class RescueRequestController {
         return;
       }
 
-      const userId = req.user?.id || req.user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1';
-
-      const requestData = {
+      const newRequest = await rescueRequestService.createRescueRequest({
         ...value,
-        user_id: userId,
-      };
-
-      const newRequest = await rescueRequestService.createRescueRequest(requestData);
+        user_id: req.user.id,
+      });
 
       res.status(201).json({
         status: 'success',
-        message: 'Tạo yêu cầu cứu hộ thành công',
+        message: 'Tao yeu cau cuu ho thanh cong',
         data: newRequest,
       });
-    } catch (error: any) {
+    } catch (error) {
       next(error);
     }
   }
@@ -58,25 +54,20 @@ class RescueRequestController {
   async cancelRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
+      const { error, value } = cancelRequestSchema.validate(req.body);
+      if (error) {
+        res.status(400).json({ status: 'error', message: error.details[0].message });
+        return;
+      }
 
-      const userId = req.user?.id || req.user?._id || req.body.user_id || '6652b2f9b1e8a001c8e4d2a1';
-
-      const updatedRequest = await rescueRequestService.cancelRescueRequest(id, userId);
+      const updated = await rescueRequestService.cancelRequest(id, req.user.id, value.reason);
 
       res.status(200).json({
         status: 'success',
-        message: 'Hủy yêu cầu thành công',
-        data: updatedRequest,
+        message: 'Yeu cau cuu ho da duoc huy',
+        data: updated,
       });
-    } catch (error: any) {
-      if (
-        error.message.includes('không tồn tại') ||
-        error.message.includes('quyền') ||
-        error.message.includes('Chỉ có thể hủy')
-      ) {
-        res.status(400).json({ status: 'error', message: error.message });
-        return;
-      }
+    } catch (error) {
       next(error);
     }
   }
