@@ -4,24 +4,84 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
-## 1.0.0 (2026-05-05)
-
+## [1.1.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v1.0.0...cuuho247-v1.1.0) (2026-05-24)
 
 ### Features
 
-* **frontend:** initialize components and layout for frontend ([b7f2443](https://github.com/vandat696/cuuho247/commit/b7f24439cbc9d07136b6dcb1b225c673cc92c137))
-* **frontend:** initialize components and layout for frontend ([f75a40f](https://github.com/vandat696/cuuho247/commit/f75a40fc8dcf342661a4d78ea3aa7fa30491728c))
-* **models:** initialize mongooses models for all collections ([7c2e988](https://github.com/vandat696/cuuho247/commit/7c2e988657d62115cd54ad4387a3a568d165b0aa))
-* **models:** initialize mongooses models for all collections ([538387d](https://github.com/vandat696/cuuho247/commit/538387d963383318735a47fc1eee1b29a4f7fa98))
-
+- add company location selection with map integration and validation ([97c76cc](https://github.com/vandat696/cuuho247/commit/97c76ccd24ca684ba2d1cd64113cee1028749fa0))
+- add company registration functionality and update related services and routes ([c94463a](https://github.com/vandat696/cuuho247/commit/c94463a70c9e8f5f28d72008648beb47ddf22630))
+- add peer dependencies and remove unused packages in package-lock files ([68401c4](https://github.com/vandat696/cuuho247/commit/68401c44114c91727517f626c0bc09b56eac7b3b))
+- add rescue services search feature ([13ed59c](https://github.com/vandat696/cuuho247/commit/13ed59c8c81cc07d00c4cef58a7d850fc6315402))
+- add service crud, company homepage ([4b14c9a](https://github.com/vandat696/cuuho247/commit/4b14c9a05f7185b9022d2cf5efb174072f684cfa))
+- add service crud, company homepage ([0f32df6](https://github.com/vandat696/cuuho247/commit/0f32df6f4054cd1f0713a3ad5c81586aa326dd5f))
+- **auth:** add company registration functionality ([58d7dea](https://github.com/vandat696/cuuho247/commit/58d7dea8712eab60e63b83aae958ae11550edbe5))
+- **auth:** add company registration functionality ([7d7b679](https://github.com/vandat696/cuuho247/commit/7d7b6796d9c16d54b804ed80fbcb1309eec3e1b4))
+- **auth:** implement multi-role authentication with JWT ([0a78c38](https://github.com/vandat696/cuuho247/commit/0a78c38626d6161073a806b9412eda999004f4ec))
+- **company:** add both fe and be for company profile ([eafb571](https://github.com/vandat696/cuuho247/commit/eafb571302b64cac94f24629c774f9d2dd3b0604))
+- **company:** add both fe and be for company profile ([b6bc4a4](https://github.com/vandat696/cuuho247/commit/b6bc4a4bd29c571b44d127b43f451b8d370958b4))
+- enhance validation and structure for service and vehicle controllers, update company model and repository ([13374be](https://github.com/vandat696/cuuho247/commit/13374be5726d79791fa5a891579dbf1f5ed4fa8b))
+- **env:** add example environment configuration file ([fa242f5](https://github.com/vandat696/cuuho247/commit/fa242f5ba332a19f24401b5bd5e8e1ab824469cb))
+- implement company registration with file upload and enhance error handling ([0215e4d](https://github.com/vandat696/cuuho247/commit/0215e4d7df363cddef91e29b45c8680f74965a64))
+- remove AddressAutocomplete component from company registration form ([37b2b05](https://github.com/vandat696/cuuho247/commit/37b2b0573aedaa6a30e5317b9fd1d25c70ac19e9))
+- update address handling and improve placeholder texts in company registration form ([cdb1673](https://github.com/vandat696/cuuho247/commit/cdb16733d8c4fd62cb084e8a3095c6600e514ac5))
+- update service areas list and ensure unique email in company model ([c71bc98](https://github.com/vandat696/cuuho247/commit/c71bc986a14b162cf5169b0e712a28b7cbf4fb59))
+- update TypeScript module settings and add peer dependencies in package-lock ([c6917d0](https://github.com/vandat696/cuuho247/commit/c6917d0cc1d27a67f1af1f54dfcb8a007f3bfd86))
+- **validation:** add validation for spaces and vietnamese characters in password schema ([da62013](https://github.com/vandat696/cuuho247/commit/da620135331db49e3679c9bf7db1218921ce1c54))
+- **vehicle:** thêm giao diện và api quản lý phương tiện ([d23dbd4](https://github.com/vandat696/cuuho247/commit/d23dbd4411b20f5d12c4c8bbfa6c0204796f8ccf))
 
 ### Bug Fixes
 
-* apply review feedback on Input, Card, Button components and backend DB connection ([fb7ff97](https://github.com/vandat696/cuuho247/commit/fb7ff9793e82cf1df06efff525eeeb4a7ef0f6e5))
-* fix card typography ([ba85ca4](https://github.com/vandat696/cuuho247/commit/ba85ca4a601a84918705a87e6b238e6e8fec915f))
-* migrate components to mui ([89bfae0](https://github.com/vandat696/cuuho247/commit/89bfae015fede84b3b9b856d63c4cbde78638ffb))
-* migrate components to mui ([d018371](https://github.com/vandat696/cuuho247/commit/d018371d79c64e59080911b70e11d22a93e21a3e))
-* resolve PR review comments ([2b242ed](https://github.com/vandat696/cuuho247/commit/2b242edee0519dacc909dea21db359bcc83d4333))
+- fix address autocomplete using goong api & add minimap ([9666824](https://github.com/vandat696/cuuho247/commit/966682437af99ccfc5e38fd8bfb4d82d6ea30c00))
+- **validation:** add whitelist pattern to restrict password to ASCII ([78b7de4](https://github.com/vandat696/cuuho247/commit/78b7de42901d85582da66cca305e0fb6aad69a98))
+- **validation:** add whitelist pattern to restrict password to ASCII characters only ([352a243](https://github.com/vandat696/cuuho247/commit/352a243a23b88b3e2ae581441f302cf0aae30970))
+
+## 1.0.0 (2026-05-05)
+
+### Features
+
+- add company location selection with map integration and validation ([97c76cc](https://github.com/vandat696/cuuho247/commit/97c76ccd24ca684ba2d1cd64113cee1028749fa0))
+- add company registration functionality and update related services and routes ([c94463a](https://github.com/vandat696/cuuho247/commit/c94463a70c9e8f5f28d72008648beb47ddf22630))
+- add peer dependencies and remove unused packages in package-lock files ([68401c4](https://github.com/vandat696/cuuho247/commit/68401c44114c91727517f626c0bc09b56eac7b3b))
+- add rescue services search feature ([13ed59c](https://github.com/vandat696/cuuho247/commit/13ed59c8c81cc07d00c4cef58a7d850fc6315402))
+- add service crud, company homepage ([4b14c9a](https://github.com/vandat696/cuuho247/commit/4b14c9a05f7185b9022d2cf5efb174072f684cfa))
+- add service crud, company homepage ([0f32df6](https://github.com/vandat696/cuuho247/commit/0f32df6f4054cd1f0713a3ad5c81586aa326dd5f))
+- **auth:** add company registration functionality ([58d7dea](https://github.com/vandat696/cuuho247/commit/58d7dea8712eab60e63b83aae958ae11550edbe5))
+- **auth:** add company registration functionality ([7d7b679](https://github.com/vandat696/cuuho247/commit/7d7b6796d9c16d54b804ed80fbcb1309eec3e1b4))
+- **auth:** implement multi-role authentication with JWT ([0a78c38](https://github.com/vandat696/cuuho247/commit/0a78c38626d6161073a806b9412eda999004f4ec))
+- **company:** add both fe and be for company profile ([eafb571](https://github.com/vandat696/cuuho247/commit/eafb571302b64cac94f24629c774f9d2dd3b0604))
+- **company:** add both fe and be for company profile ([b6bc4a4](https://github.com/vandat696/cuuho247/commit/b6bc4a4bd29c571b44d127b43f451b8d370958b4))
+- enhance validation and structure for service and vehicle controllers, update company model and repository ([13374be](https://github.com/vandat696/cuuho247/commit/13374be5726d79791fa5a891579dbf1f5ed4fa8b))
+- **env:** add example environment configuration file ([fa242f5](https://github.com/vandat696/cuuho247/commit/fa242f5ba332a19f24401b5bd5e8e1ab824469cb))
+- implement company registration with file upload and enhance error handling ([0215e4d](https://github.com/vandat696/cuuho247/commit/0215e4d7df363cddef91e29b45c8680f74965a64))
+- remove AddressAutocomplete component from company registration form ([37b2b05](https://github.com/vandat696/cuuho247/commit/37b2b0573aedaa6a30e5317b9fd1d25c70ac19e9))
+- update address handling and improve placeholder texts in company registration form ([cdb1673](https://github.com/vandat696/cuuho247/commit/cdb16733d8c4fd62cb084e8a3095c6600e514ac5))
+- update service areas list and ensure unique email in company model ([c71bc98](https://github.com/vandat696/cuuho247/commit/c71bc986a14b162cf5169b0e712a28b7cbf4fb59))
+- update TypeScript module settings and add peer dependencies in package-lock ([c6917d0](https://github.com/vandat696/cuuho247/commit/c6917d0cc1d27a67f1af1f54dfcb8a007f3bfd86))
+- **validation:** add validation for spaces and vietnamese characters in password schema ([da62013](https://github.com/vandat696/cuuho247/commit/da620135331db49e3679c9bf7db1218921ce1c54))
+- **vehicle:** thêm giao diện và api quản lý phương tiện ([d23dbd4](https://github.com/vandat696/cuuho247/commit/d23dbd4411b20f5d12c4c8bbfa6c0204796f8ccf))
+
+### Bug Fixes
+
+- fix address autocomplete using goong api & add minimap ([9666824](https://github.com/vandat696/cuuho247/commit/966682437af99ccfc5e38fd8bfb4d82d6ea30c00))
+- **validation:** add whitelist pattern to restrict password to ASCII ([78b7de4](https://github.com/vandat696/cuuho247/commit/78b7de42901d85582da66cca305e0fb6aad69a98))
+- **validation:** add whitelist pattern to restrict password to ASCII characters only ([352a243](https://github.com/vandat696/cuuho247/commit/352a243a23b88b3e2ae581441f302cf0aae30970))
+
+## 1.0.0 (2026-05-05)
+
+### Features
+
+- **frontend:** initialize components and layout for frontend ([b7f2443](https://github.com/vandat696/cuuho247/commit/b7f24439cbc9d07136b6dcb1b225c673cc92c137))
+- **frontend:** initialize components and layout for frontend ([f75a40f](https://github.com/vandat696/cuuho247/commit/f75a40fc8dcf342661a4d78ea3aa7fa30491728c))
+- **models:** initialize mongooses models for all collections ([7c2e988](https://github.com/vandat696/cuuho247/commit/7c2e988657d62115cd54ad4387a3a568d165b0aa))
+- **models:** initialize mongooses models for all collections ([538387d](https://github.com/vandat696/cuuho247/commit/538387d963383318735a47fc1eee1b29a4f7fa98))
+
+### Bug Fixes
+
+- apply review feedback on Input, Card, Button components and backend DB connection ([fb7ff97](https://github.com/vandat696/cuuho247/commit/fb7ff9793e82cf1df06efff525eeeb4a7ef0f6e5))
+- fix card typography ([ba85ca4](https://github.com/vandat696/cuuho247/commit/ba85ca4a601a84918705a87e6b238e6e8fec915f))
+- migrate components to mui ([89bfae0](https://github.com/vandat696/cuuho247/commit/89bfae015fede84b3b9b856d63c4cbde78638ffb))
+- migrate components to mui ([d018371](https://github.com/vandat696/cuuho247/commit/d018371d79c64e59080911b70e11d22a93e21a3e))
+- resolve PR review comments ([2b242ed](https://github.com/vandat696/cuuho247/commit/2b242edee0519dacc909dea21db359bcc83d4333))
 
 ## [Unreleased]
 

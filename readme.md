@@ -1,6 +1,10 @@
 # Road Rescue System - Hệ Thống Cứu Hộ Xe Cộ
 
-Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS và chat trực tiếp.
+Nền tảng số kết nối người tham gia giao thông gặp sự cố với các đơn vị cứu hộ chuyên nghiệp, cung cấp dịch vụ cứu hộ real-time với định vị GPS, chat trực tiếp và quy trình xử lý theo vai trò.
+
+**Phiên bản hiện tại:** v1.1.0
+
+**GitHub Releases:** https://github.com/vandat696/cuuho247/releases
 
 ## 📋 Tài Liệu Liên Quan
 
@@ -168,6 +172,19 @@ cuuho247/
 - ✅ Duyệt đơn đăng ký công ty (v1.0.0)
 - ✅ Quản lý danh mục dịch vụ (v1.1.0)
 - ✅ Xem lịch sử đăng nhập & hoạt động (v1.0.0)
+
+---
+
+## 🚀 Release Notes v1.1.0
+
+Bản phát hành này tập trung vào luồng xác thực, khởi tạo dữ liệu cốt lõi và hoàn thiện các thành phần nền tảng cho frontend/backend.
+
+### Nổi bật
+
+- Multi-role authentication bằng JWT.
+- Bổ sung file cấu hình môi trường mẫu.
+- Chuẩn hóa validation cho mật khẩu.
+- Đồng bộ phiên bản package và changelog cho quy trình release-please.
 
 ---
 
