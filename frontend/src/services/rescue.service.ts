@@ -3,6 +3,7 @@ import { ApiResponse } from '../types/common.type';
 import {
   ActiveRescueRequestDetailResult,
   ActiveRescueRequestsResult,
+  AcceptPendingRescueRequestPayload,
   CanceledRescueRequestDetailResult,
   CanceledRescueRequestsResult,
   CompletedRescueRequestDetailResult,
@@ -77,6 +78,17 @@ export const rescueService = {
   getCompanyPendingRequestDetail: async (requestId: string): Promise<ApiResponse<PendingRescueRequestDetailResult>> => {
     const response = await http.get<ApiResponse<PendingRescueRequestDetailResult>>(
       `/rescue/company/pending/${requestId}`
+    );
+    return response.data;
+  },
+
+  acceptCompanyPendingRequest: async (
+    requestId: string,
+    payload: AcceptPendingRescueRequestPayload
+  ): Promise<ApiResponse<ActiveRescueRequestDetailResult>> => {
+    const response = await http.patch<ApiResponse<ActiveRescueRequestDetailResult>>(
+      `/rescue/company/pending/${requestId}/accept`,
+      payload
     );
     return response.data;
   },

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import rescueService from '../services/rescue.service';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { acceptRequestSchema } from '../validators/rescueRequest.validator';
 
 class RescueController {
   async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -172,6 +173,101 @@ class RescueController {
         message: 'Lấy chi tiết yêu cầu đang chờ thành công',
         data: {
           request,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async acceptCompanyPendingRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const { error, value } = acceptRequestSchema.validate(req.body, { abortEarly: false });
+
+      if (error) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Dữ liệu không hợp lệ',
+          errors: error.details.map((err) => ({
+            field: err.context?.key,
+            message: err.message,
+          })),
+        });
+        return;
+      }
+
+      const request = await rescueService.acceptPendingRequestForCompany(companyId, requestId, value);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy yêu cầu đang chờ để nhận',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Nhận yêu cầu cứu hộ thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error: any) {
+      if (error.message.includes('Xe cứu hộ') || error.message.includes('Xe cuu ho')) {
+        res.status(400).json({ status: 'error', message: error.message });
+        return;
+      }
+      next(error);
+    }
+  }
+
+  async getCompanyRequestRouteEstimate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const { lat, lng } = req.query;
+
+      if ((lat && !lng) || (!lat && lng)) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Vui long gui du ca lat va lng',
+        });
+        return;
+      }
+
+      const origin =
+        lat && lng
+          ? {
+              lat: parseFloat(lat as string),
+              lng: parseFloat(lng as string),
+            }
+          : undefined;
+
+      if (origin && (Number.isNaN(origin.lat) || Number.isNaN(origin.lng))) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Tọa độ không hợp lệ',
+        });
+        return;
+      }
+
+      const estimate = await rescueService.estimateRequestRouteForCompany(companyId, requestId, origin);
+
+      if (!estimate) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy yêu cầu để tính thời gian di chuyển',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          estimate,
         },
       });
     } catch (error) {

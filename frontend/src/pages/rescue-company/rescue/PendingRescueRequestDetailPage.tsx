@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, MenuItem, TextField, Typography } from '@mui/material';
 import {
   AccessTimeOutlined as ClockIcon,
   DescriptionOutlined as FileIcon,
@@ -8,14 +8,15 @@ import {
   LocationOnOutlined as LocationIcon,
   PersonOutline as UserIcon,
   PhoneOutlined as PhoneIcon,
-  PhotoCameraOutlined as CameraIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { rescueService } from '@/services/rescue.service';
+import { vehicleService } from '@/services/vehicle.service';
 import { PendingRescueRequestDetail } from '@/types/rescue.type';
+import { IVehicle } from '@/types/vehicle.types';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';
@@ -29,13 +30,13 @@ interface InfoRowProps {
 }
 
 const formatAddress = (address?: Record<string, unknown>) => {
-  if (!address) return 'Chưa có địa chỉ';
+  if (!address) return 'Chua co dia chi';
 
   const orderedParts = ['detail', 'ward', 'district', 'province']
     .map((key) => address[key])
     .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
 
-  return orderedParts.length > 0 ? orderedParts.join(', ') : 'Chưa có địa chỉ';
+  return orderedParts.length > 0 ? orderedParts.join(', ') : 'Chua co dia chi';
 };
 
 const formatDistance = (distanceKm: number | null) => {
@@ -44,10 +45,10 @@ const formatDistance = (distanceKm: number | null) => {
 };
 
 const formatRequestTime = (dateValue?: string) => {
-  if (!dateValue) return 'Chưa có thời gian';
+  if (!dateValue) return 'Chua co thoi gian';
 
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return 'Chưa có thời gian';
+  if (Number.isNaN(date.getTime())) return 'Chua co thoi gian';
 
   const pad = (value: number) => value.toString().padStart(2, '0');
   return `${pad(date.getHours())}:${pad(date.getMinutes())} - ${pad(date.getDate())}/${pad(
@@ -84,7 +85,12 @@ export default function PendingRescueRequestDetailPage() {
   const navigate = useNavigate();
   const { requestId } = useParams<{ requestId: string }>();
   const [request, setRequest] = useState<PendingRescueRequestDetail | null>(null);
+  const [vehicles, setVehicles] = useState<IVehicle[]>([]);
+  const [vehicleId, setVehicleId] = useState('');
+  const [etaMinutes, setEtaMinutes] = useState('');
+  const [note, setNote] = useState('');
   const [loading, setLoading] = useState(true);
+  const [accepting, setAccepting] = useState(false);
 
   useEffect(() => {
     const fetchRequestDetail = async () => {
@@ -100,7 +106,7 @@ export default function PendingRescueRequestDetailPage() {
         }
       } catch (error) {
         console.error('Error fetching pending rescue request detail:', error);
-        toast.error('Không thể tải chi tiết yêu cầu');
+        toast.error('Khong the tai chi tiet yeu cau');
       } finally {
         setLoading(false);
       }
@@ -109,11 +115,53 @@ export default function PendingRescueRequestDetailPage() {
     fetchRequestDetail();
   }, [navigate, requestId]);
 
-  const photoSlots = request?.incident_photos.length ? request.incident_photos : ['', ''];
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const data = await vehicleService.getVehicles();
+        setVehicles(data.filter((vehicle) => vehicle.status === 'available'));
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
+  const handleAcceptRequest = async () => {
+    if (!requestId) return;
+
+    const eta = Number(etaMinutes);
+    if (!vehicleId) {
+      toast.error('Vui long chon xe cuu ho');
+      return;
+    }
+
+    if (!Number.isInteger(eta) || eta <= 0) {
+      toast.error('Vui long nhap thoi gian du kien den hop le');
+      return;
+    }
+
+    try {
+      setAccepting(true);
+      await rescueService.acceptCompanyPendingRequest(requestId, {
+        vehicle_id: vehicleId,
+        eta_minutes: eta,
+        note: note.trim() || undefined,
+      });
+      toast.success('Da nhan yeu cau cuu ho');
+      navigate('/company/rescue/active');
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast.error('Khong the nhan yeu cau');
+    } finally {
+      setAccepting(false);
+    }
+  };
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết yêu cầu" onBack={() => navigate('/company/rescue/pending')} />
+      <AppHeader title="Chi tiet yeu cau" onBack={() => navigate('/company/rescue/pending')} />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {loading ? (
@@ -122,88 +170,83 @@ export default function PendingRescueRequestDetailPage() {
           </Box>
         ) : !request ? (
           <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography sx={{ fontSize: 14 }}>Không tìm thấy yêu cầu</Typography>
+            <Typography sx={{ fontSize: 14 }}>Khong tim thay yeu cau</Typography>
           </Box>
         ) : (
           <>
-            <InfoCard title="Thông tin khách hàng">
-              <InfoRow icon={<UserIcon />} label="Tên khách hàng" value={request.customer.full_name || 'Khách hàng'} />
-              <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={request.customer.phone || 'Chưa có số'} />
+            <InfoCard title="Thong tin khach hang">
+              <InfoRow icon={<UserIcon />} label="Ten khach hang" value={request.customer.full_name || 'Khach hang'} />
+              <InfoRow icon={<PhoneIcon />} label="So dien thoai" value={request.customer.phone || 'Chua co so'} />
             </InfoCard>
 
-            <InfoCard title="Thông tin sự cố">
-              <InfoRow icon={<AlertIcon />} label="Loại sự cố" value={`🔧 ${request.title}`} />
-              <InfoRow icon={<FileIcon />} label="Mô tả" value={request.description || 'Chưa có mô tả'} />
+            <InfoCard title="Thong tin su co">
+              <InfoRow icon={<AlertIcon />} label="Loai su co" value={request.title} />
+              <InfoRow icon={<FileIcon />} label="Mo ta" value={request.description || 'Chua co mo ta'} />
               <InfoRow
                 icon={<LocationIcon />}
-                label="Vị trí"
+                label="Vi tri"
                 value={
                   <>
                     <Typography component="span" sx={{ display: 'block', fontSize: 16, fontWeight: 500 }}>
                       {formatAddress(request.address)}
                     </Typography>
                     <Typography sx={{ mt: 0.5, fontSize: 14, color: ORANGE, lineHeight: 1.35 }}>
-                      📍 Khoảng cách: {formatDistance(request.distance_km)}
+                      Khoang cach: {formatDistance(request.distance_km)}
                     </Typography>
                   </>
                 }
               />
-              <InfoRow icon={<ClockIcon />} label="Thời gian yêu cầu" value={formatRequestTime(request.created_at)} />
-              <InfoRow
-                icon={<CameraIcon />}
-                label="Hình ảnh sự cố"
-                value={
-                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, mt: 1 }}>
-                    {photoSlots.map((photo, index) => (
-                      <Box
-                        key={`${photo || 'placeholder'}-${index}`}
-                        sx={{
-                          aspectRatio: '1 / 1',
-                          borderRadius: BUTTON_RADIUS,
-                          bgcolor: '#e5e7eb',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {photo ? (
-                          <Box
-                            component="img"
-                            src={photo}
-                            alt={`Hình ảnh sự cố ${index + 1}`}
-                            sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          />
-                        ) : null}
-                      </Box>
-                    ))}
-                  </Box>
-                }
-              />
+              <InfoRow icon={<ClockIcon />} label="Thoi gian yeu cau" value={formatRequestTime(request.created_at)} />
             </InfoCard>
 
-            <Box
-              sx={{
-                height: 192,
-                mb: 3,
-                borderRadius: CARD_RADIUS,
-                bgcolor: '#e5e7eb',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <LocationIcon sx={{ fontSize: 48, color: '#9ca3af' }} />
-            </Box>
+            <InfoCard title="Nhan yeu cau">
+              <TextField
+                select
+                label="Xe cuu ho"
+                value={vehicleId}
+                onChange={(event) => setVehicleId(event.target.value)}
+                fullWidth
+                size="small"
+              >
+                {vehicles.map((vehicle) => (
+                  <MenuItem key={vehicle._id} value={vehicle._id}>
+                    {vehicle.plate_number} - {vehicle.vehicle_type}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Thoi gian du kien den (phut)"
+                type="number"
+                value={etaMinutes}
+                onChange={(event) => setEtaMinutes(event.target.value)}
+                fullWidth
+                size="small"
+                inputProps={{ min: 1 }}
+              />
+              <TextField
+                label="Ghi chu"
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                fullWidth
+                size="small"
+                multiline
+                minRows={2}
+              />
+            </InfoCard>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box
                 component="button"
                 type="button"
-                onClick={() => toast.success('Đã nhận thao tác chấp nhận yêu cầu')}
+                onClick={handleAcceptRequest}
+                disabled={accepting}
                 sx={{
                   width: '100%',
                   px: 3,
                   py: 1.5,
                   borderRadius: BUTTON_RADIUS,
-                  bgcolor: ORANGE,
+                  border: 0,
+                  bgcolor: accepting ? '#f3a267' : ORANGE,
                   color: '#fff',
                   fontSize: 16,
                   fontWeight: 500,
@@ -214,12 +257,12 @@ export default function PendingRescueRequestDetailPage() {
                   '&:active': { transform: 'scale(0.99)' },
                 }}
               >
-                Chấp nhận yêu cầu
+                {accepting ? 'Dang nhan...' : 'Chap nhan yeu cau'}
               </Box>
               <Box
                 component="button"
                 type="button"
-                onClick={() => toast('Đã nhận thao tác từ chối')}
+                onClick={() => toast('Da nhan thao tac tu choi')}
                 sx={{
                   width: '100%',
                   px: 3,
@@ -236,7 +279,7 @@ export default function PendingRescueRequestDetailPage() {
                   '&:active': { transform: 'scale(0.99)' },
                 }}
               >
-                Từ chối
+                Tu choi
               </Box>
             </Box>
           </>

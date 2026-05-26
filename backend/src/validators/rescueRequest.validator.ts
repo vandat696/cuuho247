@@ -22,3 +22,18 @@ export const createRequestSchema = Joi.object({
   service_types: Joi.array().items(Joi.string()).optional(),
   incident_photos: Joi.array().items(Joi.string()).optional(),
 });
+
+export const acceptRequestSchema = Joi.object({
+  vehicle_id: Joi.string().required().messages({
+    'string.empty': 'Vui long chon xe cuu ho',
+    'any.required': 'Vui lòng chọn xe cứu hộ',
+  }),
+  eta_minutes: Joi.number().integer().min(1).max(1440).required().messages({
+    'number.base': 'Thoi gian du kien den phai la so phut',
+    'number.integer': 'Thoi gian du kien den phai la so phut nguyen',
+    'number.min': 'Thoi gian du kien den phai lon hon 0 phut',
+    'number.max': 'Thoi gian du kien den khong duoc vuot qua 1440 phut',
+    'any.required': 'Vui long nhap thoi gian du kien den',
+  }),
+  note: Joi.string().allow('', null).optional(),
+});

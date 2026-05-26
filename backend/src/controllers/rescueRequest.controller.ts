@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
 import rescueRequestService from '../services/rescueRequest.service';
 import { createRequestSchema } from '../validators/rescueRequest.validator';
 

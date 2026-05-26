@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { RescueRequest, IRescueRequest } from '../models/RescueRequest.model';
 
 class RescueRequestRepository {
@@ -8,7 +7,7 @@ class RescueRequestRepository {
   }
 
   async findById(id: string): Promise<IRescueRequest | null> {
-    return await RescueRequest.findById(id).lean();
+    return await RescueRequest.findById(id);
   }
 
   async updateStatus(
@@ -43,7 +42,7 @@ class RescueRequestRepository {
       updateData.$set.completed_at = new Date();
     }
 
-    return await RescueRequest.findByIdAndUpdate(id, updateData, { new: true }).lean();
+    return await RescueRequest.findByIdAndUpdate(id, updateData, { new: true });
   }
 }
 

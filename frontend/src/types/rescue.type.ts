@@ -93,6 +93,7 @@ export interface PendingRescueRequest {
   title: string;
   description: string;
   distance_km: number | null;
+  eta_minutes?: number | null;
   created_at?: string;
   status?: string;
   address?: Record<string, unknown>;
@@ -124,6 +125,13 @@ export interface ActiveRescueRequest extends PendingRescueRequest {
     vehicle_type: string;
     plate_number: string;
   };
+  accepted_at?: string;
+}
+
+export interface AcceptPendingRescueRequestPayload {
+  vehicle_id: string;
+  eta_minutes: number;
+  note?: string;
 }
 
 export interface ActiveRescueRequestsResult {

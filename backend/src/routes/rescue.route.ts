@@ -27,6 +27,12 @@ router.get(
   rescueController.getCompanyCanceledRequestDetail
 );
 router.get('/company/pending', authenticate, authorize(['company']), rescueController.getCompanyPendingRequests);
+router.patch(
+  '/company/pending/:requestId/accept',
+  authenticate,
+  authorize(['company']),
+  rescueController.acceptCompanyPendingRequest
+);
 router.get(
   '/company/pending/:requestId',
   authenticate,

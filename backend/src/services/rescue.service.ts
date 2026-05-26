@@ -1,14 +1,14 @@
+import { isValidObjectId, Types } from 'mongoose';
 import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
 import { RescueRequest } from '../models/RescueRequest.model';
 import { Vehicle } from '../models/Vehicle.model';
-import { isValidObjectId } from 'mongoose';
 
 export interface SearchParams {
   lat: number;
   lng: number;
-  incident_type?: string; // slug of ServiceCategory
+  incident_type?: string;
   max_distance_km?: number;
 }
 
@@ -38,6 +38,7 @@ export interface PendingRescueRequestResult {
   title: string;
   description: string;
   distance_km: number | null;
+  eta_minutes?: number | null;
   created_at?: Date;
   address?: Record<string, unknown>;
   status?: string;
@@ -60,6 +61,7 @@ export interface ActiveRescueRequestResult extends PendingRescueRequestResult {
     vehicle_type: string;
     plate_number: string;
   };
+  accepted_at?: Date;
 }
 
 export interface CompletedRescueRequestResult extends ActiveRescueRequestResult {
@@ -92,6 +94,12 @@ export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResu
   };
 }
 
+export interface AcceptRescueRequestData {
+  vehicle_id: string;
+  eta_minutes: number;
+  note?: string | null;
+}
+
 class RescueService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
     const company = await companyRepository.findById(companyId);
@@ -107,22 +115,15 @@ class RescueService {
       .exec();
 
     return requests.map((request: any) => {
-      const requestCoords = request.location?.coordinates;
+      const distanceKm = this.getDistanceFromCoordinates(companyCoords, request.location?.coordinates);
       const serviceName = request.service_types?.[0]?.name;
-      const title = serviceName || this.getTitleFromDescription(request.description);
-
-      let distanceKm: number | null = null;
-      if (companyCoords && requestCoords) {
-        distanceKm =
-          Math.round(this.calcDistanceKm(companyCoords[1], companyCoords[0], requestCoords[1], requestCoords[0]) * 10) /
-          10;
-      }
 
       return {
         _id: request._id.toString(),
-        title,
+        title: serviceName || this.getTitleFromDescription(request.description),
         description: request.description,
         distance_km: distanceKm,
+        eta_minutes: request.eta_minutes ?? null,
         created_at: request.created_at,
         address: request.address,
         status: request.status,
@@ -139,8 +140,6 @@ class RescueService {
     }
 
     const company = await companyRepository.findById(companyId);
-    const companyCoords = company?.location?.coordinates;
-
     const request = (await RescueRequest.findOne({
       _id: requestId,
       'company.company_id': companyId,
@@ -155,27 +154,19 @@ class RescueService {
       return null;
     }
 
-    const requestCoords = request.location?.coordinates;
     const serviceName = request.service_types?.[0]?.name;
-    const title = serviceName || this.getTitleFromDescription(request.description);
-
-    let distanceKm: number | null = null;
-    if (companyCoords && requestCoords) {
-      distanceKm =
-        Math.round(this.calcDistanceKm(companyCoords[1], companyCoords[0], requestCoords[1], requestCoords[0]) * 10) /
-        10;
-    }
 
     return {
       _id: request._id.toString(),
-      title,
+      title: serviceName || this.getTitleFromDescription(request.description),
       description: request.description,
-      distance_km: distanceKm,
+      distance_km: this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates),
+      eta_minutes: request.eta_minutes ?? null,
       created_at: request.created_at,
       address: request.address,
       status: request.status,
       customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
+        full_name: request.user_id?.full_name || 'Khach hang',
         phone: request.user_id?.phone || '',
       },
       incident_photos: request.incident_photos || [],
@@ -193,29 +184,7 @@ class RescueService {
       .lean()
       .exec();
 
-    return Promise.all(
-      requests.map(async (request: any) => {
-        const serviceName = request.service_types?.[0]?.name;
-        const title = serviceName || this.getTitleFromDescription(request.description);
-        const vehicle = request.vehicle?.vehicle_id
-          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-          : null;
-
-        return {
-          _id: request._id.toString(),
-          title,
-          description: request.description,
-          distance_km: null,
-          created_at: request.created_at,
-          address: request.address,
-          status: request.status,
-          vehicle: {
-            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
-          },
-        };
-      })
-    );
+    return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
   async getActiveRequestDetailForCompany(
@@ -240,27 +209,84 @@ class RescueService {
       return null;
     }
 
-    const serviceName = request.service_types?.[0]?.name;
-    const title = serviceName || this.getTitleFromDescription(request.description);
-    const vehicle = request.vehicle?.vehicle_id
-      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-      : null;
-
     return {
-      _id: request._id.toString(),
-      title,
-      description: request.description,
-      distance_km: null,
-      created_at: request.created_at,
-      address: request.address,
-      status: request.status,
+      ...(await this.mapRequestWithVehicle(request)),
       customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
+        full_name: request.user_id?.full_name || 'Khach hang',
         phone: request.user_id?.phone || '',
       },
-      vehicle: {
-        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
+    };
+  }
+
+  async acceptPendingRequestForCompany(
+    companyId: string,
+    requestId: string,
+    data: AcceptRescueRequestData
+  ): Promise<ActiveRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId) || !isValidObjectId(data.vehicle_id)) {
+      return null;
+    }
+
+    const vehicle = await Vehicle.findOne({
+      _id: data.vehicle_id,
+      company_id: companyId,
+    })
+      .select('vehicle_type plate_number status')
+      .lean()
+      .exec();
+
+    if (!vehicle) {
+      throw new Error('Xe cuu ho khong ton tai hoac khong thuoc cong ty');
+    }
+
+    if (vehicle.status === 'unavailable') {
+      throw new Error('Xe cuu ho dang khong kha dung');
+    }
+
+    const acceptedAt = new Date();
+    const request = (await RescueRequest.findOneAndUpdate(
+      {
+        _id: requestId,
+        'company.company_id': companyId,
+        status: 'pending',
+      },
+      {
+        $set: {
+          status: 'accepted',
+          vehicle: {
+            vehicle_id: new Types.ObjectId(data.vehicle_id),
+            plate_number: vehicle.plate_number,
+          },
+          eta_minutes: data.eta_minutes,
+          accepted_at: acceptedAt,
+        },
+        $push: {
+          status_history: {
+            status: 'accepted',
+            changed_by: 'company',
+            changed_at: acceptedAt,
+            note: data.note || `Du kien den trong ${data.eta_minutes} phut`,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    )
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    await Vehicle.findByIdAndUpdate(data.vehicle_id, { status: 'unavailable' }).exec();
+
+    return {
+      ...(await this.mapRequestWithVehicle(request, vehicle)),
+      customer: {
+        full_name: request.user_id?.full_name || 'Khach hang',
+        phone: request.user_id?.phone || '',
       },
     };
   }
@@ -275,30 +301,7 @@ class RescueService {
       .lean()
       .exec();
 
-    return Promise.all(
-      requests.map(async (request: any) => {
-        const serviceName = request.service_types?.[0]?.name;
-        const title = serviceName || this.getTitleFromDescription(request.description);
-        const vehicle = request.vehicle?.vehicle_id
-          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-          : null;
-
-        return {
-          _id: request._id.toString(),
-          title,
-          description: request.description,
-          distance_km: null,
-          created_at: request.created_at,
-          completed_at: request.completed_at,
-          address: request.address,
-          status: request.status,
-          vehicle: {
-            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
-          },
-        };
-      })
-    );
+    return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
   async getCompletedRequestDetailForCompany(
@@ -323,28 +326,11 @@ class RescueService {
       return null;
     }
 
-    const serviceName = request.service_types?.[0]?.name;
-    const title = serviceName || this.getTitleFromDescription(request.description);
-    const vehicle = request.vehicle?.vehicle_id
-      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-      : null;
-
     return {
-      _id: request._id.toString(),
-      title,
-      description: request.description,
-      distance_km: null,
-      created_at: request.created_at,
-      completed_at: request.completed_at,
-      address: request.address,
-      status: request.status,
+      ...(await this.mapRequestWithVehicle(request)),
       customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
+        full_name: request.user_id?.full_name || 'Khach hang',
         phone: request.user_id?.phone || '',
-      },
-      vehicle: {
-        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
       },
     };
   }
@@ -359,31 +345,7 @@ class RescueService {
       .lean()
       .exec();
 
-    return Promise.all(
-      requests.map(async (request: any) => {
-        const serviceName = request.service_types?.[0]?.name;
-        const title = serviceName || this.getTitleFromDescription(request.description);
-        const vehicle = request.vehicle?.vehicle_id
-          ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-          : null;
-
-        return {
-          _id: request._id.toString(),
-          title,
-          description: request.description,
-          distance_km: null,
-          created_at: request.created_at,
-          cancelled_at: request.cancelled_at,
-          cancellation: request.cancellation,
-          address: request.address,
-          status: request.status,
-          vehicle: {
-            vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-            plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
-          },
-        };
-      })
-    );
+    return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
   async getCanceledRequestDetailForCompany(
@@ -408,29 +370,11 @@ class RescueService {
       return null;
     }
 
-    const serviceName = request.service_types?.[0]?.name;
-    const title = serviceName || this.getTitleFromDescription(request.description);
-    const vehicle = request.vehicle?.vehicle_id
-      ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-      : null;
-
     return {
-      _id: request._id.toString(),
-      title,
-      description: request.description,
-      distance_km: null,
-      created_at: request.created_at,
-      cancelled_at: request.cancelled_at,
-      cancellation: request.cancellation,
-      address: request.address,
-      status: request.status,
+      ...(await this.mapRequestWithVehicle(request)),
       customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
+        full_name: request.user_id?.full_name || 'Khach hang',
         phone: request.user_id?.phone || '',
-      },
-      vehicle: {
-        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
       },
     };
   }
@@ -438,44 +382,40 @@ class RescueService {
   async searchNearbyCompanies(params: SearchParams): Promise<CompanyResult[]> {
     const { lat, lng, incident_type, max_distance_km = 50 } = params;
 
-    // Resolve category _id from slug if incident_type provided
     let categoryId: string | undefined = undefined;
     if (incident_type) {
       const category = await serviceCategoryRepository.findBySlug(incident_type);
       if (!category) {
-        // Return empty list if category not found (not an error)
         return [];
       }
       categoryId = category._id.toString();
     }
 
-    // Find companies within max_distance
     const companies = await companyRepository.findNearby(lng, lat, max_distance_km);
-
     if (companies.length === 0) {
       return [];
     }
 
-    const companyIds = companies.map((c) => (c._id as any).toString());
+    const companyIds = companies.map((company) => (company._id as any).toString());
     const matchingServices = await serviceRepository.findByCompanyIdsAndCategory(companyIds, categoryId);
-
-    // Group services by company
     const servicesByCompany = new Map<string, string[]>();
-    for (const svc of matchingServices) {
-      const cid = svc.company_id.toString();
-      if (!servicesByCompany.has(cid)) servicesByCompany.set(cid, []);
-      servicesByCompany.get(cid)!.push(svc.name);
+
+    for (const service of matchingServices) {
+      const companyId = service.company_id.toString();
+      if (!servicesByCompany.has(companyId)) {
+        servicesByCompany.set(companyId, []);
+      }
+      servicesByCompany.get(companyId)!.push(service.name);
     }
 
-    // If categoryId was provided, only include companies that actually have that service
-    let resultCompanies = companies;
-    if (categoryId) {
-      resultCompanies = companies.filter((c) => servicesByCompany.has((c._id as any).toString()));
-    }
+    const resultCompanies = categoryId
+      ? companies.filter((company) => servicesByCompany.has((company._id as any).toString()))
+      : companies;
 
     return resultCompanies.map((company) => {
       const coords = company.location?.coordinates ?? [0, 0];
       const distanceKm = this.calcDistanceKm(lat, lng, coords[1], coords[0]);
+
       return {
         _id: (company._id as any).toString(),
         company_name: company.company_name,
@@ -491,23 +431,64 @@ class RescueService {
     });
   }
 
-  /** Haversine distance in km */
+  private async mapRequestWithVehicle(request: any, providedVehicle?: any): Promise<ActiveRescueRequestResult> {
+    const serviceName = request.service_types?.[0]?.name;
+    const vehicle =
+      providedVehicle ||
+      (request.vehicle?.vehicle_id
+        ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
+        : null);
+
+    return {
+      _id: request._id.toString(),
+      title: serviceName || this.getTitleFromDescription(request.description),
+      description: request.description,
+      distance_km: null,
+      eta_minutes: request.eta_minutes ?? null,
+      created_at: request.created_at,
+      accepted_at: request.accepted_at,
+      completed_at: request.completed_at,
+      cancelled_at: request.cancelled_at,
+      cancellation: request.cancellation,
+      address: request.address,
+      status: request.status,
+      vehicle: {
+        vehicle_type: vehicle?.vehicle_type || 'Xe cuu ho',
+        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chua co bien so',
+      },
+    } as ActiveRescueRequestResult;
+  }
+
+  private getDistanceFromCoordinates(originCoords?: number[], destinationCoords?: number[]): number | null {
+    if (!originCoords || !destinationCoords) {
+      return null;
+    }
+
+    const distanceKm = this.calcDistanceKm(
+      originCoords[1],
+      originCoords[0],
+      destinationCoords[1],
+      destinationCoords[0]
+    );
+    return Math.round(distanceKm * 10) / 10;
+  }
+
   private calcDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371;
+    const radiusKm = 6371;
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 + Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return radiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  private toRad(deg: number) {
+  private toRad(deg: number): number {
     return (deg * Math.PI) / 180;
   }
 
   private getTitleFromDescription(description?: string): string {
-    if (!description) return 'Sự cố cứu hộ';
-    return description.split(/[,.]/)[0].trim() || 'Sự cố cứu hộ';
+    if (!description) return 'Su co cuu ho';
+    return description.split(/[,.]/)[0].trim() || 'Su co cuu ho';
   }
 }
 
