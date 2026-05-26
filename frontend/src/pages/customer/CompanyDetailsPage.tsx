@@ -39,7 +39,7 @@ export default function CompanyDetailsPage() {
     company.min_price !== null && company.max_price !== null
       ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
       : 'Chưa cập nhật giá';
-  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có ETA';
+  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có thời gian dự kiến';
 
   const handleNext = () => {
     navigate('/rescue/confirm', {

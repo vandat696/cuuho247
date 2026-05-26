@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AccessTimeOutlined, SecurityOutlined } from '@mui/icons-material';
 import { Box, CircularProgress, Typography } from '@mui/material';
+import toast from 'react-hot-toast';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { CancelButton } from '@/components/rescue/CancelButton';
+import { CancelRequestSheet } from '@/components/rescue/CancelRequestSheet';
 import {
   CustomerRescueRequest,
   CustomerRescueRequestStatus,
@@ -23,6 +26,8 @@ const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
   rejected: 'Bị từ chối',
   timeout: 'Hết thời gian phản hồi',
 };
+
+const cancellableStatuses: CustomerRescueRequestStatus[] = ['pending'];
 
 const getRequestTimestamp = (request: CustomerRescueRequest) => {
   const value = request.updated_at || request.created_at;
@@ -45,7 +50,15 @@ const formatTime = (dateValue?: string) => {
   }).format(date);
 };
 
-function HistoryCard({ request }: { request: CustomerRescueRequest }) {
+function HistoryCard({
+  request,
+  onCancel,
+}: {
+  request: CustomerRescueRequest;
+  onCancel: (request: CustomerRescueRequest) => void;
+}) {
+  const canCancel = request.status ? cancellableStatuses.includes(request.status) : false;
+
   return (
     <Box sx={{ p: 2, border: '2px solid #e5e7eb', borderRadius: CARD_RADIUS, bgcolor: '#fff' }}>
       <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1.5 }}>
@@ -70,10 +83,16 @@ function HistoryCard({ request }: { request: CustomerRescueRequest }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: '#6b7280' }}>
           <SecurityOutlined sx={{ fontSize: 16 }} />
           <Typography sx={{ fontSize: 13, lineHeight: 1.25 }}>
-            ETA: {request.eta_minutes ? `~${request.eta_minutes} phút` : 'Chưa có ETA'}
+            Dự kiến đến: {request.eta_minutes ? `~${request.eta_minutes} phút` : 'Chưa có thời gian dự kiến'}
           </Typography>
         </Box>
       </Box>
+
+      {canCancel && (
+        <Box sx={{ mt: 1.5 }}>
+          <CancelButton status={request.status!} onCancel={() => onCancel(request)} />
+        </Box>
+      )}
     </Box>
   );
 }
@@ -82,6 +101,8 @@ export default function CustomerHistoryPage() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<CustomerRescueRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState<CustomerRescueRequest | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -103,6 +124,38 @@ export default function CustomerHistoryPage() {
   const sortedRequests = useMemo(() => {
     return [...requests].sort((a, b) => getRequestTimestamp(b) - getRequestTimestamp(a));
   }, [requests]);
+
+  const handleOpenCancel = (request: CustomerRescueRequest) => {
+    setSelectedRequest(request);
+  };
+
+  const handleCloseCancel = () => {
+    if (!cancelling) {
+      setSelectedRequest(null);
+    }
+  };
+
+  const handleConfirmCancel = async (reason: string) => {
+    if (!selectedRequest) return;
+
+    setCancelling(true);
+    try {
+      const response = await rescueRequestService.cancelRequest(selectedRequest._id, reason);
+      if (response.status === 'success') {
+        setRequests((current) =>
+          current.map((request) => (request._id === selectedRequest._id ? response.data : request))
+        );
+        toast.success('Đã hủy yêu cầu cứu hộ');
+        setSelectedRequest(null);
+      } else {
+        toast.error(response.message || 'Không thể hủy yêu cầu');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Không thể hủy yêu cầu');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <MobileLayout>
@@ -140,11 +193,18 @@ export default function CustomerHistoryPage() {
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {sortedRequests.map((request) => (
-              <HistoryCard key={request._id} request={request} />
+              <HistoryCard key={request._id} request={request} onCancel={handleOpenCancel} />
             ))}
           </Box>
         )}
       </Box>
+
+      <CancelRequestSheet
+        isOpen={Boolean(selectedRequest)}
+        isLoading={cancelling}
+        onClose={handleCloseCancel}
+        onConfirm={handleConfirmCancel}
+      />
     </MobileLayout>
   );
 }

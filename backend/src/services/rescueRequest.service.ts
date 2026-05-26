@@ -17,7 +17,7 @@ export interface CreateRequestData {
   incident_photos?: string[];
 }
 
-const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
+const CANCELLABLE_STATUSES: RequestStatus[] = ['pending'];
 
 class RescueRequestService {
   async getRequestsForUser(userId: string): Promise<IRescueRequest[]> {

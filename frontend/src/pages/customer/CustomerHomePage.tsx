@@ -147,7 +147,7 @@ const getRequestTimestamp = (request: CustomerRescueRequest) => {
 };
 
 const getEtaText = (etaMinutes?: number) => {
-  if (!etaMinutes) return 'Chưa có ETA';
+  if (!etaMinutes) return 'Chưa có thời gian dự kiến';
   return `~${etaMinutes} phút`;
 };
 

@@ -44,7 +44,7 @@ export function ConfirmRequestCard({
     company.minPrice !== null && company.maxPrice !== null
       ? `${formatPrice(company.minPrice)} - ${formatPrice(company.maxPrice)}đ`
       : 'Chưa cập nhật giá';
-  const etaText = company.etaMinutes ? `~${company.etaMinutes} phút` : 'Chưa có ETA';
+  const etaText = company.etaMinutes ? `~${company.etaMinutes} phút` : 'Chưa có thời gian dự kiến';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

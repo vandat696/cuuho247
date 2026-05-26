@@ -34,6 +34,10 @@ export interface CustomerRescueRequest {
   started_at?: string;
   completed_at?: string;
   cancelled_at?: string;
+  cancellation?: {
+    cancelled_by?: 'user' | 'company' | 'system';
+    reason?: string;
+  };
 }
 
 export interface MyRescueRequestsResult {
@@ -47,8 +51,11 @@ export const rescueRequestService = {
     return response.data;
   },
 
-  cancelRequest: async (requestId: string) => {
-    const response = await axiosInstance.patch(`/rescue/requests/${requestId}/cancel`);
+  cancelRequest: async (requestId: string, reason: string): Promise<ApiResponse<CustomerRescueRequest>> => {
+    const response = await axiosInstance.patch<ApiResponse<CustomerRescueRequest>>(
+      `/rescue/requests/${requestId}/cancel`,
+      { reason }
+    );
     return response.data;
   },
 
