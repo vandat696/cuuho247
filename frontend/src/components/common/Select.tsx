@@ -19,20 +19,7 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'siz
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  (
-    {
-      label,
-      error,
-      options,
-      placeholder,
-      id,
-      disabled,
-      required,
-      value,
-      onChange,
-      name    },
-    ref
-  ) => {
+  ({ label, error, options, placeholder, id, disabled, required, value, onChange, name }, ref) => {
     return (
       <FormControl fullWidth error={!!error}>
         {label && <InputLabel id={`${id}-label`}>{label}</InputLabel>}

@@ -28,8 +28,8 @@ export function MiniMap({ lat, lng, zoom = 14 }: MiniMapProps) {
 
   if (!mapTilesKey) {
     return (
-      <Box sx={{ p: 2, bgcolor: '#fee2e2', color: '#b91c1c', borderRadius: '12px', fontSize: 12 }}>
-        Thiếu Goong Map Tiles Key. Vui lòng kiểm tra file .env
+      <Box sx={{ p: 2, bgcolor: '#fee2e2', color: '#b91c1c', borderRadius: '12px', fontSize: 13, textAlign: 'center' }}>
+        ⚠️ Không thể hiển thị bản đồ lúc này. Vui lòng thử lại sau.
       </Box>
     );
   }

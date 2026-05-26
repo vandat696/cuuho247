@@ -137,12 +137,7 @@ export const FileUpload = ({
               </Typography>
             </Box>
           </Box>
-          <MuiButton
-            size="small"
-            onClick={handleRemove}
-            startIcon={<CancelIcon />}
-            sx={{ textTransform: 'none' }}
-          >
+          <MuiButton size="small" onClick={handleRemove} startIcon={<CancelIcon />} sx={{ textTransform: 'none' }}>
             Xóa
           </MuiButton>
         </Box>
