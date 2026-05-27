@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import rescueService from '../services/rescue.service';
+import companyRescueRequestService from '../services/companyRescueRequest.service';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from '../validators/rescueRequest.validator';
 
@@ -7,7 +7,7 @@ class RescueController {
   async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
-      const requests = await rescueService.getActiveRequestsForCompany(companyId);
+      const requests = await companyRescueRequestService.getActiveRequestsForCompany(companyId);
 
       res.status(200).json({
         status: 'success',
@@ -26,7 +26,7 @@ class RescueController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const request = await rescueService.getActiveRequestDetailForCompany(companyId, requestId);
+      const request = await companyRescueRequestService.getActiveRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
         res.status(404).json({
@@ -51,7 +51,7 @@ class RescueController {
   async getCompanyCompletedRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
-      const requests = await rescueService.getCompletedRequestsForCompany(companyId);
+      const requests = await companyRescueRequestService.getCompletedRequestsForCompany(companyId);
 
       res.status(200).json({
         status: 'success',
@@ -70,7 +70,7 @@ class RescueController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const request = await rescueService.getCompletedRequestDetailForCompany(companyId, requestId);
+      const request = await companyRescueRequestService.getCompletedRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
         res.status(404).json({
@@ -95,7 +95,7 @@ class RescueController {
   async getCompanyCanceledRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
-      const requests = await rescueService.getCanceledRequestsForCompany(companyId);
+      const requests = await companyRescueRequestService.getCanceledRequestsForCompany(companyId);
 
       res.status(200).json({
         status: 'success',
@@ -114,7 +114,7 @@ class RescueController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const request = await rescueService.getCanceledRequestDetailForCompany(companyId, requestId);
+      const request = await companyRescueRequestService.getCanceledRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
         res.status(404).json({
@@ -139,7 +139,7 @@ class RescueController {
   async getCompanyPendingRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
-      const requests = await rescueService.getPendingRequestsForCompany(companyId);
+      const requests = await companyRescueRequestService.getPendingRequestsForCompany(companyId);
 
       res.status(200).json({
         status: 'success',
@@ -158,7 +158,7 @@ class RescueController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const request = await rescueService.getPendingRequestDetailForCompany(companyId, requestId);
+      const request = await companyRescueRequestService.getPendingRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
         res.status(404).json({
@@ -198,7 +198,7 @@ class RescueController {
         return;
       }
 
-      const request = await rescueService.acceptPendingRequestForCompany(companyId, requestId, value);
+      const request = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, value);
 
       if (!request) {
         res.status(404).json({
@@ -242,7 +242,7 @@ class RescueController {
         return;
       }
 
-      const request = await rescueService.completeActiveRequestForCompany(companyId, requestId, value);
+      const request = await companyRescueRequestService.completeActiveRequestForCompany(companyId, requestId, value);
 
       if (!request) {
         res.status(404).json({
@@ -294,7 +294,7 @@ class RescueController {
         return;
       }
 
-      const estimate = await rescueService.estimateRequestRouteForCompany(companyId, requestId, origin);
+      const estimate = await companyRescueRequestService.estimateRequestRouteForCompany(companyId, requestId, origin);
 
       if (!estimate) {
         res.status(404).json({
@@ -331,7 +331,7 @@ class RescueController {
         return;
       }
 
-      const results = await rescueService.searchNearbyCompanies({
+      const results = await companyRescueRequestService.searchNearbyCompanies({
         lat: parseFloat(lat as string),
         lng: parseFloat(lng as string),
         incident_type: incident_type as string,

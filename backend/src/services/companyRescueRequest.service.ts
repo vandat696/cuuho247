@@ -122,7 +122,7 @@ export interface RouteEstimateResult {
   } | null;
 }
 
-class RescueService {
+class CompanyRescueRequestService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
     const company = await companyRepository.findById(companyId);
     const companyCoords = company?.location?.coordinates;
@@ -651,4 +651,4 @@ class RescueService {
   }
 }
 
-export default new RescueService();
+export default new CompanyRescueRequestService();
