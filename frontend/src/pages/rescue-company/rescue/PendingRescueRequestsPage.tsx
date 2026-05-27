@@ -4,8 +4,6 @@ import { Box, Typography } from '@mui/material';
 import { AccessTimeOutlined as ClockIcon, LocationOnOutlined as LocationIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { rescueService } from '@/services/rescue.service';
-import { PendingRescueRequest } from '@/types/rescue.type';
 import {
   CardContainer,
   formatDistance,
@@ -13,7 +11,9 @@ import {
   NAVY,
   PrimaryActionButton,
   RescueListScaffold,
-} from './rescueCompanyShared';
+} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { rescueService } from '@/services/rescue.service';
+import { PendingRescueRequest } from '@/types/rescue.type';
 
 interface RequestCardProps {
   request: PendingRescueRequest;

@@ -3,124 +3,22 @@ import companyRepository from '../repositories/company.repository';
 import serviceRepository from '../repositories/service.repository';
 import serviceCategoryRepository from '../repositories/serviceCategory.repository';
 import { RescueRequest } from '../models/RescueRequest.model';
-import type { IPayment, PaymentMethod } from '../models/RescueRequest.model';
 import { Vehicle } from '../models/Vehicle.model';
-
-export interface SearchParams {
-  lat: number;
-  lng: number;
-  incident_type?: string;
-  max_distance_km?: number;
-}
-
-export interface CompanyResult {
-  _id: string;
-  company_name: string;
-  director_name: string;
-  email: string;
-  phone: string;
-  address: {
-    province?: string;
-    district?: string;
-    ward?: string;
-    detail?: string;
-  };
-  location: {
-    type: 'Point';
-    coordinates: number[];
-  };
-  distance_km: number;
-  rating_avg: number;
-  rating_count: number;
-  status: string;
-  service_names: string[];
-  min_price: number | null;
-  max_price: number | null;
-  eta_minutes: number | null;
-}
-
-export interface PendingRescueRequestResult {
-  _id: string;
-  title: string;
-  description: string;
-  distance_km: number | null;
-  eta_minutes?: number | null;
-  created_at?: Date;
-  address?: Record<string, unknown>;
-  status?: string;
-}
-
-export interface PendingRescueRequestDetailResult extends PendingRescueRequestResult {
-  customer: {
-    full_name: string;
-    phone: string;
-  };
-  incident_photos: string[];
-  location?: {
-    type: 'Point';
-    coordinates: number[];
-  };
-}
-
-export interface ActiveRescueRequestResult extends PendingRescueRequestResult {
-  vehicle: {
-    vehicle_type: string;
-    plate_number: string;
-  };
-  accepted_at?: Date;
-}
-
-export interface CompletedRescueRequestResult extends ActiveRescueRequestResult {
-  completed_at?: Date;
-  payment?: IPayment;
-}
-
-export interface CompletedRescueRequestDetailResult extends CompletedRescueRequestResult {
-  customer: {
-    full_name: string;
-    phone: string;
-  };
-}
-
-export interface CanceledRescueRequestResult extends ActiveRescueRequestResult {
-  cancelled_at?: Date;
-  cancellation?: Record<string, unknown>;
-}
-
-export interface CanceledRescueRequestDetailResult extends CanceledRescueRequestResult {
-  customer: {
-    full_name: string;
-    phone: string;
-  };
-}
-
-export interface ActiveRescueRequestDetailResult extends ActiveRescueRequestResult {
-  customer: {
-    full_name: string;
-    phone: string;
-  };
-}
-
-export interface AcceptRescueRequestData {
-  vehicle_id: string;
-  eta_minutes: number;
-  note?: string | null;
-}
-
-export interface CompleteRescueRequestData {
-  amount: number;
-  method?: PaymentMethod;
-  note?: string | null;
-}
-
-export interface RouteEstimateResult {
-  distance_km: number | null;
-  eta_minutes: number | null;
-  origin: {
-    lat: number;
-    lng: number;
-  } | null;
-}
+import type {
+  AcceptRescueRequestData,
+  ActiveRescueRequestDetailResult,
+  ActiveRescueRequestResult,
+  CanceledRescueRequestDetailResult,
+  CanceledRescueRequestResult,
+  CompanyResult,
+  CompleteRescueRequestData,
+  CompletedRescueRequestDetailResult,
+  CompletedRescueRequestResult,
+  PendingRescueRequestDetailResult,
+  PendingRescueRequestResult,
+  RouteEstimateResult,
+  SearchParams,
+} from '@/types/companyRescueRequest.type';
 
 class CompanyRescueRequestService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {

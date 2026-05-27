@@ -11,10 +11,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescue.service';
-import { ActiveRescueRequestDetail } from '@/types/rescue.type';
 import {
   DetailContentState,
   formatAddress,
@@ -25,7 +21,11 @@ import {
   PrimaryActionButton,
   StatusBanner,
   VehiclePanel,
-} from './rescueCompanyShared';
+} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { rescueService } from '@/services/rescue.service';
+import { ActiveRescueRequestDetail } from '@/types/rescue.type';
 
 export default function ActiveRescueRequestDetailPage() {
   const navigate = useNavigate();

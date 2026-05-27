@@ -9,8 +9,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { rescueService } from '@/services/rescue.service';
-import { ActiveRescueRequest } from '@/types/rescue.type';
 import {
   CardContainer,
   CARD_RADIUS,
@@ -20,7 +18,9 @@ import {
   NAVY,
   PrimaryActionButton,
   RescueListScaffold,
-} from './rescueCompanyShared';
+} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { rescueService } from '@/services/rescue.service';
+import { ActiveRescueRequest } from '@/types/rescue.type';
 
 interface ActiveRequestCardProps {
   request: ActiveRescueRequest;

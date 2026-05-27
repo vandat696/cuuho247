@@ -12,10 +12,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescue.service';
-import { CompletedRescueRequestDetail } from '@/types/rescue.type';
 import {
   CARD_RADIUS,
   DetailContentState,
@@ -29,7 +25,11 @@ import {
   paymentMethodLabel,
   StatusBanner,
   VehiclePanel,
-} from './rescueCompanyShared';
+} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { rescueService } from '@/services/rescue.service';
+import { CompletedRescueRequestDetail } from '@/types/rescue.type';
 
 export default function CompletedRescueRequestDetailPage() {
   const navigate = useNavigate();

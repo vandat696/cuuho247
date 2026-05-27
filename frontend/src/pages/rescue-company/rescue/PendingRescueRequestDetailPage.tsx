@@ -11,13 +11,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { MiniMap } from '@/components/location/MiniMap';
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescue.service';
-import { vehicleService } from '@/services/vehicle.service';
-import { PendingRescueRequestDetail } from '@/types/rescue.type';
-import { IVehicle } from '@/types/vehicle.types';
 import {
   CARD_RADIUS,
   DetailContentState,
@@ -28,7 +21,14 @@ import {
   InfoRow,
   ORANGE,
   PrimaryActionButton,
-} from './rescueCompanyShared';
+} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { MiniMap } from '@/components/location/MiniMap';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { rescueService } from '@/services/rescue.service';
+import { vehicleService } from '@/services/vehicle.service';
+import { PendingRescueRequestDetail } from '@/types/rescue.type';
+import { IVehicle } from '@/types/vehicle.types';
 
 const getRequestCoordinates = (request: PendingRescueRequestDetail) => {
   const [lng, lat] = request.location?.coordinates ?? [];
