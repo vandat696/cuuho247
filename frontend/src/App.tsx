@@ -17,6 +17,7 @@ import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
 import RescueRequestPage from '@/pages/customer/RescueRequestPage';
 import RescueResultsPage from '@/pages/customer/RescueResultsPage';
 import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
+import ChatPage from '@/pages/chat/ChatPage';
 
 function App() {
   return (
@@ -63,6 +64,9 @@ function App() {
         /> */}
         <Route path="/rescue/request" element={<RescueRequestPage />} />
         <Route path="/rescue/search" element={<RescueResultsPage />} />
+
+        {/* Chat Routes */}
+        <Route path="/chat/:rescueRequestId" element={<ChatPage />} />
 
         <Route path="/showcase" element={<ShowcasePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
