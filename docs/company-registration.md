@@ -44,7 +44,7 @@ Tài liệu này mô tả luồng **đăng ký tài khoản Công ty cứu hộ*
 - **address**: bắt buộc, 5–200 ký tự
 - **service_area**: bắt buộc, 1 trong các giá trị:
   - `tp_hcm`, `can_tho`, `hai_phong`, `da_nang`, `ha_noi`
-- **license_file_url**: *không bắt buộc*, nếu có phải là URL hợp lệ, tối đa 500 ký tự  
+- **license_file_url**: _không bắt buộc_, nếu có phải là URL hợp lệ, tối đa 500 ký tự  
   (dùng để lưu link ảnh/PDF giấy phép kinh doanh)
 - **terms_accepted**: bắt buộc, phải là `true`
 
@@ -79,9 +79,7 @@ Tài liệu này mô tả luồng **đăng ký tài khoản Công ty cứu hộ*
 {
   "status": "error",
   "message": "Dữ liệu không hợp lệ",
-  "errors": [
-    "\"service_area\" is required"
-  ]
+  "errors": ["\"service_area\" is required"]
 }
 ```
 
@@ -164,4 +162,3 @@ Tài liệu này mô tả luồng **đăng ký tài khoản Công ty cứu hộ*
 
 - Sau khi đăng ký, công ty **chưa đăng nhập được** cho tới khi admin duyệt (vì `pending_verification` / `is_verified=false`).
 - Khi cần hiển thị danh sách khu vực hoạt động ở UI, lấy từ `frontend/src/constants/serviceAreas.ts`.
-

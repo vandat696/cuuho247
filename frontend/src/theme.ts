@@ -9,7 +9,7 @@ export const theme = createTheme({
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#1e3a5f',
+      main: '#1b3a5d',
       light: '#ebf4ff',
       dark: '#162d4a',
       contrastText: '#ffffff',
@@ -19,7 +19,7 @@ export const theme = createTheme({
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e3a5f',
+      primary: '#1b3a5d',
       secondary: '#4a5568',
       disabled: '#a0aec0',
     },
@@ -38,30 +38,30 @@ export const theme = createTheme({
     divider: '#e2e8f0',
   },
   typography: {
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     fontSize: 14,
     h1: {
       fontSize: '28px',
       fontWeight: 700,
       lineHeight: 1.2,
-      color: '#1e3a5f',
+      color: '#1b3a5d',
     },
     h2: {
       fontSize: '22px',
       fontWeight: 700,
       lineHeight: 1.3,
-      color: '#1e3a5f',
+      color: '#1b3a5d',
     },
     h3: {
       fontSize: '18px',
       fontWeight: 600,
       lineHeight: 1.4,
-      color: '#1e3a5f',
+      color: '#1b3a5d',
     },
     h4: {
       fontSize: '16px',
       fontWeight: 600,
-      color: '#1e3a5f',
+      color: '#1b3a5d',
     },
     body1: {
       fontSize: '16px',
@@ -139,7 +139,7 @@ export const theme = createTheme({
           display: 'flex',
           justifyContent: 'center',
           boxShadow: 'none',
-          backgroundColor: '#1e3a5f',
+          backgroundColor: '#1b3a5d',
           color: '#ffffff',
         },
       },
@@ -169,11 +169,11 @@ export const theme = createTheme({
           margin: 0,
           padding: 0,
         },
-        'html': {
+        html: {
           WebkitTextSizeAdjust: '100%',
           scrollBehavior: 'smooth',
         },
-        'body': {
+        body: {
           backgroundColor: '#f5f7fa',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',

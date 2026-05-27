@@ -64,7 +64,7 @@ class AuthController {
       // Response successfully (HTTP Status 201: Created)
       res.status(201).json({
         status: 'success',
-        message: 'Đăng ký công ty thành công. Chờ xác minh từ quản trị viên',
+        message: 'Đăng ký công ty thành công',
         data: newCompany,
       });
     } catch (err: any) {

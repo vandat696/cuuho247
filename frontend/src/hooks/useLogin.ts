@@ -48,6 +48,13 @@ export const useLogin = () => {
           localStorage.setItem('accessToken', response.data.access_token);
           localStorage.setItem('role', response.data.role);
           localStorage.setItem('accountId', response.data.user._id);
+          localStorage.setItem('accountPhone', response.data.user.phone || '');
+          localStorage.setItem(
+            'accountName',
+            response.data.role === 'company'
+              ? response.data.user.company_name || ''
+              : response.data.user.full_name || ''
+          );
           if (response.data.role === 'company') {
             localStorage.setItem('companyId', response.data.user._id);
           } else {
@@ -56,9 +63,9 @@ export const useLogin = () => {
           // Success
           toast.success('Đăng nhập thành công!');
           if (response.data.role === 'customer') {
-            navigate('/', { replace: true });
+            navigate('/customer/home', { replace: true });
           } else if (response.data.role === 'company') {
-            navigate('/company', { replace: true });
+            navigate('/company/home', { replace: true });
           }
         }
       } catch (error: unknown) {

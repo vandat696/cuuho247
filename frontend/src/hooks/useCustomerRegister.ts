@@ -29,7 +29,7 @@ export const useCustomerRegister = () => {
   };
 
   const handleRegister = async () => {
-    let newErrors = { fullName: '', phone: '', email: '', password: '', confirmPassword: '' };
+    const newErrors = { fullName: '', phone: '', email: '', password: '', confirmPassword: '' };
     let isValid = true;
 
     // Validate
@@ -61,7 +61,7 @@ export const useCustomerRegister = () => {
       newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
       isValid = false;
     }
-    // Only accept alphabets, number and special characters
+    // eslint-disable-next-line no-useless-escape
     else if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(formData.password)) {
       newErrors.password = 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách';
       isValid = false;

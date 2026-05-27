@@ -1,7 +1,7 @@
 import serviceRepository from '@/repositories/service.repository';
 import { ApiError } from '@/utils/apiError.util';
 
-class ServiceService {
+class CompanyServiceService {
   async getServicesByCompany(companyId: string) {
     if (!companyId) {
       throw new ApiError(400, 'Company ID là bắt buộc');
@@ -84,4 +84,4 @@ class ServiceService {
   }
 }
 
-export default new ServiceService();
+export default new CompanyServiceService();

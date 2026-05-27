@@ -42,7 +42,7 @@ export default function ServiceFormPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title={isEditing ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'} />
+      <AppHeader title={isEditing ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'} backFallback="/company/services" />
 
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
         {/* Category Select */}

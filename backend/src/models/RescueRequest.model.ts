@@ -39,7 +39,7 @@ export interface IPayment {
 export interface IRescueRequest extends Document {
   user_id: Types.ObjectId;
   company: IRequestCompany;
-  vehicle: IRequestVehicle;
+  vehicle?: IRequestVehicle;
   description: string;
   location: IGeoPoint;
   service_types?: Types.ObjectId[];
@@ -121,7 +121,7 @@ const RescueRequestSchema = new Schema<IRescueRequest>(
   {
     user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     company: { type: RequestCompanySchema, required: true },
-    vehicle: { type: RequestVehicleSchema, required: true },
+    vehicle: { type: RequestVehicleSchema },
     description: { type: String, required: true },
     location: { type: GeoPointSchema, required: true },
     service_types: [{ type: Schema.Types.ObjectId, ref: 'ServiceCategory' }],

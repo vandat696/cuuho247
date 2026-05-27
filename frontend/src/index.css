@@ -6,7 +6,7 @@
   --clr-primary: #ff6b00; /* orange — CTA, active states   */
   --clr-primary-hover: #e05a00; /* darker orange — hover         */
   --clr-primary-light: #fff3e0; /* light orange — warning banners*/
-  --clr-navy: #1e3a5f; /* dark blue — headers, headings */
+  --clr-navy: #1b3a5d; /* dark blue — headers, headings */
   --clr-navy-light: #ebf4ff; /* light blue — info banners     */
 
   /* --- Backgrounds --- */
@@ -14,7 +14,7 @@
   --clr-surface: #ffffff; /* cards, inputs, modals         */
 
   /* --- Text --- */
-  --clr-text: #1e3a5f; /* primary text / headings       */
+  --clr-text: #1b3a5d; /* primary text / headings       */
   --clr-text-sub: #4a5568; /* body, labels                  */
   --clr-text-muted: #a0aec0; /* placeholders, disabled        */
   --clr-text-inverse: #ffffff; /* text on dark/orange bg        */
@@ -42,9 +42,9 @@
 
   /* --- Border radius --- */
   --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 16px;
-  --r-xl: 24px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 12px;
   --r-full: 9999px;
 
   /* --- Shadows --- */
@@ -53,7 +53,7 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   /* --- Typography --- */
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --fs-xs: 12px;
   --fs-sm: 14px;
   --fs-md: 16px;
@@ -66,8 +66,8 @@
   --fw-bold: 700;
 
   /* --- Layout --- */
-  --mobile-max: 430px;
-  --header-h: 56px;
+  --mobile-max: 375px;
+  --header-h: 70px;
   --bottom-nav-h: 64px;
 }
 
@@ -92,7 +92,7 @@ body {
   font-family: var(--font);
   font-size: var(--fs-md);
   color: var(--clr-text-sub);
-  background-color: var(--clr-border); /* shows gap on desktop screens */
+  background-color: var(--clr-border);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -133,8 +133,11 @@ select {
 .mobile-shell {
   width: 100%;
   max-width: var(--mobile-max);
-  min-height: 100dvh;
-  background-color: var(--clr-bg);
+  min-height: 100vh;
+  background-color: var(--clr-surface);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -183,7 +186,7 @@ h4 {
   display: flex;
   align-items: center;
   padding: 0 var(--sp-4);
-  gap: var(--sp-3);
+  gap: var(--sp-2);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -191,10 +194,9 @@ h4 {
 }
 
 .app-header__logo {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-full);
-  background: rgba(255, 255, 255, 0.14);
+  width: 24px;
+  height: 24px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,19 +211,23 @@ h4 {
   justify-content: center;
 }
 
+.app-header__center--start {
+  justify-content: flex-start;
+}
+
 .app-header__title {
   font-size: var(--fs-lg);
   font-weight: var(--fw-semibold);
   color: var(--clr-text-inverse);
-  line-height: 1;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .app-header__back {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,7 +241,7 @@ h4 {
 }
 
 .app-header__action {
-  width: 36px;
+  width: 40px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -793,6 +799,7 @@ h4 {
   to {
     transform: translateX(-50%) translateY(0);
   }
+}
 /* ═══════════════════════════════════════════════
    Component: Chat Page
 ═══════════════════════════════════════════════ */

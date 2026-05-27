@@ -1,12 +1,15 @@
 import { Router } from 'express';
-import { authenticate } from '@/middleware/auth.middleware';
-import { authorize } from '@/middleware/authorize.middleware';
-import RescueRequestController from '@/controllers/rescueRequest.controller';
+import rescueRequestController from '../controllers/rescueRequest.controller';
+import { authenticate } from '../middleware/auth.middleware';
+import { authorize } from '../middleware/authorize.middleware';
 
 const router = Router();
 
 router.use(authenticate);
 router.use(authorize(['customer']));
-router.patch('/:id/cancel', RescueRequestController.cancelRequest);
+
+router.get('/my-requests', rescueRequestController.getMyRequests);
+router.post('/', rescueRequestController.createRequest);
+router.patch('/:id/cancel', rescueRequestController.cancelRequest);
 
 export default router;

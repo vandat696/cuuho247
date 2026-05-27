@@ -37,7 +37,7 @@ export default function ServiceListPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Danh mục dịch vụ" onBack={() => navigate('/company')} />
+      <AppHeader title="Danh mục dịch vụ" backFallback="/company/home" />
 
       <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', bgcolor: 'grey.100' }}>
         {/* Add Button */}

@@ -33,13 +33,13 @@ export default function VehicleListPage() {
 
   const getVehicleIcon = (type: string) => {
     switch (type) {
-      case 'Xe máy cứu hộ':
+      case 'Xe may cuu ho':
         return <TwoWheelerIcon />;
-      case 'Xe kéo ô tô':
+      case 'Xe keo o to':
         return <RvHookupIcon />;
-      case 'Xe bán tải':
+      case 'Xe ban tai':
         return <AirportShuttleIcon />;
-      case 'Xe tải cẩu':
+      case 'Xe tai cau':
         return <LocalShippingIcon />;
       default:
         return <LocalShippingIcon />;
@@ -56,7 +56,7 @@ export default function VehicleListPage() {
       const data = await vehicleService.getVehicles();
       setVehicles(data);
     } catch (error) {
-      console.error('Lỗi khi tải danh sách xe', error);
+      console.error('Error fetching vehicles', error);
     } finally {
       setLoading(false);
     }
@@ -67,25 +67,25 @@ export default function VehicleListPage() {
   };
 
   const confirmDelete = async () => {
-    if (deleteId) {
-      try {
-        await vehicleService.deleteVehicle(deleteId);
-        setVehicles(vehicles.filter((v) => v._id !== deleteId));
-      } catch (error) {
-        console.error('Lỗi khi xóa xe', error);
-      } finally {
-        setDeleteId(null);
-      }
+    if (!deleteId) return;
+
+    try {
+      await vehicleService.deleteVehicle(deleteId);
+      setVehicles(vehicles.filter((vehicle) => vehicle._id !== deleteId));
+    } catch (error) {
+      console.error('Error deleting vehicle', error);
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
     <MobileLayout>
-      <AppHeader title="Danh sách xe cứu hộ" />
+      <AppHeader title="Danh sach xe cuu ho" backFallback="/company/home" />
 
       <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: 'secondary.main' }}>
-          Tổng số xe: {vehicles.length}
+          Tong so xe: {vehicles.length}
         </Typography>
 
         {loading ? (
@@ -111,7 +111,7 @@ export default function VehicleListPage() {
                     </Box>
                   </Box>
                   <Chip
-                    label={vehicle.status === 'available' ? 'Hoạt động' : 'Bảo trì'}
+                    label={vehicle.status === 'available' ? 'San sang' : 'Bao tri'}
                     size="small"
                     sx={{
                       bgcolor: vehicle.status === 'available' ? '#e8f5e9' : '#fff8e1',
@@ -133,7 +133,7 @@ export default function VehicleListPage() {
                       textTransform: 'none',
                     }}
                   >
-                    Chỉnh sửa
+                    Sua
                   </Button>
                   <Button
                     variant="outlined"
@@ -143,7 +143,7 @@ export default function VehicleListPage() {
                     onClick={() => handleDeleteClick(vehicle._id)}
                     sx={{ textTransform: 'none' }}
                   >
-                    Xóa
+                    Xoa
                   </Button>
                 </Box>
               </Card>
@@ -152,7 +152,6 @@ export default function VehicleListPage() {
         )}
       </Box>
 
-      {/* Bottom Fixed Button */}
       <Box
         sx={{
           position: 'sticky',
@@ -180,7 +179,7 @@ export default function VehicleListPage() {
             fontWeight: 'bold',
           }}
         >
-          Thêm xe
+          Them xe
         </Button>
       </Box>
 
@@ -192,12 +191,10 @@ export default function VehicleListPage() {
         }}
       >
         <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: 'secondary.main', pb: 1 }}>
-          Xác nhận xóa
+          Xac nhan xoa
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ textAlign: 'center' }}>
-            Bạn có chắc chắn muốn xóa xe cứu hộ này khỏi hệ thống?
-          </DialogContentText>
+          <DialogContentText sx={{ textAlign: 'center' }}>Ban co chac chan muon xoa xe nay?</DialogContentText>
         </DialogContent>
         <DialogActions sx={{ display: 'flex', gap: 1, px: 3, pb: 2 }}>
           <Button
@@ -206,7 +203,7 @@ export default function VehicleListPage() {
             fullWidth
             sx={{ color: 'secondary.main', borderColor: 'secondary.main', textTransform: 'none', py: 1 }}
           >
-            Hủy
+            Huy
           </Button>
           <Button
             onClick={confirmDelete}
@@ -216,7 +213,7 @@ export default function VehicleListPage() {
             sx={{ textTransform: 'none', py: 1 }}
             autoFocus
           >
-            Xóa
+            Xoa
           </Button>
         </DialogActions>
       </Dialog>

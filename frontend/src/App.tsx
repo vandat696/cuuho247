@@ -1,23 +1,48 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import ShowcasePage from '@/pages/ShowcasePage';
-import VehicleListPage from './pages/rescue-company/vehicle/VehicleListPage';
-import VehicleFormPage from './pages/rescue-company/vehicle/VehicleFormPage';
-import ServiceListPage from './pages/rescue-company/service/ServiceListPage';
-import ServiceDetailPage from './pages/rescue-company/service/ServiceDetailPage';
-import ServiceFormPage from './pages/rescue-company/service/ServiceFormPage';
-import HomePage from '@/pages/HomePage';
-import LoginPage from '@/pages/auth/LoginPage';
-import RoleSelectionPage from '@/pages/auth/RoleSelectionPage';
-import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
-import CompanyRegisterPage from '@/pages/auth/CompanyRegisterPage';
-import CompanyProfilePage from '@/pages/rescue-company/CompanyProfilePage';
-// import { ProtectedRoute } from './components/common/ProtectedRoute';
-import RescueRequestPage from '@/pages/customer/RescueRequestPage';
-import RescueResultsPage from '@/pages/customer/RescueResultsPage';
-import CompanyHomePage from './pages/rescue-company/CompanyHomePage';
-import ChatPage from '@/pages/chat/ChatPage';
+// Suspense Fallback
+const SuspenseFallback = () => (
+  <div style={{ padding: 20, textAlign: 'center', fontFamily: 'var(--font)' }}>Đang tải...</div>
+);
+
+// Public & Auth Pages
+const HomePage = React.lazy(() => import('@/pages/HomePage'));
+const ShowcasePage = React.lazy(() => import('@/pages/ShowcasePage'));
+const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'));
+const RoleSelectionPage = React.lazy(() => import('@/pages/auth/RoleSelectionPage'));
+const CustomerRegisterPage = React.lazy(() => import('@/pages/auth/CustomerRegisterPage'));
+const CompanyRegisterPage = React.lazy(() => import('@/pages/auth/CompanyRegisterPage'));
+
+// Customer Pages
+const CustomerHomePage = React.lazy(() => import('@/pages/customer/CustomerHomePage'));
+const CustomerHistoryPage = React.lazy(() => import('@/pages/customer/CustomerHistoryPage'));
+const RescueRequestPage = React.lazy(() => import('@/pages/customer/RescueRequestPage'));
+const RescueResultsPage = React.lazy(() => import('@/pages/customer/RescueResultsPage'));
+const CompanyDetailsPage = React.lazy(() => import('@/pages/customer/CompanyDetailsPage'));
+const ConfirmRequestPage = React.lazy(() => import('@/pages/customer/ConfirmRequestPage'));
+
+// Company Pages
+const CompanyHomePage = React.lazy(() => import('./pages/rescue-company/CompanyHomePage'));
+const CompanyProfilePage = React.lazy(() => import('@/pages/rescue-company/CompanyProfilePage'));
+const CompanyNotificationsPage = React.lazy(
+  () => import('./pages/rescue-company/notifications/CompanyNotificationsPage')
+);
+
+// Company Rescue Pages (Unified)
+const RescueRequestListPage = React.lazy(() => import('./pages/rescue-company/rescue/RescueRequestListPage'));
+const RescueRequestDetailPage = React.lazy(() => import('./pages/rescue-company/rescue/RescueRequestDetailPage'));
+
+// Company Service & Vehicle Pages
+const VehicleListPage = React.lazy(() => import('./pages/rescue-company/vehicle/VehicleListPage'));
+const VehicleFormPage = React.lazy(() => import('./pages/rescue-company/vehicle/VehicleFormPage'));
+const ServiceListPage = React.lazy(() => import('./pages/rescue-company/service/ServiceListPage'));
+const ServiceFormPage = React.lazy(() => import('./pages/rescue-company/service/ServiceFormPage'));
+const ServiceDetailPage = React.lazy(() => import('./pages/rescue-company/service/ServiceDetailPage'));
+
+// Chat Pages
+const ChatPage = React.lazy(() => import('@/pages/chat/ChatPage'));
 
 function App() {
   return (
@@ -34,43 +59,70 @@ function App() {
         }}
       />
 
-      <Routes>
-        {/* Rescue Company Routes */}
-        <Route path="/company/vehicles" element={<VehicleListPage />} />
-        <Route path="/company/vehicles/new" element={<VehicleFormPage />} />
-        <Route path="/company/vehicles/:id/edit" element={<VehicleFormPage />} />
+      <Suspense fallback={<SuspenseFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/showcase" element={<ShowcasePage />} />
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Service Routes */}
-        <Route path="/company/services" element={<ServiceListPage />} />
-        <Route path="/company/services/new" element={<ServiceFormPage />} />
-        <Route path="/company/services/:serviceId" element={<ServiceDetailPage />} />
-        <Route path="/company/services/:serviceId/edit" element={<ServiceFormPage />} />
+          <Route path="/register">
+            <Route index element={<RoleSelectionPage />} />
+            <Route path="customer" element={<CustomerRegisterPage />} />
+            <Route path="company" element={<CompanyRegisterPage />} />
+          </Route>
 
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RoleSelectionPage />} />
-        <Route path="/register/customer" element={<CustomerRegisterPage />} />
-        <Route path="/register/company" element={<CompanyRegisterPage />} />
+          {/* Rescue Flow (Customer mix) */}
+          <Route path="/rescue">
+            <Route path="request" element={<RescueRequestPage />} />
+            <Route path="search" element={<RescueResultsPage />} />
+            <Route path="company/:id" element={<CompanyDetailsPage />} />
+            <Route path="confirm" element={<ConfirmRequestPage />} />
+          </Route>
 
-        <Route path="/company" element={<CompanyHomePage />} />
-        <Route path="/company/profile" element={<CompanyProfilePage />} />
-        {/* <Route
-          path="/company/:id"
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <ShowcasePage />
-            </ProtectedRoute>
-          }
-        /> */}
-        <Route path="/rescue/request" element={<RescueRequestPage />} />
-        <Route path="/rescue/search" element={<RescueResultsPage />} />
+          {/* Customer Routes */}
+          <Route path="/customer">
+            <Route index element={<Navigate to="/customer/home" replace />} />
+            <Route path="home" element={<CustomerHomePage />} />
+            <Route path="history" element={<CustomerHistoryPage />} />
+          </Route>
 
-        {/* Chat Routes */}
-        <Route path="/chat/:rescueRequestId" element={<ChatPage />} />
+          {/* Company Routes */}
+          <Route path="/company">
+            <Route index element={<Navigate to="/company/home" replace />} />
+            <Route path="home" element={<CompanyHomePage />} />
+            <Route path="profile" element={<CompanyProfilePage />} />
+            <Route path="notifications" element={<CompanyNotificationsPage />} />
 
-        <Route path="/showcase" element={<ShowcasePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+            {/* Company Vehicles */}
+            <Route path="vehicles">
+              <Route index element={<VehicleListPage />} />
+              <Route path="new" element={<VehicleFormPage />} />
+              <Route path=":id/edit" element={<VehicleFormPage />} />
+            </Route>
+
+            {/* Company Services */}
+            <Route path="services">
+              <Route index element={<ServiceListPage />} />
+              <Route path="new" element={<ServiceFormPage />} />
+              <Route path=":serviceId" element={<ServiceDetailPage />} />
+              <Route path=":serviceId/edit" element={<ServiceFormPage />} />
+            </Route>
+
+            {/* Company Rescue Requests */}
+            <Route path="rescue">
+              <Route path=":status" element={<RescueRequestListPage />} />
+              <Route path=":status/:requestId" element={<RescueRequestDetailPage />} />
+            </Route>
+          </Route>
+
+          {/* Chat Routes */}
+          <Route path="/chat/:rescueRequestId" element={<ChatPage />} />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

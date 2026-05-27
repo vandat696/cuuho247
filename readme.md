@@ -59,16 +59,21 @@ npm run dev
 
 ## 📦 Tech Stack
 
-| Lớp           | Công Nghệ          | Phiên Bản |
-| ------------- | ------------------ | --------- |
-| **Frontend**  | React + Vite       | 19 + 5    |
-| **Backend**   | Express + Node.js  | 5.2       |
-| **Database**  | MongoDB + Mongoose | 9         |
-| **Real-time** | Socket.IO          | 4.8       |
-| **Maps**      | Leaflet            | 1.9       |
-| **State**     | Zustand            | 5         |
-| **Auth**      | JWT + bcryptjs     | -         |
-| **Language**  | TypeScript         | -         |
+| Lớp              | Công Nghệ               | Phiên Bản       |
+| ---------------- | ----------------------- | --------------- |
+| **Frontend**     | React + TypeScript      | 18.2.0 + 5.2    |
+| **Frontend Dev** | Vite                    | 5.0.0           |
+| **Backend**      | Express + TypeScript    | 4.18.2 + 5.2    |
+| **Database**     | MongoDB + Mongoose      | 8.0.3           |
+| **Real-time**    | Socket.IO               | 4.7.2           |
+| **Maps**         | Leaflet + React Leaflet | 1.9.0 + 4.2.0   |
+| **UI Framework** | Material-UI (MUI)       | 5.15.10         |
+| **State Mgmt**   | Zustand                 | 4.4.0           |
+| **Validation**   | Joi + Zod               | 17.11.0 + 4.4.3 |
+| **HTTP Client**  | Axios                   | 1.6.0           |
+| **Auth**         | JWT + bcryptjs          | 9.0.2 + 2.4.3   |
+| **File Upload**  | Multer                  | 1.4.5-lts.1     |
+| **Job Queue**    | Bull                    | 4.16.5          |
 
 ---
 
@@ -139,32 +144,34 @@ cuuho247/
 
 ### 👤 Người Dùng Cá Nhân
 
-- ✅ Đăng ký / Đăng nhập
-- ✅ Tạo yêu cầu cứu hộ với GPS
-- ✅ Nhập địa chỉ thủ công theo cấp hành chính khi không dùng GPS
-- ✅ Đính kèm ảnh hiện trường
-- ✅ Xem trạng thái real-time
-- ✅ Đánh giá dịch vụ
-- ✅ Chat với công ty cứu hộ
-- ✅ Tham gia cộng đồng (bài viết, bình luận)
-- ✅ Hủy yêu cầu theo trạng thái xử lý
+- ✅ Đăng ký / Đăng nhập (v1.0.0)
+- ✅ Tạo yêu cầu cứu hộ với GPS (v1.1.0)
+- ✅ Xem trạng thái real-time (v1.1.0)
+- ✅ Đánh giá dịch vụ (v1.1.0)
+- ✅ Chat với công ty cứu hộ (v1.x - coming soon)
+- ✅ Tham gia cộng đồng (v1.x - coming soon)
+- ✅ Tìm kiếm yêu cầu cứu hộ gần đó (v1.1.0)
+- ✅ Quản lý thông tin xe (v1.0.0)
+- ✅ Thông báo real-time (v2.0.0 - coming soon)
 
 ### 🚗 Công Ty Cứu Hộ
 
-- ✅ Đăng ký công ty và chờ Admin duyệt
-- ✅ Quản lý dịch vụ, giá cả và danh mục
-- ✅ Quản lý danh sách xe cứu hộ
-- ✅ Nhận yêu cầu real-time và cập nhật ETA
-- ✅ Cập nhật trạng thái xử lý, hoàn tất và thanh toán
-- ✅ Chat với khách hàng trong quá trình xử lý
-- ✅ Phản hồi đánh giá của khách hàng
+- ✅ Đăng ký công ty (v1.0.0)
+- ✅ Đăng nhập & quản lý tài khoản (v1.0.0)
+- 🔄 Lựa chọn vị trí công ty trên bản đồ (v1.2.0 - in progress)
+- ✅ Quản lý dịch vụ & giá cả (v1.1.0)
+- ✅ Quản lý danh mục dịch vụ (v1.1.0)
+- ✅ Nhận yêu cầu real-time (v1.x - coming soon)
+- ✅ Cập nhật trạng thái xử lý (v1.x - coming soon)
+- ✅ Dashboard công ty (v1.x - coming soon)
+- 🔄 Quản lý độc quyền dịch vụ (v1.2.0 - in progress)
 
 ### 👨‍💼 Quản Trị Viên
 
-- ✅ Duyệt công ty cứu hộ
-- ✅ Quản lý người dùng
-- ✅ Kiểm duyệt nội dung
-- ✅ Xem thống kê
+- ✅ Theo dõi toàn bộ hoạt động hệ thống (v1.0.0)
+- ✅ Duyệt đơn đăng ký công ty (v1.0.0)
+- ✅ Quản lý danh mục dịch vụ (v1.1.0)
+- ✅ Xem lịch sử đăng nhập & hoạt động (v1.0.0)
 
 ---
 
@@ -234,59 +241,121 @@ cd frontend && npm run build
 
 ---
 
-## Lịch Sử Tài Liệu
+## � Release History & Versioning
 
-| Ngày       | Phiên bản | Người sửa     | Nội dung sửa                                     |
-| ---------- | --------- | ------------- | ------------------------------------------------ |
-| 01/04/2026 | v0.1.0    | Văn Thành Đạt | Khởi tạo tài liệu, mô tả tính năng phiên bản đầu |
-| -          | v0.2.0    | Team          | Base project setup, configuration files          |
+### v1.1.0 - Service & Rescue Features Release ✅
+
+**Release Date:** 2026-05-13  
+**Status:** Stable
+
+**Key Features:**
+
+- ✅ Service CRUD operations
+- ✅ Service category management
+- ✅ Rescue request search functionality
+- ✅ Company profile (read/write)
+- ✅ Rescue service refactoring (Repository pattern)
+- ✅ Input validation enhancement (Joi + Zod)
+- ✅ Address autocomplete (Goong API integration)
+- ✅ Mini-map feature
+
+**Improvements:**
+
+- 🔧 Refactored rescue service architecture
+- 🔧 Enhanced password validation
+- 🔧 Improved UI components (category, borders)
+
+**Tag:** `cuuho247-v1.1.0`
+
+---
+
+### v1.0.0 - Authentication & Authorization Release ✅
+
+**Release Date:** 2026-05-10  
+**Status:** Stable
+
+**Key Features:**
+
+- ✅ Multi-role authentication system (user, rescue_company, admin)
+- ✅ JWT-based authentication
+- ✅ Login & Registration UI (Frontend)
+- ✅ Auth APIs with global error handling
+- ✅ Password validation & security
+- ✅ Vehicle management foundation
+- ✅ Custom ApiError utility
+- ✅ Release-please workflow setup
+
+**Tags:**
+
+- `road-rescue-backend-v1.0.0`
+- `road-rescue-frontend-v1.0.0`
+- `cuuho247-v1.0.0`
 
 ---
 
-## Công Nghệ Sử Dụng
+### v0.1.0 - Initial Setup & Base Infrastructure ✅
 
-- **Frontend**: React + Vite
-- **Backend**: Node.js + Express
-- **Database**: MongoDB Atlas
-- **Real-time**: Socket.IO
-- **Bản đồ**: Leaflet
+**Release Date:** 2026-04-27  
+**Status:** Archived
+
+**Key Features:**
+
+- ✅ Project setup with TypeScript, Express, React, Vite
+- ✅ MongoDB + Mongoose models initialization
+- ✅ Frontend component & layout foundation
+- ✅ Tailwind CSS → MUI migration
+- ✅ Environment configuration (.env.example)
+
+**Tag:** `cuuho247-v0.1.0`
+
+---
+
+### v1.2.0 - Company Registration Enhancement 🚀
+
+**Status:** In Development (`feat/company-rescue` branch)  
+**Expected Release:** 2026-05-20+
+
+**Features in Progress:**
+
+- 🔄 Company registration with file upload
+- 🔄 Company location selection on map
+- 🔄 Service area management
+- 🔄 Address handling improvements
+
+**Completed So Far:**
+
+- ✅ Company registration flow
+- ✅ Map-based location selection
+- ✅ Service areas list configuration
+- ✅ Address handling & placeholder texts
+- ✅ AddressAutocomplete component refinement
+
+**Estimated Tag:** `cuuho247-v1.2.0`
 
 ---
 
-## Phiên Bản Hiện Tại: v0.1.0
+### Future Versions
 
-> Ngày: 01/04/2026 · Người sửa: Văn Thành Đạt · Nội dung: Khởi tạo, xây dựng các chức năng cốt lõi cho 3 nhóm người dùng.
+**v1.3.0** - Notifications & Real-time Features
 
-**Người dùng cá nhân:**
+- Socket.IO integration
+- Real-time notifications
+- Live chat system
+- Request status tracking
 
-- Đăng ký và đăng nhập tài khoản
-- Nhập thông tin sự cố và chọn loại dịch vụ
-- Xác định vị trí qua GPS hoặc nhập địa chỉ thủ công (cascade: Tỉnh → Quận/Huyện → Xã/Phường)
-- Đính kèm 1 ảnh hiện trường
-- Xem danh sách công ty cứu hộ kèm giá và đánh giá
-- Gửi yêu cầu cứu hộ đến công ty đã chọn
-- Theo dõi trạng thái yêu cầu theo thời gian thực
-- Hủy yêu cầu (không cần lý do khi chưa xác nhận, cần lý do khi đang xử lý)
-- Đánh giá dịch vụ 1-5 sao sau khi hoàn tất
-- Đăng và tìm kiếm bài viết hướng dẫn xử lý sự cố cộng đồng
+**v2.0.0** - Advanced Features
 
-**Công ty cứu hộ:**
-
-- Đăng ký tài khoản doanh nghiệp (chờ Admin duyệt)
-- Quản lý thông tin công ty, danh mục dịch vụ và bảng giá
-- Quản lý danh sách xe cứu hộ (biển số, loại xe, trạng thái tự động)
-- Nhận thông báo yêu cầu mới và xác nhận/từ chối trong 10 phút
-- Cung cấp ETA sau khi xác nhận
-- Cập nhật trạng thái xử lý và xác nhận hoàn tất kèm thông tin thanh toán
-- Chat với khách hàng trong quá trình xử lý
-- Phản hồi đánh giá của khách hàng
-
-**Quản trị viên:**
-
-- Đăng nhập bằng tài khoản được seed sẵn, giao diện riêng biệt
-- Xác minh và phê duyệt tài khoản công ty cứu hộ
-- Quản lý tài khoản người dùng (khóa/mở khóa)
-- Kiểm duyệt đánh giá và bài đăng vi phạm
-- Xem báo cáo và thống kê hoạt động hệ thống
+- Payment integration
+- Advanced analytics
+- Community features
+- Reviews & ratings system
+- Admin dashboard enhancements
 
 ---
+
+## 📞 Thông Tin Liên Hệ & Tài Liệu
+
+- **Repository**: https://github.com/vandat696/cuuho247
+- **Quy chuẩn Commit**: Xem [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md)
+- **Changelog**: Xem [CHANGELOG.md](./CHANGELOG.md)
+- **Project Progress**: Xem [progress.md](./progress.md)

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
-import  CompanyRegisterForm  from '@/components/auth/CompanyRegisterForm';
+import CompanyRegisterForm from '@/components/auth/CompanyRegisterForm';
 
 const CompanyRegisterPage = () => {
   const navigate = useNavigate();
@@ -17,7 +17,8 @@ const CompanyRegisterPage = () => {
           Đăng ký Công ty
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4 }}>
-          Vui lòng điền đầy đủ thông tin bên dưới để tạo tài khoản công ty. Tài khoản sẽ cần được xác minh trước khi kích hoạt.
+          Vui lòng điền đầy đủ thông tin bên dưới để tạo tài khoản công ty. Tài khoản sẽ cần được xác minh trước khi
+          kích hoạt.
         </Typography>
 
         <CompanyRegisterForm />

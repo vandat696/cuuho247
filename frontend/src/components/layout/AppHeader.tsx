@@ -1,22 +1,26 @@
 import { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldOutlined as ShieldOutlinedIcon } from '@mui/icons-material';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ApartmentOutlined as ApartmentIcon } from '@mui/icons-material';
 
 interface AppHeaderProps {
   title: string;
-  onBack?: () => void; // override default navigate(-1)
+  onBack?: () => void;
+  backFallback?: string;
   showBack?: boolean;
-  rightSlot?: ReactNode; // e.g. notification icon
+  rightSlot?: ReactNode;
 }
 
-export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHeaderProps) {
+export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot }: AppHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
     if (onBack) {
       onBack();
-    } else {
+    } else if (location.key !== 'default') {
       navigate(-1);
+    } else {
+      navigate(backFallback, { replace: true });
     }
   };
 
@@ -25,25 +29,26 @@ export function AppHeader({ title, onBack, showBack = true, rightSlot }: AppHead
       {showBack ? (
         <button type="button" className="app-header__back" onClick={handleBack} aria-label="Quay lại">
           <svg
-            width="20"
-            height="20"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M15 18l-6-6 6-6" />
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
           </svg>
         </button>
       ) : (
         <div className="app-header__logo" aria-hidden="true">
-          <ShieldOutlinedIcon sx={{ fontSize: 18 }} />
+          <ApartmentIcon sx={{ fontSize: 24 }} />
         </div>
       )}
 
-      <div className="app-header__center">
+      <div className={showBack ? 'app-header__center' : 'app-header__center app-header__center--start'}>
         <h1 className="app-header__title">{title}</h1>
       </div>
 

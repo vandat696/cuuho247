@@ -15,7 +15,7 @@ export default function RescueResultsPage() {
   if (!locationState) {
     return (
       <MobileLayout>
-        <AppHeader title="Kết quả tìm kiếm" onBack={() => navigate('/rescue/request')} />
+        <AppHeader title="Kết quả tìm kiếm" backFallback="/rescue/request" />
         <Box
           sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4, textAlign: 'center' }}
         >
@@ -53,12 +53,14 @@ export default function RescueResultsPage() {
   const { formData, results } = locationState;
 
   const handleViewDetail = (company: CompanyResult) => {
-    toast(`${company.company_name} – ${company.phone}`, { icon: '📞' });
+    navigate(`/rescue/company/${company._id}`, {
+      state: { formData, company },
+    });
   };
 
   return (
     <MobileLayout>
-      <AppHeader title="Kết quả tìm kiếm" onBack={() => navigate('/rescue/request')} />
+      <AppHeader title="Kết quả tìm kiếm" backFallback="/rescue/request" />
 
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff' }}>
         <SearchResultHeader

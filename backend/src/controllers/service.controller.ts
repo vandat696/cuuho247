@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { ValidationErrorItem } from 'joi';
 import { AuthRequest } from '@/middleware/auth.middleware';
-import serviceService from '@/services/service.service';
+import companyServiceService from '@/services/companyService.service';
 import serviceRepository from '@/repositories/service.repository';
 import { createServiceSchema, updateServiceSchema } from '@/validators/service.validator';
 
@@ -22,7 +22,7 @@ class ServiceController {
     try {
       const companyId = req.user.id;
       const { serviceId } = req.params;
-      const service = await serviceService.getServiceById(serviceId, companyId);
+      const service = await companyServiceService.getServiceById(serviceId, companyId);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -46,7 +46,7 @@ class ServiceController {
         return;
       }
 
-      const service = await serviceService.createService(value);
+      const service = await companyServiceService.createService(value);
       res.status(201).json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -70,7 +70,7 @@ class ServiceController {
         return;
       }
 
-      const service = await serviceService.updateService(serviceId, companyId, value);
+      const service = await companyServiceService.updateService(serviceId, companyId, value);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;
@@ -82,7 +82,7 @@ class ServiceController {
     try {
       const companyId = req.user.id;
       const { serviceId } = req.params;
-      const service = await serviceService.deleteService(serviceId, companyId);
+      const service = await companyServiceService.deleteService(serviceId, companyId);
       res.json({ status: 'success', data: service });
     } catch (error: unknown) {
       const err = error as Error;

@@ -31,6 +31,7 @@ export const INCIDENT_TYPES: IncidentType[] = [
 // ─── Request Status ────────────────────────────────────────────────────────────
 
 export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'rejected' | 'timeout';
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'e_wallet';
 
 // ─── Form Data ─────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,8 @@ export interface RescueFormErrors {
 export interface CompanyResult {
   _id: string;
   company_name: string;
+  director_name: string;
+  email: string;
   phone: string;
   address: {
     province?: string;
@@ -76,6 +79,9 @@ export interface CompanyResult {
   rating_count: number;
   status: string;
   service_names: string[];
+  min_price: number | null;
+  max_price: number | null;
+  eta_minutes: number | null;
 }
 
 // ─── Search Params & Result ────────────────────────────────────────────────────
@@ -90,6 +96,125 @@ export interface SearchCompaniesParams {
 export interface SearchCompaniesResult {
   total: number;
   companies: CompanyResult[];
+}
+
+export interface PendingRescueRequest {
+  _id: string;
+  title: string;
+  description: string;
+  distance_km: number | null;
+  eta_minutes?: number | null;
+  created_at?: string;
+  status?: string;
+  address?: Record<string, unknown>;
+}
+
+export interface PendingRescueRequestsResult {
+  total: number;
+  requests: PendingRescueRequest[];
+}
+
+export interface PendingRescueRequestDetail extends PendingRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+  incident_photos: string[];
+  location?: {
+    type: 'Point';
+    coordinates: number[];
+  };
+}
+
+export interface PendingRescueRequestDetailResult {
+  request: PendingRescueRequestDetail;
+}
+
+export interface ActiveRescueRequest extends PendingRescueRequest {
+  vehicle: {
+    vehicle_type: string;
+    plate_number: string;
+  };
+  accepted_at?: string;
+}
+
+export interface AcceptPendingRescueRequestPayload {
+  vehicle_id: string;
+  eta_minutes: number;
+  note?: string;
+}
+
+export interface RequestPayment {
+  amount?: number;
+  method?: PaymentMethod;
+  paid_at?: string;
+}
+
+export interface CompleteActiveRescueRequestPayload {
+  amount: number;
+  method?: PaymentMethod;
+  note?: string;
+}
+
+export interface ActiveRescueRequestsResult {
+  total: number;
+  requests: ActiveRescueRequest[];
+}
+
+export interface ActiveRescueRequestDetail extends ActiveRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface ActiveRescueRequestDetailResult {
+  request: ActiveRescueRequestDetail;
+}
+
+export interface CompletedRescueRequest extends ActiveRescueRequest {
+  completed_at?: string;
+  payment?: RequestPayment;
+}
+
+export interface CompletedRescueRequestsResult {
+  total: number;
+  requests: CompletedRescueRequest[];
+}
+
+export interface CompletedRescueRequestDetail extends CompletedRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface CompletedRescueRequestDetailResult {
+  request: CompletedRescueRequestDetail;
+}
+
+export interface CanceledRescueRequest extends ActiveRescueRequest {
+  cancelled_at?: string;
+  cancellation?: {
+    cancelled_by?: string;
+    reason?: string;
+  };
+}
+
+export interface CanceledRescueRequestsResult {
+  total: number;
+  requests: CanceledRescueRequest[];
+}
+
+export interface CanceledRescueRequestDetail extends CanceledRescueRequest {
+  customer: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+export interface CanceledRescueRequestDetailResult {
+  request: CanceledRescueRequestDetail;
 }
 
 // ─── Navigation State (passed to results page) ────────────────────────────────

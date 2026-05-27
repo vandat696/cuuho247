@@ -105,7 +105,7 @@ export default function VehicleFormPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title={isEdit ? 'Chỉnh sửa xe cứu hộ' : 'Thêm xe cứu hộ'} />
+      <AppHeader title={isEdit ? 'Chỉnh sửa xe cứu hộ' : 'Thêm xe cứu hộ'} backFallback="/company/vehicles" />
 
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
         <Box>
