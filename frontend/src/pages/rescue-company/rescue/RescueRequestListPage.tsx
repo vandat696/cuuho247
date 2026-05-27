@@ -25,7 +25,7 @@ import {
   RescueListScaffold,
   InfoRow,
 } from '@/components/rescue-company/RescueCompanyRequestShared';
-import { rescueService } from '@/services/rescue.service';
+import { rescueService } from '@/services/rescueRequestCompany.service';
 
 type RequestStatus = 'pending' | 'active' | 'completed' | 'canceled';
 

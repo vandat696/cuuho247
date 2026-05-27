@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import rescueController from '@/controllers/rescue.controller';
+import rescueController from '@/controllers/rescueRequestCompany.controller';
 import { authenticate } from '@/middleware/auth.middleware';
 import { authorize } from '@/middleware/authorize.middleware';
 

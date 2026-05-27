@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import companyRescueRequestService from '../services/companyRescueRequest.service';
+import companyRescueRequestService from '../services/RescueRequestCompany.service';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from '../validators/rescueRequest.validator';
 

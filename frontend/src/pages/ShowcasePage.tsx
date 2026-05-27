@@ -4,9 +4,9 @@ import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Input } from '@/components/common/Input';
 import { Box, Typography } from '@mui/material';
-import { CancelButton } from '@/components/rescue/CancelButton';
+import { CancelButton } from '@/components/rescue-customer/CancelButton';
 import { useState } from 'react';
-import { CancelRequestSheet } from '@/components/rescue/CancelRequestSheet';
+import { CancelRequestSheet } from '@/components/rescue-customer/CancelRequestSheet';
 
 const ShowcasePage = () => {
   const [showSheet, setShowSheet] = useState(false);

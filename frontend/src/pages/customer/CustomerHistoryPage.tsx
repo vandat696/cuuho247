@@ -5,13 +5,13 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import toast from 'react-hot-toast';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { CancelButton } from '@/components/rescue/CancelButton';
-import { CancelRequestSheet } from '@/components/rescue/CancelRequestSheet';
+import { CancelButton } from '@/components/rescue-customer/CancelButton';
+import { CancelRequestSheet } from '@/components/rescue-customer/CancelRequestSheet';
 import {
   CustomerRescueRequest,
   CustomerRescueRequestStatus,
   rescueRequestService,
-} from '@/services/rescueRequest.service';
+} from '@/services/rescueRequestCustomer.service';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';

@@ -2,8 +2,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { SearchResultHeader } from '@/components/rescue/SearchResultHeader';
-import { CompanyList } from '@/components/rescue/CompanyList';
+import { SearchResultHeader } from '@/components/rescue-customer/SearchResultHeader';
+import { CompanyList } from '@/components/rescue-customer/CompanyList';
 import { RescueSearchState, CompanyResult } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
 

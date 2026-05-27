@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
-import rescueRequestService from '../services/rescueRequest.service';
+import rescueRequestService from '../services/rescueRequestCustomer.service';
 import { cancelRequestSchema, createRequestSchema } from '../validators/rescueRequest.validator';
 
 class RescueRequestController {

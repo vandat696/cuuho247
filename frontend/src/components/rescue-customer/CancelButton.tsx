@@ -5,7 +5,7 @@ interface CancelButtonProps {
   onCancel: () => void;
 }
 
-const CANCELLABLE: RequestStatus[] = ['pending'];
+const CANCELLABLE: RequestStatus[] = ['pending', 'accepted'];
 
 export function CancelButton({ status, onCancel }: CancelButtonProps) {
   const canCancel = CANCELLABLE.includes(status);
