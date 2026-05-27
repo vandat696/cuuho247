@@ -30,7 +30,15 @@ export const INCIDENT_TYPES: IncidentType[] = [
 
 // ─── Request Status ────────────────────────────────────────────────────────────
 
-export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'rejected' | 'timeout';
+export type RequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'in_progress'
+  | 'arrived'
+  | 'completed'
+  | 'cancelled'
+  | 'rejected'
+  | 'timeout';
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'e_wallet';
 
 // ─── Form Data ─────────────────────────────────────────────────────────────────

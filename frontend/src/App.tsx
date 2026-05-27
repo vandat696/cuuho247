@@ -18,6 +18,7 @@ const CompanyRegisterPage = React.lazy(() => import('@/pages/auth/CompanyRegiste
 // Customer Pages
 const CustomerHomePage = React.lazy(() => import('@/pages/customer/CustomerHomePage'));
 const CustomerHistoryPage = React.lazy(() => import('@/pages/customer/CustomerHistoryPage'));
+const RescueTrackingPage = React.lazy(() => import('@/pages/customer/RescueTrackingPage'));
 const RescueRequestPage = React.lazy(() => import('@/pages/customer/RescueRequestPage'));
 const RescueResultsPage = React.lazy(() => import('@/pages/customer/RescueResultsPage'));
 const CompanyDetailsPage = React.lazy(() => import('@/pages/customer/CompanyDetailsPage'));
@@ -85,6 +86,7 @@ function App() {
             <Route index element={<Navigate to="/customer/home" replace />} />
             <Route path="home" element={<CustomerHomePage />} />
             <Route path="history" element={<CustomerHistoryPage />} />
+            <Route path="tracking/:requestId" element={<RescueTrackingPage />} />
           </Route>
 
           {/* Company Routes */}

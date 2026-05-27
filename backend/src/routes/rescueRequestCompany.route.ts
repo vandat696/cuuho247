@@ -12,6 +12,18 @@ router.patch(
   authorize(['company']),
   rescueController.completeCompanyActiveRequest
 );
+router.patch(
+  '/company/active/:requestId/start',
+  authenticate,
+  authorize(['company']),
+  rescueController.startCompanyActiveRequest
+);
+router.patch(
+  '/company/active/:requestId/arrive',
+  authenticate,
+  authorize(['company']),
+  rescueController.arriveCompanyActiveRequest
+);
 router.get(
   '/company/active/:requestId',
   authenticate,
