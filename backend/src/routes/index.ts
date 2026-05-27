@@ -6,6 +6,7 @@ import rescueRoutes from './rescue.route';
 import rescueRequestRoutes from './rescueRequest.route';
 import serviceRoutes from './service.route';
 import serviceCategoryRoutes from './serviceCategory.route';
+import messageRoutes from './message.route';
 
 const router = Router();
 
@@ -27,5 +28,8 @@ router.use('/vehicles', vehicleRoutes);
 // Rescue Routes
 router.use('/rescue', rescueRoutes);
 router.use('/rescue/requests', rescueRequestRoutes);
+
+// Message Routes
+router.use('/messages', messageRoutes);
 
 export default router;

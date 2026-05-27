@@ -41,6 +41,9 @@ const ServiceListPage = React.lazy(() => import('./pages/rescue-company/service/
 const ServiceFormPage = React.lazy(() => import('./pages/rescue-company/service/ServiceFormPage'));
 const ServiceDetailPage = React.lazy(() => import('./pages/rescue-company/service/ServiceDetailPage'));
 
+// Chat Pages
+const ChatPage = React.lazy(() => import('@/pages/chat/ChatPage'));
+
 function App() {
   return (
     <BrowserRouter>
@@ -112,6 +115,9 @@ function App() {
               <Route path=":status/:requestId" element={<RescueRequestDetailPage />} />
             </Route>
           </Route>
+
+          {/* Chat Routes */}
+          <Route path="/chat/:rescueRequestId" element={<ChatPage />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
