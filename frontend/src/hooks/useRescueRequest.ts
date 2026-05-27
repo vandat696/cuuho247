@@ -22,7 +22,6 @@ export function useRescueRequest() {
   // Auto-get GPS on mount
   useEffect(() => {
     geo.getCurrentLocation();
-     
   }, []);
 
   // Sync GPS location into form when it arrives
@@ -105,6 +104,7 @@ export function useRescueRequest() {
         navigate('/rescue/search', {
           state: {
             formData: {
+              incident_type: form.incident_type?.slug,
               incident_type_label: form.incident_type?.label ?? '',
               description: form.description,
               location: loc,

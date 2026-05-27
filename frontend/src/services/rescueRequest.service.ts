@@ -14,6 +14,7 @@ export type CustomerRescueRequestStatus =
   | 'pending'
   | 'accepted'
   | 'in_progress'
+  | 'arrived'
   | 'completed'
   | 'cancelled'
   | 'rejected'
@@ -26,12 +27,20 @@ export interface CustomerRescueRequest {
     company_id: string;
     company_name?: string;
   };
+  vehicle?: {
+    vehicle_id: string;
+    plate_number?: string;
+  };
+  location?: {
+    coordinates: [number, number]; // [lng, lat]
+  };
   status?: CustomerRescueRequestStatus;
   eta_minutes?: number;
   created_at?: string;
   updated_at?: string;
   accepted_at?: string;
   started_at?: string;
+  arrived_at?: string;
   completed_at?: string;
   cancelled_at?: string;
   cancellation?: {

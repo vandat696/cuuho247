@@ -3,6 +3,7 @@ import companyRepository from '../repositories/company.repository';
 import rescueRequestRepository from '../repositories/rescueRequest.repository';
 import type { IRescueRequest, RequestStatus } from '../models/RescueRequest.model';
 import { ApiError } from '../utils/apiError.util';
+import { ServiceCategory } from '../models/ServiceCategory.model';
 
 export interface CreateRequestData {
   user_id: string;
@@ -58,7 +59,10 @@ class RescueRequestService {
     }
 
     if (service_types && service_types.length > 0) {
-      payload.service_types = service_types.map((id) => new Types.ObjectId(id));
+      const categories = await ServiceCategory.find({ slug: { $in: service_types } });
+      if (categories.length > 0) {
+        payload.service_types = categories.map((cat) => cat._id as Types.ObjectId);
+      }
     }
 
     if (incident_photos && incident_photos.length > 0) {

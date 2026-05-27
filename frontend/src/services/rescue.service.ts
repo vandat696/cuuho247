@@ -104,4 +104,18 @@ export const rescueService = {
     );
     return response.data;
   },
+
+  startCompanyActiveRequest: async (requestId: string): Promise<ApiResponse<ActiveRescueRequestDetailResult>> => {
+    const response = await http.patch<ApiResponse<ActiveRescueRequestDetailResult>>(
+      `/rescue/company/active/${requestId}/start`
+    );
+    return response.data;
+  },
+
+  arriveCompanyActiveRequest: async (requestId: string): Promise<ApiResponse<ActiveRescueRequestDetailResult>> => {
+    const response = await http.patch<ApiResponse<ActiveRescueRequestDetailResult>>(
+      `/rescue/company/active/${requestId}/arrive`
+    );
+    return response.data;
+  },
 };

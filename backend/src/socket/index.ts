@@ -170,6 +170,60 @@ export function setupSocket(io: Server): void {
       }
     });
 
+    /**
+     * join_tracking: Client joins a tracking room for a specific rescue request
+     */
+    socket.on('join_tracking', async ({ rescue_request_id }: { rescue_request_id: string }) => {
+      if (!rescue_request_id) {
+        socket.emit('error', { message: 'rescue_request_id is required' });
+        return;
+      }
+      if (!socket.user) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
+      try {
+        const rescueRequest = await RescueRequest.findById(rescue_request_id).lean();
+        if (!rescueRequest) {
+          socket.emit('error', { message: 'Yêu cầu cứu hộ không tồn tại' });
+          return;
+        }
+        if (!hasRequestAccess(rescueRequest, socket.user.id, socket.user.role)) {
+          socket.emit('error', { message: 'Không có quyền truy cập yêu cầu này' });
+          return;
+        }
+        const room = `tracking:${rescue_request_id}`;
+        socket.join(room);
+        console.log(`[Socket] ${socket.user?.id} joined tracking room: ${room}`);
+      } catch (err) {
+        console.error('[Socket] Error joining tracking:', err);
+        socket.emit('error', { message: 'Failed to join tracking' });
+      }
+    });
+
+    /**
+     * update_location: Company sends real-time location to the tracking room
+     */
+    socket.on(
+      'update_location',
+      async (payload: { rescue_request_id: string; lat: number; lng: number; heading?: number }) => {
+        if (!socket.user || socket.user.role !== 'company') {
+          return; // Only company can send location updates
+        }
+        const { rescue_request_id, lat, lng, heading } = payload;
+        if (!rescue_request_id || typeof lat !== 'number' || typeof lng !== 'number') {
+          return;
+        }
+        // Broadcast to tracking room
+        const room = `tracking:${rescue_request_id}`;
+        io.to(room).emit('location_updated', {
+          rescue_request_id,
+          location: { lat, lng, heading },
+          timestamp: new Date(),
+        });
+      }
+    );
+
     socket.on('disconnect', () => {
       console.log(`[Socket] User disconnected: ${socket.user?.id}`);
     });

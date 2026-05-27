@@ -7,13 +7,21 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
 import { ConfirmRequestCard } from '@/components/rescue/ConfirmRequestCard';
 import { rescueRequestService } from '@/services/rescueRequest.service';
-import { CompanyResult, RescueFormData } from '@/types/rescue.type';
+import { CompanyResult } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
 
 export default function ConfirmRequestPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const locationState = location.state as { formData: RescueFormData; company: CompanyResult } | null;
+  const locationState = location.state as {
+    formData: {
+      incident_type?: string;
+      incident_type_label?: string;
+      description: string;
+      location: { lat: number; lng: number; address: string } | null;
+    };
+    company: CompanyResult;
+  } | null;
 
   const [loading, setLoading] = useState(false);
 
@@ -53,12 +61,13 @@ export default function ConfirmRequestPage() {
           lng: formData.location?.lng || 0,
         },
         address: formData.location?.address,
+        service_types: formData.incident_type ? [formData.incident_type] : undefined,
       };
 
-      await rescueRequestService.createRequest(payload);
+      const res = await rescueRequestService.createRequest(payload);
 
       toast.success('Gửi yêu cầu thành công!');
-      navigate('/customer/home', { replace: true });
+      navigate(`/customer/tracking/${res.data._id}`, { replace: true });
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra khi gửi yêu cầu');
     } finally {
@@ -72,7 +81,7 @@ export default function ConfirmRequestPage() {
 
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff', p: 2 }}>
         <ConfirmRequestCard
-          incidentTypeName={formData.incident_type?.label || 'Chưa rõ'}
+          incidentTypeName={formData.incident_type_label || 'Chưa rõ'}
           description={formData.description}
           locationText={formData.location?.address || 'Tọa độ GPS'}
           location={formData.location}

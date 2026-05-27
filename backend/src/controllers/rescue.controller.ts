@@ -208,6 +208,15 @@ class RescueController {
         return;
       }
 
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`tracking:${requestId}`).emit('status_changed', {
+          rescue_request_id: requestId,
+          status: 'accepted',
+          timestamp: new Date(),
+        });
+      }
+
       res.status(200).json({
         status: 'success',
         message: 'Nhận yêu cầu cứu hộ thành công',
@@ -252,6 +261,15 @@ class RescueController {
         return;
       }
 
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`tracking:${requestId}`).emit('status_changed', {
+          rescue_request_id: requestId,
+          status: 'completed',
+          timestamp: new Date(),
+        });
+      }
+
       res.status(200).json({
         status: 'success',
         message: 'Hoàn tất và chốt thanh toán thành công',
@@ -261,6 +279,80 @@ class RescueController {
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  async startCompanyActiveRequest(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+
+      const request = await companyRescueRequestService.startActiveRequestForCompany(companyId, requestId);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy nhiệm vụ để bắt đầu',
+        });
+        return;
+      }
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`tracking:${requestId}`).emit('status_changed', {
+          rescue_request_id: requestId,
+          status: 'in_progress',
+          timestamp: new Date(),
+        });
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Bắt đầu di chuyển thành công',
+        data: {
+          request,
+        },
+      });
+    } catch (error: any) {
+      console.error('startCompanyActiveRequest ERROR:', error);
+      res.status(500).json({ status: 'error', message: error.message || 'Lỗi server', details: error });
+    }
+  }
+
+  async arriveCompanyActiveRequest(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+
+      const request = await companyRescueRequestService.arriveActiveRequestForCompany(companyId, requestId);
+
+      if (!request) {
+        res.status(404).json({
+          status: 'error',
+          message: 'Không tìm thấy nhiệm vụ để xác nhận đến nơi',
+        });
+        return;
+      }
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`tracking:${requestId}`).emit('status_changed', {
+          rescue_request_id: requestId,
+          status: 'arrived',
+          timestamp: new Date(),
+        });
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Đã cập nhật trạng thái xe đến nơi',
+        data: {
+          request,
+        },
+      });
+    } catch (error: any) {
+      console.error('arriveCompanyActiveRequest ERROR:', error);
+      res.status(500).json({ status: 'error', message: error.message || 'Lỗi server', details: error });
     }
   }
 
