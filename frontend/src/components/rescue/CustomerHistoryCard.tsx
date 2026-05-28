@@ -1,11 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import { AccessTimeOutlined, SecurityOutlined } from '@mui/icons-material';
 import { CancelButton } from '@/components/rescue/CancelButton';
-import { CustomerRescueRequest, CustomerRescueRequestStatus } from '@/services/rescueRequest.service';
-
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
-const CARD_RADIUS = '12px';
+import { CustomerRescueRequest, CustomerRescueRequestStatus } from '@/services/customer-rescue.service';
+import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
+import { formatDateTime } from '@/utils/format';
 
 const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
   pending: 'Đang chờ công ty xác nhận',
@@ -19,21 +17,6 @@ const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
 };
 
 const cancellableStatuses: CustomerRescueRequestStatus[] = ['pending'];
-
-const formatTime = (dateValue?: string) => {
-  if (!dateValue) return 'Chưa rõ thời gian';
-
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return 'Chưa rõ thời gian';
-
-  return new Intl.DateTimeFormat('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-};
 
 export interface CustomerHistoryCardProps {
   request: CustomerRescueRequest;
@@ -77,7 +60,7 @@ export function CustomerHistoryCard({ request, onCancel, onClick }: CustomerHist
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: '#6b7280' }}>
           <AccessTimeOutlined sx={{ fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13, lineHeight: 1.25 }}>{formatTime(request.created_at)}</Typography>
+          <Typography sx={{ fontSize: 13, lineHeight: 1.25 }}>{formatDateTime(request.created_at)}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: '#6b7280' }}>
           <SecurityOutlined sx={{ fontSize: 16 }} />

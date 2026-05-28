@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { rescueRequestService, CustomerRescueRequest } from '@/services/rescueRequest.service';
+import { customerRescueService, CustomerRescueRequest } from '@/services/customer-rescue.service';
 import { getSocket } from '@/utils/socket';
 import { CancelRequestSheet } from '@/components/rescue/CancelRequestSheet';
 
@@ -66,7 +66,7 @@ export default function RescueTrackingPage() {
 
     const fetchRequest = async () => {
       try {
-        const response = await rescueRequestService.getMyRequests();
+        const response = await customerRescueService.getMyRequests();
         const found = response.data.requests.find((r) => r._id === requestId);
         if (found) {
           setRequest(found);
@@ -100,7 +100,7 @@ export default function RescueTrackingPage() {
           if (!prev) return prev;
 
           // Re-fetch to get full updated object with new timestamps
-          rescueRequestService.getMyRequests().then((response) => {
+          customerRescueService.getMyRequests().then((response) => {
             const found = response.data.requests.find((r) => r._id === requestId);
             if (found) setRequest(found);
           });
@@ -121,7 +121,7 @@ export default function RescueTrackingPage() {
     if (!request) return;
     setCancelling(true);
     try {
-      const response = await rescueRequestService.cancelRequest(request._id, reason);
+      const response = await customerRescueService.cancelRequest(request._id, reason);
       if (response.status === 'success') {
         setRequest(response.data);
         toast.success('Đã hủy yêu cầu cứu hộ');

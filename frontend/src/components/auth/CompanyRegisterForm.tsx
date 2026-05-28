@@ -13,7 +13,7 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { LocationPickerDialog } from '../location/LocationPickerDialog';
-import { SERVICE_AREAS } from '../../constants/serviceAreas';
+import { SERVICE_AREAS } from '../../constants/service-areas';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '../../types/rescue.type';
 

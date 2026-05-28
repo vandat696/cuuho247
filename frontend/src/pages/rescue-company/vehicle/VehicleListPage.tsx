@@ -20,10 +20,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import { MobileLayout } from '../../../components/layout/MobileLayout';
-import { AppHeader } from '../../../components/layout/AppHeader';
-import { IVehicle } from '../../../types/vehicle.types';
-import { vehicleService } from '../../../services/vehicle.service';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { IVehicle } from '@/types/vehicle.type';
+import { vehicleService } from '@/services/vehicle.service';
 
 export default function VehicleListPage() {
   const navigate = useNavigate();

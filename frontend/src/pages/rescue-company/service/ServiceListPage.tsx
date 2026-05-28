@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { Button } from '@/components/common/Button';
-import { ServiceCard } from '@/components/company/ServiceCard';
+import { ServiceCard } from '@/components/rescue-company/ServiceCard';
 import { useServiceList } from '@/hooks/useServiceList';
 import { AddRounded as AddIcon } from '@mui/icons-material';
 import { AppHeader } from '@/components/layout/AppHeader';

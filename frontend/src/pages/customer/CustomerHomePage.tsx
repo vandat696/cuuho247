@@ -1,28 +1,28 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AccessTimeOutlined,
   GroupsOutlined,
   HistoryOutlined,
-  LocationOnOutlined,
   NotificationsNoneRounded,
   PersonOutlineOutlined,
   PhoneOutlined,
   SecurityOutlined,
 } from '@mui/icons-material';
-import { Box, Button, CircularProgress, IconButton, Typography } from '@mui/material';
+import { Box, CircularProgress, IconButton, Typography } from '@mui/material';
 
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { RequestSummaryCard } from '@/components/customer/RequestSummaryCard';
+import { QuickActionButton } from '@/components/customer/QuickActionButton';
 import {
   CustomerRescueRequest,
   CustomerRescueRequestStatus,
-  rescueRequestService,
-} from '@/services/rescueRequest.service';
+  customerRescueService,
+} from '@/services/customer-rescue.service';
 import { getSocket } from '@/utils/socket';
+import { NAVY, ORANGE, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
 
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
-const CARD_RADIUS = '12px';
 const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress', 'arrived'];
 
 const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
@@ -36,66 +36,13 @@ const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
   timeout: 'Hết thời gian phản hồi',
 };
 
-function CustomerHeader() {
-  return (
-    <Box
-      component="header"
-      sx={{
-        bgcolor: NAVY,
-        color: '#fff',
-        px: 2,
-        py: 2,
-        minHeight: 64,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, flex: 1 }}>
-        <SecurityOutlined sx={{ fontSize: 24, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.25 }} noWrap>
-          Cứu hộ 247
-        </Typography>
-      </Box>
-
-      <IconButton aria-label="Thông báo" size="small" sx={{ p: 1, color: '#fff' }}>
-        <NotificationsNoneRounded sx={{ fontSize: 24 }} />
-      </IconButton>
-    </Box>
-  );
-}
-
-function PrimaryButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return (
-    <Button
-      type="button"
-      variant="contained"
-      fullWidth
-      onClick={onClick}
-      sx={{
-        minHeight: 48,
-        borderRadius: '8px',
-        bgcolor: ORANGE,
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 700,
-        boxShadow: '0 10px 15px -3px rgba(255, 107, 0, 0.28)',
-        '&:hover': { bgcolor: '#ff8533', boxShadow: '0 10px 15px -3px rgba(255, 107, 0, 0.34)' },
-      }}
-    >
-      {children}
-    </Button>
-  );
-}
-
 function RescueInfoRow({
   icon,
   label,
   value,
   accent,
 }: {
-  icon: ReactNode;
+  icon: React.ReactNode;
   label: string;
   value: string;
   accent?: boolean;
@@ -113,35 +60,6 @@ function RescueInfoRow({
   );
 }
 
-function QuickAction({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        minHeight: 104,
-        p: 2,
-        bgcolor: '#fff',
-        border: '2px solid #e5e7eb',
-        borderRadius: CARD_RADIUS,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 1,
-        color: NAVY,
-        transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
-        '&:hover': { bgcolor: '#F5F7FA', borderColor: '#d1d5db' },
-        '&:active': { transform: 'scale(0.98)' },
-      }}
-    >
-      {icon}
-      <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#374151', lineHeight: 1.25 }}>{label}</Typography>
-    </Box>
-  );
-}
-
 const getRequestTimestamp = (request: CustomerRescueRequest) => {
   const value = request.updated_at || request.created_at;
   const timestamp = value ? new Date(value).getTime() : 0;
@@ -153,56 +71,6 @@ const getEtaText = (etaMinutes?: number) => {
   return `~${etaMinutes} phút`;
 };
 
-const formatTime = (dateValue?: string) => {
-  if (!dateValue) return 'Chưa rõ thời gian';
-
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return 'Chưa rõ thời gian';
-
-  return new Intl.DateTimeFormat('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-};
-
-function RequestSummaryCard({ request, onClick }: { request: CustomerRescueRequest; onClick?: () => void }) {
-  return (
-    <Box
-      component={onClick ? 'button' : 'div'}
-      type={onClick ? 'button' : undefined}
-      onClick={onClick}
-      sx={{
-        width: '100%',
-        p: 2,
-        border: '2px solid #e5e7eb',
-        borderRadius: CARD_RADIUS,
-        bgcolor: '#fff',
-        textAlign: 'left',
-        cursor: onClick ? 'pointer' : 'default',
-        '&:active': onClick ? { transform: 'scale(0.98)' } : {},
-      }}
-    >
-      <Typography sx={{ mb: 0.75, fontSize: 15, fontWeight: 800, color: NAVY, lineHeight: 1.25 }} noWrap>
-        {request.company.company_name || 'Chưa có thông tin công ty'}
-      </Typography>
-      <Typography sx={{ mb: 0.75, fontSize: 13, color: '#4b5563', lineHeight: 1.35 }} noWrap>
-        {request.description}
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
-        <Typography sx={{ fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>
-          {formatTime(request.created_at)}
-        </Typography>
-        <Typography sx={{ fontSize: 12, fontWeight: 800, color: ORANGE, lineHeight: 1.25 }}>
-          {request.status ? statusTextByValue[request.status] : 'Đang xử lý'}
-        </Typography>
-      </Box>
-    </Box>
-  );
-}
-
 export default function CustomerHomePage() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<CustomerRescueRequest[]>([]);
@@ -213,7 +81,6 @@ export default function CustomerHomePage() {
 
     const socket = getSocket();
     const handleStatusChanged = () => {
-      // Refetch để cập nhật trạng thái mới nhất
       fetchMyRequests();
     };
     socket.on('status_changed', handleStatusChanged);
@@ -225,7 +92,7 @@ export default function CustomerHomePage() {
 
   const fetchMyRequests = async () => {
     try {
-      const response = await rescueRequestService.getMyRequests();
+      const response = await customerRescueService.getMyRequests();
       if (response.status === 'success') {
         setRequests(response.data.requests);
       }
@@ -250,9 +117,19 @@ export default function CustomerHomePage() {
 
   return (
     <MobileLayout>
-      <CustomerHeader />
+      <AppHeader
+        title="Cứu hộ 247"
+        showBack={false}
+        logoIcon={<SecurityOutlined sx={{ fontSize: 24 }} />}
+        rightSlot={
+          <IconButton aria-label="Thông báo" size="small" sx={{ p: 1, color: '#fff' }}>
+            <NotificationsNoneRounded sx={{ fontSize: 24 }} />
+          </IconButton>
+        }
+      />
 
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff', px: 3, py: 3 }}>
+        {/* User greeting card */}
         <Box
           sx={{
             p: 2,
@@ -267,7 +144,7 @@ export default function CustomerHomePage() {
               sx={{
                 width: 56,
                 height: 56,
-                borderRadius: '9999px',
+                borderRadius: CIRCLE_RADIUS,
                 bgcolor: 'rgba(255,255,255,0.2)',
                 display: 'flex',
                 alignItems: 'center',
@@ -283,6 +160,7 @@ export default function CustomerHomePage() {
           </Box>
         </Box>
 
+        {/* Active rescue section */}
         <Box
           sx={{
             p: 2,
@@ -302,7 +180,7 @@ export default function CustomerHomePage() {
             <>
               <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <RescueInfoRow
-                  icon={<LocationOnOutlined sx={{ fontSize: 18 }} />}
+                  icon={<SecurityOutlined sx={{ fontSize: 18 }} />}
                   label="Trạng thái hiện tại"
                   value={activeRequest.status ? statusTextByValue[activeRequest.status] : 'Đang xử lý'}
                 />
@@ -319,9 +197,24 @@ export default function CustomerHomePage() {
                 />
               </Box>
 
-              <PrimaryButton onClick={() => navigate('/customer/tracking/' + activeRequest._id)}>
+              <Box
+                component="button"
+                type="button"
+                onClick={() => navigate('/customer/tracking/' + activeRequest._id)}
+                sx={{
+                  width: '100%',
+                  minHeight: 48,
+                  borderRadius: '8px',
+                  bgcolor: ORANGE,
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  boxShadow: '0 10px 15px -3px rgba(255, 107, 0, 0.28)',
+                  '&:hover': { bgcolor: '#ff8533' },
+                }}
+              >
                 Theo dõi cứu hộ
-              </PrimaryButton>
+              </Box>
             </>
           ) : (
             <Typography sx={{ fontSize: 14, color: '#374151', lineHeight: 1.45 }}>
@@ -330,13 +223,34 @@ export default function CustomerHomePage() {
           )}
         </Box>
 
+        {/* CTA button */}
         <Box sx={{ mb: 3 }}>
-          <PrimaryButton onClick={() => navigate('/rescue/request')}>
-            <PhoneOutlined sx={{ mr: 1, fontSize: 22 }} />
+          <Box
+            component="button"
+            type="button"
+            onClick={() => navigate('/rescue/request')}
+            sx={{
+              width: '100%',
+              minHeight: 48,
+              borderRadius: '8px',
+              bgcolor: ORANGE,
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              boxShadow: '0 10px 15px -3px rgba(255, 107, 0, 0.28)',
+              '&:hover': { bgcolor: '#ff8533' },
+            }}
+          >
+            <PhoneOutlined sx={{ fontSize: 22 }} />
             Gửi yêu cầu cứu hộ
-          </PrimaryButton>
+          </Box>
         </Box>
 
+        {/* Recent requests */}
         <Box sx={{ mb: 3 }}>
           <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
             <Typography sx={{ fontSize: 16, fontWeight: 800, color: NAVY }}>Yêu cầu đã gửi gần đây</Typography>
@@ -375,24 +289,26 @@ export default function CustomerHomePage() {
           )}
         </Box>
 
+        {/* Quick actions */}
         <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 2 }}>
-          <QuickAction
+          <QuickActionButton
             icon={<PersonOutlineOutlined sx={{ fontSize: 34 }} />}
             label="Hồ sơ"
             onClick={() => navigate('/customer/profile')}
           />
-          <QuickAction
+          <QuickActionButton
             icon={<HistoryOutlined sx={{ fontSize: 34 }} />}
             label="Lịch sử"
             onClick={() => navigate('/customer/history')}
           />
-          <QuickAction
+          <QuickActionButton
             icon={<GroupsOutlined sx={{ fontSize: 34 }} />}
             label="Cộng đồng"
             onClick={() => navigate('/customer/community')}
           />
         </Box>
 
+        {/* Tips section */}
         <Box sx={{ p: 2, borderRadius: CARD_RADIUS, bgcolor: '#eff6ff', border: '1px solid #bfdbfe' }}>
           <Typography sx={{ mb: 1, fontSize: 16, fontWeight: 800, color: NAVY }}>Mẹo hữu ích</Typography>
           <Typography sx={{ fontSize: 14, color: '#374151', lineHeight: 1.45 }}>

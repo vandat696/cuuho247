@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
+import { InfoField } from '@/components/common/InfoField';
 import { CompanyResult, RescueFormData } from '@/types/rescue.type';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -13,6 +14,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StarIcon from '@mui/icons-material/Star';
+import { formatPriceRange, formatEta } from '@/utils/format';
 
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
@@ -34,17 +36,15 @@ export default function CompanyDetailsPage() {
 
   const { formData, company } = locationState;
 
-  const formatPrice = (price: number | null) => (price === null ? null : new Intl.NumberFormat('vi-VN').format(price));
-  const priceText =
-    company.min_price !== null && company.max_price !== null
-      ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
-      : 'Chưa cập nhật giá';
-  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có thời gian dự kiến';
+  const priceText = formatPriceRange(company.min_price, company.max_price);
+  const etaText = formatEta(company.eta_minutes);
+
+  const addressText = [company.address.detail, company.address.ward, company.address.district, company.address.province]
+    .filter(Boolean)
+    .join(', ');
 
   const handleNext = () => {
-    navigate('/rescue/confirm', {
-      state: { formData, company },
-    });
+    navigate('/rescue/confirm', { state: { formData, company } });
   };
 
   return (
@@ -75,43 +75,10 @@ export default function CompanyDetailsPage() {
           <Typography variant="h6" sx={{ fontSize: 16, fontWeight: 700, color: '#0f172a', mb: 2 }}>
             Thông tin công ty
           </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <PersonIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Giám đốc</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.director_name}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <PhoneIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Số điện thoại</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.phone}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <EmailIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Email</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.email}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <LocationOnIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Địa chỉ</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>
-                {company.address.detail ? `${company.address.detail}, ` : ''}
-                {company.address.ward ? `${company.address.ward}, ` : ''}
-                {company.address.district ? `${company.address.district}, ` : ''}
-                {company.address.province}
-              </Typography>
-            </Box>
-          </Box>
+          <InfoField icon={<PersonIcon sx={{ fontSize: 20 }} />} label="Giám đốc" value={company.director_name} />
+          <InfoField icon={<PhoneIcon sx={{ fontSize: 20 }} />} label="Số điện thoại" value={company.phone} />
+          <InfoField icon={<EmailIcon sx={{ fontSize: 20 }} />} label="Email" value={company.email} />
+          <InfoField icon={<LocationOnIcon sx={{ fontSize: 20 }} />} label="Địa chỉ" value={addressText} />
         </Box>
 
         {/* Service Info Overview */}
@@ -119,30 +86,13 @@ export default function CompanyDetailsPage() {
           <Typography variant="h6" sx={{ fontSize: 16, fontWeight: 700, color: '#0f172a', mb: 2 }}>
             Thông tin dịch vụ
           </Typography>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <PaidIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Giá dự kiến</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{priceText}</Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <AccessTimeIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Thời gian đến</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#ea580c' }}>{etaText}</Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <LocationOnIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Khoảng cách</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{company.distance_km} km</Typography>
-          </Box>
+          <InfoField icon={<PaidIcon sx={{ fontSize: 20 }} />} label="Giá dự kiến" value={priceText} />
+          <InfoField icon={<AccessTimeIcon sx={{ fontSize: 20 }} />} label="Thời gian đến" value={etaText} />
+          <InfoField
+            icon={<LocationOnIcon sx={{ fontSize: 20 }} />}
+            label="Khoảng cách"
+            value={`${company.distance_km} km`}
+          />
         </Box>
 
         {/* Provided Services */}

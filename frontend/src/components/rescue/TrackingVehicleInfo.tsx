@@ -1,6 +1,6 @@
 import { Typography, Box } from '@mui/material';
 import { DirectionsCar } from '@mui/icons-material';
-import { CustomerRescueRequest } from '@/services/rescueRequest.service';
+import { CustomerRescueRequest } from '@/services/customer-rescue.service';
 import { NAVY } from '@/components/rescue-company/RescueCompanyRequestShared';
 
 interface TrackingVehicleInfoProps {

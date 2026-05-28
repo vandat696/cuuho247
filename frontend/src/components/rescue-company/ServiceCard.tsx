@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
-import { Service } from '@/types/service.types';
+import { Service } from '@/types/service.type';
 import { BuildRounded as WrenchIcon } from '@mui/icons-material';
 
 interface ServiceCardProps {

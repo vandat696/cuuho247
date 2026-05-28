@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Badge, Box, IconButton, Typography, CircularProgress } from '@mui/material';
+import { Badge, Box, IconButton, CircularProgress } from '@mui/material';
 import {
   ApartmentOutlined as ApartmentIcon,
   DescriptionOutlined as ServicesIcon,
@@ -11,97 +11,17 @@ import {
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { StatCard } from '@/components/rescue-company/StatCard';
+import { ActionCard } from '@/components/rescue-company/ActionCard';
+import { CompanyHeroCard } from '@/components/rescue-company/CompanyHeroCard';
 import { Company } from '@/types/common.type';
 import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
-import { rescueService } from '@/services/rescue.service';
+import { companyRescueService } from '@/services/company-rescue.service';
 import { toast } from 'react-hot-toast';
+import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
-const CARD_RADIUS = '12px';
-const CIRCLE_RADIUS = '9999px';
 const NOTIFICATION_POLL_MS = 15000;
-
-const StatCard = ({
-  value,
-  label,
-  color,
-  hoverColor,
-  onClick,
-}: {
-  value: number | string;
-  label: string;
-  color: string;
-  hoverColor: string;
-  onClick?: () => void;
-}) => (
-  <Box
-    component="button"
-    type="button"
-    onClick={onClick}
-    sx={{
-      minHeight: 92,
-      p: 2,
-      border: '2px solid #e5e7eb',
-      borderRadius: CARD_RADIUS,
-      bgcolor: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'border-color 0.15s, transform 0.1s',
-      '&:hover': { borderColor: hoverColor },
-      '&:active': { transform: 'scale(0.99)' },
-    }}
-  >
-    <Typography sx={{ fontSize: 24, lineHeight: 1, fontWeight: 800, color }}>{value}</Typography>
-    <Typography sx={{ mt: 1, fontSize: 12, color: '#4b5563', lineHeight: 1.2 }}>{label}</Typography>
-  </Box>
-);
-
-const ActionCard = ({
-  icon,
-  title,
-  description,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-}) => (
-  <Box
-    component="button"
-    type="button"
-    onClick={onClick}
-    sx={{
-      width: '100%',
-      p: 2,
-      border: '2px solid #e5e7eb',
-      borderRadius: CARD_RADIUS,
-      bgcolor: '#fff',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1.5,
-      textAlign: 'left',
-      color: NAVY,
-      transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
-      '&:hover': { bgcolor: '#F5F7FA', borderColor: '#e5e7eb' },
-      '&:active': { transform: 'scale(0.99)' },
-    }}
-  >
-    <Box sx={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      {icon}
-    </Box>
-    <Box sx={{ minWidth: 0, flex: 1 }}>
-      <Typography sx={{ fontSize: 16, fontWeight: 500, color: NAVY, lineHeight: 1.25 }}>{title}</Typography>
-      <Typography sx={{ mt: 0.25, fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>{description}</Typography>
-    </Box>
-  </Box>
-);
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
@@ -148,7 +68,7 @@ export default function CompanyHomePage() {
 
   const fetchPendingRequests = async ({ notifyNew }: { notifyNew: boolean }) => {
     try {
-      const response = await rescueService.getCompanyPendingRequests();
+      const response = await companyRescueService.getCompanyPendingRequests();
       if (response.status !== 'success') return;
 
       const requests = response.data.requests;
@@ -182,7 +102,7 @@ export default function CompanyHomePage() {
 
   const fetchActiveRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyActiveRequests();
+      const response = await companyRescueService.getCompanyActiveRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, inProgress: response.data.total }));
       }
@@ -193,7 +113,7 @@ export default function CompanyHomePage() {
 
   const fetchCompletedRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyCompletedRequests();
+      const response = await companyRescueService.getCompanyCompletedRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, done: response.data.total }));
       }
@@ -204,7 +124,7 @@ export default function CompanyHomePage() {
 
   const fetchCanceledRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyCanceledRequests();
+      const response = await companyRescueService.getCompanyCanceledRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, cancelled: response.data.total }));
       }
@@ -265,25 +185,7 @@ export default function CompanyHomePage() {
           </Box>
         ) : (
           <>
-            <Box
-              onClick={() => navigate('/company/profile')}
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: CARD_RADIUS,
-                background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
-                color: '#fff',
-                cursor: 'pointer',
-              }}
-            >
-              <Typography sx={{ mb: 0.5, fontSize: 20, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
-                {companyName}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: '#4ade80' }} />
-                <Typography sx={{ fontSize: 14, color: '#fff', lineHeight: 1.25 }}>Đang hoạt động</Typography>
-              </Box>
-            </Box>
+            <CompanyHeroCard companyName={companyName} onClick={() => navigate('/company/profile')} />
 
             <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
               <StatCard
@@ -316,7 +218,7 @@ export default function CompanyHomePage() {
               />
             </Box>
 
-            <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>
+            <Box sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <ActionCard

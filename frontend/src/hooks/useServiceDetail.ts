@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Service } from '../types/service.types';
+import { Service } from '../types/service.type';
 import { serviceService } from '../services/service.service';
 import toast from 'react-hot-toast';
 

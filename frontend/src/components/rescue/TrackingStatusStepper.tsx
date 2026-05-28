@@ -1,7 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { NAVY, GREEN } from '@/components/rescue-company/RescueCompanyRequestShared';
-import { CustomerRescueRequest } from '@/services/rescueRequest.service';
+import { CustomerRescueRequest } from '@/services/customer-rescue.service';
+import { formatTimeOnly } from '@/utils/format';
 
 export const STATUS_STEPS = [
   { id: 'pending', label: 'Yêu cầu đã gửi' },
@@ -25,16 +26,6 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
     if (stepId === 'arrived') return request.arrived_at;
     if (stepId === 'completed') return request.completed_at;
     return undefined;
-  };
-
-  const formatTime = (dateValue?: string) => {
-    if (!dateValue) return '';
-    const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return '';
-    return new Intl.DateTimeFormat('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
   };
 
   return (
@@ -73,7 +64,7 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
               <Box sx={{ flex: 1, pb: 3 }}>
                 <Typography sx={{ fontSize: 15, fontWeight: 700, color: NAVY }}>Yêu cầu đã gửi</Typography>
                 <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
-                  {formatTime(request.created_at)}
+                  {formatTimeOnly(request.created_at)}
                 </Typography>
               </Box>
             </Box>
@@ -87,7 +78,7 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
                   {request.status === 'cancelled' ? 'Yêu cầu đã bị huỷ' : 'Yêu cầu bị từ chối'}
                 </Typography>
                 <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
-                  {formatTime(request.cancelled_at || request.updated_at)}
+                  {formatTimeOnly(request.cancelled_at || request.updated_at)}
                 </Typography>
               </Box>
             </Box>
@@ -95,7 +86,7 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
         ) : (
           STATUS_STEPS.map((step, index) => {
             const isCompleted = currentStatusIndex >= index;
-            const time = formatTime(getStepTime(step.id));
+            const time = formatTimeOnly(getStepTime(step.id));
             const isLast = index === STATUS_STEPS.length - 1;
 
             return (

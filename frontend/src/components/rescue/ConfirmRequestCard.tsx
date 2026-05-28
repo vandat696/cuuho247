@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/common/Button';
 import { MiniMap } from '@/components/location/MiniMap';
+import { formatPriceRange, formatEta } from '@/utils/format';
 
 interface CompanyData {
   id: string;
@@ -39,12 +40,8 @@ export function ConfirmRequestCard({
   onBack,
   loading = false,
 }: ConfirmRequestCardProps) {
-  const formatPrice = (price: number) => new Intl.NumberFormat('vi-VN').format(price);
-  const priceText =
-    company.minPrice !== null && company.maxPrice !== null
-      ? `${formatPrice(company.minPrice)} - ${formatPrice(company.maxPrice)}đ`
-      : 'Chưa cập nhật giá';
-  const etaText = company.etaMinutes ? `~${company.etaMinutes} phút` : 'Chưa có thời gian dự kiến';
+  const priceText = formatPriceRange(company.minPrice, company.maxPrice);
+  const etaText = formatEta(company.etaMinutes);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

@@ -1,5 +1,5 @@
 import { http } from './http';
-import { Service, ServiceFormData, ServiceCategory } from '../types/service.types';
+import { Service, ServiceFormData, ServiceCategory } from '../types/service.type';
 
 interface ServiceApiResponse<T> {
   status: 'success' | 'error';
