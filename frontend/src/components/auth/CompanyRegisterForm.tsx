@@ -486,20 +486,8 @@ const CompanyRegisterForm = () => {
           )}
         </Box>
 
-        {/* Nút đăng ký */}
-        <Button
-          type="submit"
-          disabled={isLoading}
-          sx={{
-            py: 1.5,
-            bgcolor: 'secondary.main',
-            color: 'white',
-            fontWeight: 'bold',
-            '&:hover': { bgcolor: 'secondary.dark' },
-            '&:disabled': { bgcolor: 'action.disabled' },
-          }}
-        >
-          {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
+        <Button type="submit" variant="primary" fullWidth loading={isLoading}>
+          Đăng ký
         </Button>
 
         <Box sx={{ textAlign: 'center' }}>

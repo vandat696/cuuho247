@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ChatEndedBanner } from '@/components/chat/ChatEndedBanner';
+import { Button } from '@/components/common/Button';
 
 export default function ChatPage() {
   const { rescueRequestId } = useParams<{ rescueRequestId: string }>();
@@ -190,9 +191,9 @@ export default function ChatPage() {
           <span className="chat-error__icon">🔒</span>
           <h2 className="chat-error__title">Từ chối truy cập</h2>
           <p className="chat-error__text">{error}</p>
-          <button className="chat-error__btn" onClick={() => navigate(-1)}>
+          <Button variant="primary" onClick={() => navigate(-1)} sx={{ mt: 2, px: 4 }}>
             Quay lại
-          </button>
+          </Button>
         </div>
       ) : (
         <>

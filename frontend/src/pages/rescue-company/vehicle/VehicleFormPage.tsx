@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, TextField, MenuItem, Select, FormControl, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, TextField, MenuItem, Select, FormControl, Snackbar, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileLayout } from '../../../components/layout/MobileLayout';
 import { AppHeader } from '../../../components/layout/AppHeader';
+import { Button } from '../../../components/common/Button';
 import { vehicleService } from '../../../services/vehicle.service';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
 
@@ -156,37 +157,17 @@ export default function VehicleFormPage() {
 
         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Button
-            variant="contained"
+            variant="primary"
             fullWidth
             onClick={handleSave}
-            disabled={loading || !formData.vehicle_type || !formData.plate_number}
-            sx={{
-              bgcolor: 'secondary.main',
-              '&:hover': { bgcolor: '#152943' },
-              py: 1.5,
-              textTransform: 'none',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
+            loading={loading}
+            disabled={!formData.vehicle_type || !formData.plate_number}
           >
             Lưu thay đổi
           </Button>
 
           {isEdit && (
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={handleDeleteClick}
-              disabled={loading}
-              sx={{
-                borderColor: 'secondary.main',
-                color: 'secondary.main',
-                py: 1.5,
-                textTransform: 'none',
-                fontSize: '16px',
-                fontWeight: 'bold',
-              }}
-            >
+            <Button variant="outline" fullWidth onClick={handleDeleteClick} disabled={loading}>
               Xóa xe
             </Button>
           )}

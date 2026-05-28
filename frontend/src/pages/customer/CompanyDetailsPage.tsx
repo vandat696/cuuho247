@@ -56,13 +56,13 @@ export default function CompanyDetailsPage() {
         sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff', p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         {/* Header Hero */}
-        <Box sx={{ bgcolor: '#1e3a8a', color: 'white', borderRadius: '12px', p: 2.5 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontSize: 20 }}>
+        <Box sx={{ bgcolor: '#1e3a8a', color: '#ffffff', borderRadius: '12px', p: 2.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontSize: 20, color: '#ffffff' }}>
             {company.company_name}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <StarIcon sx={{ color: '#fbbf24', fontSize: 18, mr: 0.5 }} />
-            <Typography sx={{ fontWeight: 700, mr: 1 }}>{company.rating_avg}</Typography>
+            <Typography sx={{ fontWeight: 700, mr: 1, color: '#ffffff' }}>{company.rating_avg}</Typography>
             <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
           </Box>
           <Typography sx={{ color: '#bfdbfe', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}>

@@ -12,11 +12,12 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       sx={{
         width: '100%',
         maxWidth: '375px',
-        minHeight: '100vh',
+        height: '100dvh',
         backgroundColor: '#fff',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)',
         display: 'flex',
         flexDirection: 'column',
+        overflowY: 'auto',
         overflowX: 'hidden',
         position: 'relative',
         margin: '0 auto',

@@ -31,7 +31,7 @@ export const ServiceCard = ({ service, onViewDetail }: ServiceCardProps) => {
           <Typography
             sx={{
               fontWeight: 'bold',
-              fontSize: '1.1rem',
+              fontSize: '15px',
               color: 'secondary.main',
               mb: 0.5,
             }}
@@ -40,7 +40,7 @@ export const ServiceCard = ({ service, onViewDetail }: ServiceCardProps) => {
           </Typography>
           <Typography
             sx={{
-              fontSize: '1rem',
+              fontSize: '13px',
               fontWeight: 500,
               color: 'secondary.main',
             }}
