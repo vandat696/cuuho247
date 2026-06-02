@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { connectDB } from '../config/db';
-import { RescueRequest } from '../models';
+import { connectDB } from '../shared/config/db';
+import { RescueRequest } from '../shared/models';
 
 async function main() {
   await connectDB();

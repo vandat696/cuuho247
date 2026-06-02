@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
-import { connectDB } from '../config/db';
-import { Company, Service, ServiceCategory, User, Vehicle, RescueRequest } from '../models';
+import { connectDB } from '../shared/config/db';
+import { Company, Service, ServiceCategory, User, Vehicle, RescueRequest } from '../shared/models';
 
 const DEFAULT_PASSWORD = 'Password123!';
 const SALT_ROUNDS = 10;
@@ -75,20 +75,6 @@ const serviceSeeds = [
   },
 ];
 
-const rescueRequestSeed = {
-  description: 'Xe chết máy trên đường Nguyễn Hữu Cảnh, cần cứu hộ nhanh.',
-  location: {
-    type: 'Point' as const,
-    coordinates: [106.7235, 10.7785] as [number, number],
-  },
-  address: {
-    province: 'TP. Hồ Chí Minh',
-    district: 'Quận Bình Thạnh',
-    ward: 'Phường 22',
-    detail: 'Nguyễn Hữu Cảnh, gần cầu Thủ Thiêm',
-  },
-};
-
 async function upsertOne<T>(model: any, filter: Record<string, unknown>, update: Record<string, unknown>): Promise<T> {
   return model.findOneAndUpdate(filter, update, {
     upsert: true,
@@ -111,7 +97,7 @@ async function main() {
     }
   );
 
-  const customer = await upsertOne<any>(
+  await upsertOne<any>(
     User,
     { email: customerSeed.email },
     {
