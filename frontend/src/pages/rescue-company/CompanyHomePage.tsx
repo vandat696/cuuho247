@@ -14,7 +14,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Company } from '@/types/common.type';
 import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
-import { rescueService } from '@/services/rescue.service';
+import { rescueService } from '@/services/rescueRequestCompany.service';
 import { toast } from 'react-hot-toast';
 
 const NAVY = '#1B3A5D';

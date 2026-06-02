@@ -10,7 +10,7 @@ import { toast } from 'react-hot-toast';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescue.service';
+import { rescueService } from '@/services/rescueRequestCompany.service';
 import {
   ActiveRescueRequest,
   CanceledRescueRequest,

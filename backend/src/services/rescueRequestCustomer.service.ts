@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import companyRepository from '../repositories/company.repository';
-import rescueRequestRepository from '../repositories/rescueRequest.repository';
+import rescueRequestRepository from '../repositories/rescueRequestCustomer.repository';
 import type { IRescueRequest, RequestStatus } from '../models/RescueRequest.model';
 import { ApiError } from '../utils/apiError.util';
 
@@ -17,7 +17,7 @@ export interface CreateRequestData {
   incident_photos?: string[];
 }
 
-const CANCELLABLE_STATUSES: RequestStatus[] = ['pending'];
+const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
 
 class RescueRequestService {
   async getRequestsForUser(userId: string): Promise<IRescueRequest[]> {

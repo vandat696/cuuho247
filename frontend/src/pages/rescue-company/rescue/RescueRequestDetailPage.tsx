@@ -30,7 +30,7 @@ import {
 import { MiniMap } from '@/components/location/MiniMap';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescue.service';
+import { rescueService } from '@/services/rescueRequestCompany.service';
 import { vehicleService } from '@/services/vehicle.service';
 import { IVehicle } from '@/types/vehicle.types';
 

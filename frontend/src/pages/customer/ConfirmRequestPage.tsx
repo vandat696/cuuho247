@@ -5,8 +5,8 @@ import Typography from '@mui/material/Typography';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
-import { ConfirmRequestCard } from '@/components/rescue/ConfirmRequestCard';
-import { rescueRequestService } from '@/services/rescueRequest.service';
+import { ConfirmRequestCard } from '@/components/rescue-customer/ConfirmRequestCard';
+import { rescueRequestService } from '@/services/rescueRequestCustomer.service';
 import { CompanyResult, RescueFormData } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
 

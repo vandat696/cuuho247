@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { IncidentType, RescueFormData, RescueFormErrors, RescueLocation } from '../types/rescue.type';
-import { rescueService } from '../services/rescue.service';
+import { rescueService } from '../services/rescueRequestCompany.service';
 import { useCurrentLocation } from './useCurrentLocation';
 
 export function useRescueRequest() {
@@ -22,7 +22,6 @@ export function useRescueRequest() {
   // Auto-get GPS on mount
   useEffect(() => {
     geo.getCurrentLocation();
-     
   }, []);
 
   // Sync GPS location into form when it arrives

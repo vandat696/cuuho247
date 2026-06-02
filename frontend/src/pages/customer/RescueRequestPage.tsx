@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { RescueFormCard } from '@/components/rescue/RescueFormCard';
+import { RescueFormCard } from '@/components/rescue-customer/RescueFormCard';
 import { useRescueRequest } from '@/hooks/useRescueRequest';
 
 export default function RescueRequestPage() {

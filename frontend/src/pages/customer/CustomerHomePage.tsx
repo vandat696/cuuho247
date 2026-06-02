@@ -17,7 +17,7 @@ import {
   CustomerRescueRequest,
   CustomerRescueRequestStatus,
   rescueRequestService,
-} from '@/services/rescueRequest.service';
+} from '@/services/rescueRequestCustomer.service';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';
