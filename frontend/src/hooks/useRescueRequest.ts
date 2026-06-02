@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { IncidentType, RescueFormData, RescueFormErrors, RescueLocation } from '../types/rescue.type';
 import { rescueService } from '../services/rescueRequestCompany.service';
+import { rescueRequestService } from '../services/rescueRequestCustomer.service';
 import { useCurrentLocation } from './useCurrentLocation';
 
 export function useRescueRequest() {
@@ -23,6 +24,28 @@ export function useRescueRequest() {
   useEffect(() => {
     geo.getCurrentLocation();
   }, []);
+
+  // Check active requests on mount to prevent direct route access
+  useEffect(() => {
+    const checkActiveRequest = async () => {
+      try {
+        const response = await rescueRequestService.getMyRequests();
+        if (response.status === 'success') {
+          const requests = response.data.requests || [];
+          const active = requests.find(
+            (r) => r.status && ['pending', 'accepted', 'in_progress', 'arrived'].includes(r.status)
+          );
+          if (active) {
+            toast.error('Bạn đang có một yêu cầu cứu hộ đang diễn ra. Không thể tạo yêu cầu mới!');
+            navigate('/customer/home');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking active request:', error);
+      }
+    };
+    checkActiveRequest();
+  }, [navigate]);
 
   // Sync GPS location into form when it arrives
   useEffect(() => {
@@ -104,6 +127,7 @@ export function useRescueRequest() {
         navigate('/rescue/search', {
           state: {
             formData: {
+              incident_type: form.incident_type?.slug,
               incident_type_label: form.incident_type?.label ?? '',
               description: form.description,
               location: loc,

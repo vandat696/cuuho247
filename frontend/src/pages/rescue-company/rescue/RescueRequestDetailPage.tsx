@@ -8,6 +8,7 @@ import {
   LocationOnOutlined as LocationIcon,
   PersonOutline as UserIcon,
   PhoneOutlined as PhoneIcon,
+  ChatBubbleOutline,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -32,6 +33,7 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { rescueService } from '@/services/rescueRequestCompany.service';
 import { vehicleService } from '@/services/vehicle.service';
+import { getSocket } from '@/utils/socket';
 import { IVehicle } from '@/types/vehicle.types';
 
 type RequestStatus = 'pending' | 'active' | 'completed' | 'canceled';
@@ -119,6 +121,40 @@ export default function RescueRequestDetailPage() {
     }
   }, [status]);
 
+  // Location Sync over Socket for 'active' request
+  useEffect(() => {
+    if (status !== 'active' || !requestId) return;
+    const socket = getSocket();
+    let watchId: number;
+
+    const startLocationSync = () => {
+      if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+          (position) => {
+            const { latitude, longitude, heading } = position.coords;
+            socket.emit('update_location', {
+              rescue_request_id: requestId,
+              lat: latitude,
+              lng: longitude,
+              heading,
+            });
+          },
+          (error) => {
+            console.error('Error watching position:', error);
+          },
+          { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+        );
+      }
+    };
+    startLocationSync();
+
+    return () => {
+      if (watchId !== undefined) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [status, requestId]);
+
   const handleAcceptRequest = async () => {
     if (!requestId) return;
 
@@ -147,6 +183,46 @@ export default function RescueRequestDetailPage() {
       toast.error('Không thể nhận yêu cầu');
     } finally {
       setAccepting(false);
+    }
+  };
+
+  const [startLoading, setStartLoading] = useState(false);
+
+  const handleStartTrip = async () => {
+    if (!requestId) return;
+    try {
+      setStartLoading(true);
+      const response = await rescueService.startCompanyActiveRequest(requestId);
+      if (response.status === 'success') {
+        toast.success('Đã bắt đầu chuyến đi');
+        setRequest(response.data.request);
+      }
+    } catch (error: any) {
+      console.error('Error starting trip:', error);
+      const msg = error.response?.data?.message || 'Không thể cập nhật trạng thái';
+      toast.error(msg);
+    } finally {
+      setStartLoading(false);
+    }
+  };
+
+  const [arriveLoading, setArriveLoading] = useState(false);
+
+  const handleArrive = async () => {
+    if (!requestId) return;
+    try {
+      setArriveLoading(true);
+      const response = await rescueService.arriveCompanyActiveRequest(requestId);
+      if (response.status === 'success') {
+        toast.success('Đã cập nhật trạng thái xe đến nơi');
+        setRequest(response.data.request);
+      }
+    } catch (error: any) {
+      console.error('Error arriving:', error);
+      const msg = error.response?.data?.message || 'Không thể cập nhật trạng thái';
+      toast.error(msg);
+    } finally {
+      setArriveLoading(false);
     }
   };
 
@@ -187,6 +263,15 @@ export default function RescueRequestDetailPage() {
   const renderStatusBanner = () => {
     switch (status) {
       case 'active':
+        if (request?.status === 'accepted') {
+          return <StatusBanner label="Đã tiếp nhận" color={NAVY} background="rgba(27, 58, 93, 0.10)" />;
+        }
+        if (request?.status === 'in_progress') {
+          return <StatusBanner label="Đang di chuyển" color="#ea580c" background="rgba(234, 88, 12, 0.1)" />;
+        }
+        if (request?.status === 'arrived') {
+          return <StatusBanner label="Xe đã đến" color={GREEN} background="#f0fdf4" />;
+        }
         return <StatusBanner label="Đang thực hiện" color={NAVY} background="rgba(27, 58, 93, 0.10)" />;
       case 'completed':
         return <StatusBanner label="Đã hoàn thành" color={GREEN} background="#f0fdf4" />;
@@ -315,46 +400,76 @@ export default function RescueRequestDetailPage() {
 
               {status === 'active' && (
                 <>
-                  <InfoCard title="Chốt thanh toán">
-                    <TextField
-                      fullWidth
-                      label="Số tiền thực tế"
-                      type="number"
-                      value={finalAmount}
-                      onChange={(event) => setFinalAmount(event.target.value)}
-                      inputProps={{ min: 0, step: 1000 }}
-                      InputProps={{ endAdornment: <Typography sx={{ color: '#6b7280' }}>VND</Typography> }}
-                    />
-                    <TextField
-                      select
-                      fullWidth
-                      label="Phương thức thanh toán"
-                      value={paymentMethod}
-                      onChange={(event) =>
-                        setPaymentMethod(event.target.value as 'cash' | 'bank_transfer' | 'e_wallet')
-                      }
-                      sx={{ mt: 2 }}
-                    >
-                      <MenuItem value="cash">Tiền mặt</MenuItem>
-                      <MenuItem value="bank_transfer">Chuyển khoản</MenuItem>
-                      <MenuItem value="e_wallet">Ví điện tử</MenuItem>
-                    </TextField>
-                    <TextField
-                      fullWidth
-                      multiline
-                      minRows={3}
-                      label="Ghi chú"
-                      value={completionNote}
-                      onChange={(event) => setCompletionNote(event.target.value)}
-                      sx={{ mt: 2 }}
-                      placeholder="Ví dụ: phát sinh thêm phí kéo xe, giảm giá, khách đã thanh toán..."
-                    />
-                  </InfoCard>
+                  {request.status === 'arrived' && (
+                    <InfoCard title="Chốt thanh toán">
+                      <TextField
+                        fullWidth
+                        label="Số tiền thực tế"
+                        type="number"
+                        value={finalAmount}
+                        onChange={(event) => setFinalAmount(event.target.value)}
+                        inputProps={{ min: 0, step: 1000 }}
+                        InputProps={{ endAdornment: <Typography sx={{ color: '#6b7280' }}>VND</Typography> }}
+                      />
+                      <TextField
+                        select
+                        fullWidth
+                        label="Phương thức thanh toán"
+                        value={paymentMethod}
+                        onChange={(event) =>
+                          setPaymentMethod(event.target.value as 'cash' | 'bank_transfer' | 'e_wallet')
+                        }
+                        sx={{ mt: 2 }}
+                      >
+                        <MenuItem value="cash">Tiền mặt</MenuItem>
+                        <MenuItem value="bank_transfer">Chuyển khoản</MenuItem>
+                        <MenuItem value="e_wallet">Ví điện tử</MenuItem>
+                      </TextField>
+                      <TextField
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        label="Ghi chú"
+                        value={completionNote}
+                        onChange={(event) => setCompletionNote(event.target.value)}
+                        sx={{ mt: 2 }}
+                        placeholder="Ví dụ: phát sinh thêm phí kéo xe, giảm giá, khách đã thanh toán..."
+                      />
+                    </InfoCard>
+                  )}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {request.status === 'accepted' && (
+                      <PrimaryActionButton onClick={handleStartTrip} disabled={startLoading} variant="navy">
+                        {startLoading ? 'Đang bắt đầu...' : 'Bắt đầu chuyến đi'}
+                      </PrimaryActionButton>
+                    )}
 
-                  <PrimaryActionButton onClick={handleCompleteRequest} disabled={completeLoading} variant="orange">
-                    {completeLoading ? 'Đang hoàn tất...' : 'Hoàn thành và chốt thanh toán'}
-                  </PrimaryActionButton>
+                    {request.status === 'in_progress' && (
+                      <PrimaryActionButton onClick={handleArrive} disabled={arriveLoading} variant="orange">
+                        {arriveLoading ? 'Đang cập nhật...' : 'Xe đã đến'}
+                      </PrimaryActionButton>
+                    )}
+
+                    {request.status === 'arrived' && (
+                      <PrimaryActionButton onClick={handleCompleteRequest} disabled={completeLoading} variant="navy">
+                        {completeLoading ? 'Đang hoàn tất...' : 'Hoàn thành và chốt thanh toán'}
+                      </PrimaryActionButton>
+                    )}
+
+                    <PrimaryActionButton onClick={() => navigate(`/chat/${requestId}`)} variant="outline">
+                      <ChatBubbleOutline sx={{ fontSize: 20, mr: 1 }} />
+                      Nhắn tin với khách hàng
+                    </PrimaryActionButton>
+                  </Box>
                 </>
+              )}
+
+              {(status === 'completed' || status === 'canceled') && (
+                <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  <PrimaryActionButton onClick={() => navigate('/company/home')} variant="navy">
+                    Quay về trang chủ
+                  </PrimaryActionButton>
+                </Box>
               )}
             </>
           )}

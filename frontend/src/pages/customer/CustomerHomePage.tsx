@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   AccessTimeOutlined,
   GroupsOutlined,
@@ -18,16 +19,18 @@ import {
   CustomerRescueRequestStatus,
   rescueRequestService,
 } from '@/services/rescueRequestCustomer.service';
+import { getSocket } from '@/utils/socket';
 
 const NAVY = '#1B3A5D';
 const ORANGE = '#FF6B00';
 const CARD_RADIUS = '12px';
-const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress'];
+const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress', 'arrived'];
 
 const statusTextByValue: Record<CustomerRescueRequestStatus, string> = {
   pending: 'Đang chờ công ty xác nhận',
   accepted: 'Công ty đã nhận yêu cầu',
   in_progress: 'Đội cứu hộ đang di chuyển',
+  arrived: 'Xe đã đến nơi',
   completed: 'Đã hoàn thành',
   cancelled: 'Đã hủy',
   rejected: 'Bị từ chối',
@@ -166,9 +169,23 @@ const formatTime = (dateValue?: string) => {
   }).format(date);
 };
 
-function RequestSummaryCard({ request }: { request: CustomerRescueRequest }) {
+function RequestSummaryCard({ request, onClick }: { request: CustomerRescueRequest; onClick?: () => void }) {
   return (
-    <Box sx={{ p: 2, border: '2px solid #e5e7eb', borderRadius: CARD_RADIUS, bgcolor: '#fff' }}>
+    <Box
+      component={onClick ? 'button' : 'div'}
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      sx={{
+        width: '100%',
+        p: 2,
+        border: '2px solid #e5e7eb',
+        borderRadius: CARD_RADIUS,
+        bgcolor: '#fff',
+        textAlign: 'left',
+        cursor: onClick ? 'pointer' : 'default',
+        '&:active': onClick ? { transform: 'scale(0.98)' } : {},
+      }}
+    >
       <Typography sx={{ mb: 0.75, fontSize: 15, fontWeight: 800, color: NAVY, lineHeight: 1.25 }} noWrap>
         {request.company.company_name || 'Chưa có thông tin công ty'}
       </Typography>
@@ -194,6 +211,17 @@ export default function CustomerHomePage() {
 
   useEffect(() => {
     fetchMyRequests();
+
+    const socket = getSocket();
+    const handleStatusChanged = () => {
+      // Refetch để cập nhật trạng thái mới nhất
+      fetchMyRequests();
+    };
+    socket.on('status_changed', handleStatusChanged);
+
+    return () => {
+      socket.off('status_changed', handleStatusChanged);
+    };
   }, []);
 
   const fetchMyRequests = async () => {
@@ -292,7 +320,9 @@ export default function CustomerHomePage() {
                 />
               </Box>
 
-              <PrimaryButton onClick={() => navigate('/customer/history')}>Theo dõi cứu hộ</PrimaryButton>
+              <PrimaryButton onClick={() => navigate('/customer/tracking/' + activeRequest._id)}>
+                Theo dõi cứu hộ
+              </PrimaryButton>
             </>
           ) : (
             <Typography sx={{ fontSize: 14, color: '#374151', lineHeight: 1.45 }}>
@@ -302,7 +332,15 @@ export default function CustomerHomePage() {
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <PrimaryButton onClick={() => navigate('/rescue/request')}>
+          <PrimaryButton
+            onClick={() => {
+              if (activeRequest) {
+                toast.error('Bạn đang có một yêu cầu cứu hộ đang diễn ra. Không thể gửi thêm yêu cầu mới!');
+                return;
+              }
+              navigate('/rescue/request');
+            }}
+          >
             <PhoneOutlined sx={{ mr: 1, fontSize: 22 }} />
             Gửi yêu cầu cứu hộ
           </PrimaryButton>
@@ -330,7 +368,11 @@ export default function CustomerHomePage() {
           ) : recentRequests.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
               {recentRequests.map((request) => (
-                <RequestSummaryCard key={request._id} request={request} />
+                <RequestSummaryCard
+                  key={request._id}
+                  request={request}
+                  onClick={() => navigate(`/customer/tracking/${request._id}`)}
+                />
               ))}
             </Box>
           ) : (

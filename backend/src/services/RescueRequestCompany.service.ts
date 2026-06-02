@@ -211,6 +211,104 @@ class CompanyRescueRequestService {
     };
   }
 
+  async startActiveRequestForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<ActiveRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const startedAt = new Date();
+    const request = (await RescueRequest.findOneAndUpdate(
+      {
+        _id: requestId,
+        'company.company_id': companyId,
+        status: 'accepted',
+      },
+      {
+        $set: {
+          status: 'in_progress',
+          started_at: startedAt,
+        },
+        $push: {
+          status_history: {
+            status: 'in_progress',
+            changed_by: 'company',
+            changed_at: startedAt,
+            note: 'Bắt đầu di chuyển',
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    )
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    return {
+      ...(await this.mapRequestWithVehicle(request)),
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+    };
+  }
+
+  async arriveActiveRequestForCompany(
+    companyId: string,
+    requestId: string
+  ): Promise<ActiveRescueRequestDetailResult | null> {
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const arrivedAt = new Date();
+    const request = (await RescueRequest.findOneAndUpdate(
+      {
+        _id: requestId,
+        'company.company_id': companyId,
+        status: 'in_progress',
+      },
+      {
+        $set: {
+          status: 'arrived',
+          arrived_at: arrivedAt,
+        },
+        $push: {
+          status_history: {
+            status: 'arrived',
+            changed_by: 'company',
+            changed_at: arrivedAt,
+            note: 'Xe đã đến nơi',
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    )
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec()) as any;
+
+    if (!request) {
+      return null;
+    }
+
+    return {
+      ...(await this.mapRequestWithVehicle(request)),
+      customer: {
+        full_name: request.user_id?.full_name || 'Khách hàng',
+        phone: request.user_id?.phone || '',
+      },
+    };
+  }
+
   async getCompletedRequestsForCompany(companyId: string): Promise<CompletedRescueRequestResult[]> {
     const requests = await RescueRequest.find({
       'company.company_id': companyId,
@@ -269,7 +367,7 @@ class CompanyRescueRequestService {
       {
         _id: requestId,
         'company.company_id': companyId,
-        status: { $in: ['accepted', 'in_progress'] },
+        status: { $in: ['accepted', 'in_progress', 'arrived'] },
       },
       {
         $set: {

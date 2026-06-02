@@ -164,6 +164,9 @@ export const PrimaryActionButton = ({
         fontSize: 16,
         fontWeight: 500,
         lineHeight: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.75 : 1,
         boxShadow: variant === 'orange' ? '0 10px 15px -3px rgba(255, 107, 0, 0.25)' : 'none',
@@ -207,13 +210,17 @@ export const VehiclePanel = ({ vehicle }: { vehicle: { vehicle_type: string; pla
       color: '#fff',
     }}
   >
-    <Typography sx={{ mb: 1.5, fontSize: 16, fontWeight: 800, lineHeight: 1.25 }}>Thông tin xe</Typography>
+    <Typography sx={{ mb: 1.5, fontSize: 16, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
+      Thông tin xe
+    </Typography>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <TruckIcon sx={{ fontSize: 20 }} />
-        <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>{vehicle.vehicle_type}</Typography>
+        <TruckIcon sx={{ fontSize: 20, color: '#fff' }} />
+        <Typography sx={{ fontSize: 14, lineHeight: 1.3, color: '#fff' }}>{vehicle.vehicle_type}</Typography>
       </Box>
-      <Typography sx={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>{vehicle.plate_number}</Typography>
+      <Typography sx={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3, color: '#fff' }}>
+        {vehicle.plate_number}
+      </Typography>
     </Box>
   </Box>
 );

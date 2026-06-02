@@ -62,6 +62,15 @@ class RescueRequestController {
 
       const updated = await rescueRequestService.cancelRequest(id, req.user.id, value.reason);
 
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`tracking:${id}`).emit('status_changed', {
+          rescue_request_id: id,
+          status: 'cancelled',
+          timestamp: new Date(),
+        });
+      }
+
       res.status(200).json({
         status: 'success',
         message: 'Yêu cầu cứu hộ đã được hủy',

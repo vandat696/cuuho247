@@ -82,13 +82,17 @@ const UnifiedRequestCard = ({ request, status, onViewDetail }: UnifiedRequestCar
             color: '#fff',
           }}
         >
-          <Typography sx={{ mb: 1, fontSize: 16, fontWeight: 800, lineHeight: 1.25 }}>Thông tin xe</Typography>
+          <Typography sx={{ mb: 1, fontSize: 16, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
+            Thông tin xe
+          </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TruckIcon sx={{ fontSize: 20 }} />
-              <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>{request.vehicle?.vehicle_type}</Typography>
+              <TruckIcon sx={{ fontSize: 20, color: '#fff' }} />
+              <Typography sx={{ fontSize: 14, lineHeight: 1.3, color: '#fff' }}>
+                {request.vehicle?.vehicle_type}
+              </Typography>
             </Box>
-            <Typography sx={{ pl: 3.5, fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>
+            <Typography sx={{ pl: 3.5, fontSize: 14, fontWeight: 600, lineHeight: 1.3, color: '#fff' }}>
               {request.vehicle?.plate_number}
             </Typography>
           </Box>

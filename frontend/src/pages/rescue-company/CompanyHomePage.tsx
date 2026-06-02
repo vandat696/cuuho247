@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Badge, Box, IconButton, Typography } from '@mui/material';
+import { Badge, Box, IconButton, Typography, CircularProgress } from '@mui/material';
 import {
   ApartmentOutlined as ApartmentIcon,
   DescriptionOutlined as ServicesIcon,
@@ -108,15 +108,24 @@ export default function CompanyHomePage() {
   const [counts, setCounts] = useState({ waiting: 0, inProgress: 3, done: 12, cancelled: 2 });
   const [company, setCompany] = useState<Company | null>(null);
   const [pendingRequests, setPendingRequests] = useState<PendingRescueRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const knownPendingIdsRef = useRef<Set<string>>(new Set());
   const hasInitializedNotificationsRef = useRef(false);
 
   useEffect(() => {
-    fetchCompanyProfile();
-    fetchActiveRequestsCount();
-    fetchCompletedRequestsCount();
-    fetchCanceledRequestsCount();
-    fetchPendingRequests({ notifyNew: false });
+    const initialize = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchCompanyProfile(),
+        fetchActiveRequestsCount(),
+        fetchCompletedRequestsCount(),
+        fetchCanceledRequestsCount(),
+        fetchPendingRequests({ notifyNew: false }),
+      ]);
+      setLoading(false);
+    };
+
+    initialize();
 
     const intervalId = window.setInterval(() => {
       fetchPendingRequests({ notifyNew: true });
@@ -250,107 +259,115 @@ export default function CompanyHomePage() {
       />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
-        <Box
-          onClick={() => navigate('/company/profile')}
-          sx={{
-            p: 2,
-            mb: 3,
-            borderRadius: CARD_RADIUS,
-            background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
-            color: '#fff',
-            cursor: 'pointer',
-          }}
-        >
-          <Typography sx={{ mb: 0.5, fontSize: 20, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
-            {companyName}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: '#4ade80' }} />
-            <Typography sx={{ fontSize: 14, color: '#fff', lineHeight: 1.25 }}>Đang hoạt động</Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+            <CircularProgress />
           </Box>
-        </Box>
+        ) : (
+          <>
+            <Box
+              onClick={() => navigate('/company/profile')}
+              sx={{
+                p: 2,
+                mb: 3,
+                borderRadius: CARD_RADIUS,
+                background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
+                color: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              <Typography sx={{ mb: 0.5, fontSize: 20, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
+                {companyName}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: '#4ade80' }} />
+                <Typography sx={{ fontSize: 14, color: '#fff', lineHeight: 1.25 }}>Đang hoạt động</Typography>
+              </Box>
+            </Box>
 
-        <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-          <StatCard
-            value={counts.waiting}
-            label="Đang chờ"
-            color={ORANGE}
-            hoverColor={ORANGE}
-            onClick={() => navigate('/company/rescue/pending')}
-          />
-          <StatCard
-            value={counts.inProgress}
-            label="Đang thực hiện"
-            color={NAVY}
-            hoverColor={NAVY}
-            onClick={() => navigate('/company/rescue/active')}
-          />
-          <StatCard
-            value={counts.done}
-            label="Hoàn thành"
-            color="#16a34a"
-            hoverColor="#16a34a"
-            onClick={() => navigate('/company/rescue/completed')}
-          />
-          <StatCard
-            value={counts.cancelled}
-            label="Đã hủy"
-            color="#dc2626"
-            hoverColor="#dc2626"
-            onClick={() => navigate('/company/rescue/canceled')}
-          />
-        </Box>
+            <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+              <StatCard
+                value={counts.waiting}
+                label="Đang chờ"
+                color={ORANGE}
+                hoverColor={ORANGE}
+                onClick={() => navigate('/company/rescue/pending')}
+              />
+              <StatCard
+                value={counts.inProgress}
+                label="Đang thực hiện"
+                color={NAVY}
+                hoverColor={NAVY}
+                onClick={() => navigate('/company/rescue/active')}
+              />
+              <StatCard
+                value={counts.done}
+                label="Hoàn thành"
+                color="#16a34a"
+                hoverColor="#16a34a"
+                onClick={() => navigate('/company/rescue/completed')}
+              />
+              <StatCard
+                value={counts.cancelled}
+                label="Đã hủy"
+                color="#dc2626"
+                hoverColor="#dc2626"
+                onClick={() => navigate('/company/rescue/canceled')}
+              />
+            </Box>
 
-        <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>
+            <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <ActionCard
-            icon={<ApartmentIcon sx={{ fontSize: 24 }} />}
-            title="Thông tin công ty"
-            description="Xem và chỉnh sửa thông tin"
-            onClick={() => navigate('/company/profile')}
-          />
-          <ActionCard
-            icon={<ServicesIcon sx={{ fontSize: 24 }} />}
-            title="Danh mục dịch vụ"
-            description="Quản lý dịch vụ cung cấp"
-            onClick={() => navigate('/company/services')}
-          />
-          <ActionCard
-            icon={<VehiclesIcon sx={{ fontSize: 24 }} />}
-            title="Phương tiện cứu hộ"
-            description="Quản lý xe cứu hộ"
-            onClick={() => navigate('/company/vehicles')}
-          />
-        </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <ActionCard
+                icon={<ApartmentIcon sx={{ fontSize: 24 }} />}
+                title="Thông tin công ty"
+                description="Xem và chỉnh sửa thông tin"
+                onClick={() => navigate('/company/profile')}
+              />
+              <ActionCard
+                icon={<ServicesIcon sx={{ fontSize: 24 }} />}
+                title="Danh mục dịch vụ"
+                description="Quản lý dịch vụ cung cấp"
+                onClick={() => navigate('/company/services')}
+              />
+              <ActionCard
+                icon={<VehiclesIcon sx={{ fontSize: 24 }} />}
+                title="Phương tiện cứu hộ"
+                description="Quản lý xe cứu hộ"
+                onClick={() => navigate('/company/vehicles')}
+              />
+            </Box>
 
-        <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e5e7eb' }}>
-          <Box
-            component="button"
-            type="button"
-            onClick={handleLogout}
-            sx={{
-              width: '100%',
-              p: 2,
-              border: '2px solid #fee2e2',
-              borderRadius: CARD_RADIUS,
-              bgcolor: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              color: '#dc2626',
-              fontSize: 16,
-              fontWeight: 700,
-              transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
-              '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
-              '&:active': { transform: 'scale(0.99)' },
-            }}
-          >
-            <LogoutIcon sx={{ fontSize: 22 }} />
-            Đăng xuất
-          </Box>
-        </Box>
+            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e5e7eb' }}>
+              <Box
+                component="button"
+                type="button"
+                onClick={handleLogout}
+                sx={{
+                  width: '100%',
+                  p: 2,
+                  border: '2px solid #fee2e2',
+                  borderRadius: CARD_RADIUS,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  color: '#dc2626',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
+                  '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
+                  '&:active': { transform: 'scale(0.99)' },
+                }}
+              >
+                <LogoutIcon sx={{ fontSize: 22 }} />
+                Đăng xuất
+              </Box>
+            </Box>
+          </>
+        )}
       </Box>
     </MobileLayout>
   );
