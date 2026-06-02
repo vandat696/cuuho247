@@ -11,7 +11,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       className="mobile-shell"
       sx={{
         width: '100%',
-        maxWidth: '375px',
+        maxWidth: '100%',
         minHeight: '100vh',
         backgroundColor: '#fff',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)',

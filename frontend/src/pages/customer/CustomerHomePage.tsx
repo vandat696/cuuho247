@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   AccessTimeOutlined,
   GroupsOutlined,
@@ -331,7 +332,15 @@ export default function CustomerHomePage() {
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <PrimaryButton onClick={() => navigate('/rescue/request')}>
+          <PrimaryButton
+            onClick={() => {
+              if (activeRequest) {
+                toast.error('Bạn đang có một yêu cầu cứu hộ đang diễn ra. Không thể gửi thêm yêu cầu mới!');
+                return;
+              }
+              navigate('/rescue/request');
+            }}
+          >
             <PhoneOutlined sx={{ mr: 1, fontSize: 22 }} />
             Gửi yêu cầu cứu hộ
           </PrimaryButton>

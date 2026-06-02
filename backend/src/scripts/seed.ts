@@ -169,46 +169,8 @@ async function main() {
     );
   }
 
-  const firstVehicle = vehicles[0];
-  const firstCategoryIds = categories.slice(0, 2).map((item) => item._id);
-
-  if (firstVehicle) {
-    await upsertOne<any>(
-      RescueRequest,
-      {
-        user_id: customer._id,
-        'company.company_id': company._id,
-        'vehicle.vehicle_id': firstVehicle._id,
-        description: rescueRequestSeed.description,
-      },
-      {
-        user_id: customer._id,
-        company: {
-          company_id: company._id,
-          company_name: company.company_name,
-        },
-        vehicle: {
-          vehicle_id: firstVehicle._id,
-          plate_number: firstVehicle.plate_number,
-        },
-        description: rescueRequestSeed.description,
-        location: rescueRequestSeed.location,
-        address: rescueRequestSeed.address,
-        service_types: firstCategoryIds,
-        status: 'pending',
-        response_deadline: new Date(Date.now() + 30 * 60 * 1000),
-        eta_minutes: 20,
-        status_history: [
-          {
-            status: 'pending',
-            changed_by: 'user',
-            note: 'Seed data created',
-            changed_at: new Date(),
-          },
-        ],
-      }
-    );
-  }
+  // Delete all existing RescueRequests to start clean
+  await RescueRequest.deleteMany({});
 
   console.log('Seed completed successfully');
   console.log(`Company login: ${companySeed.email} / ${DEFAULT_PASSWORD}`);

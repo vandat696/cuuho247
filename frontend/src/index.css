@@ -66,7 +66,7 @@
   --fw-bold: 700;
 
   /* --- Layout --- */
-  --mobile-max: 375px;
+  --mobile-max: 100%;
   --header-h: 70px;
   --bottom-nav-h: 64px;
 }
@@ -241,10 +241,11 @@ h4 {
 }
 
 .app-header__action {
-  width: 40px;
+  min-width: 40px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: var(--sp-1);
   color: var(--clr-text-inverse);
 }
 
