@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
 
 export interface AuthRequest extends Request {
-  user?: { id: string; role: string; [key: string]: unknown } | unknown;
+  user?: {
+    id: string;
+    role: string;
+    [key: string]: unknown;
+  };
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -24,8 +28,17 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     // Verify token
     const decoded = verifyToken(token);
 
+    if (typeof decoded === 'string' || !decoded) {
+      res.status(401).json({ status: 'error', message: 'Token không hợp lệ' });
+      return;
+    }
+
     // Save data to request
-    req.user = decoded;
+    req.user = {
+      id: decoded.id as string,
+      role: decoded.role as string,
+      ...decoded,
+    };
 
     // Continue to controller
     next();
