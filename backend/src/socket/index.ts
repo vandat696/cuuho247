@@ -1,8 +1,8 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { Message } from '../models/Message.model';
-import { RescueRequest } from '../models/RescueRequest.model';
-import { hasRequestAccess } from '../utils/rescueRequestAuth';
+import { Message } from '../shared/models/Message.model';
+import { RescueRequest } from '../shared/models/RescueRequest.model';
+import { hasRequestAccess } from '../shared/utils/rescueRequestAuth';
 
 interface SocketUser {
   id: string;
