@@ -35,8 +35,9 @@ logs/
 *.log
 
 # Uploads
-backend/uploads/*
-!backend/uploads/.gitkeep
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+backend/src/shared/uploads/
 
 # Cache
 .cache/

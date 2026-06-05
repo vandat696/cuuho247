@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import rescueRequestService from './customer.service';
-import { cancelRequestSchema, createRequestSchema } from './rescue.validator.js';
+import { cancelRequestSchema, createRequestSchema } from './rescue.validator';
 
 class RescueCustomerController {
   async getMyRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
