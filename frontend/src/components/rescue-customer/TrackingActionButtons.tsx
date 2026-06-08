@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 import { NAVY, ORANGE } from '@/components/rescue-company/RescueCompanyRequestShared';
 import { CancelButton } from '@/components/rescue-customer/CancelButton';
-import { CustomerRescueRequestStatus } from '@/services/rescueRequestCustomer.service';
+import { CustomerRescueRequestStatus } from '@/services/customer-rescue.service';
 
 interface TrackingActionButtonsProps {
   requestId: string;

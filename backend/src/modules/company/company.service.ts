@@ -38,7 +38,7 @@ class CompanyService implements ICompanyService {
     }
 
     // Set status to pending verification as per requirements
-    const updateData: Partial<ICompany> = {
+    const updateData: any = {
       ...data,
       status: 'pending_verification',
       is_verified: false,

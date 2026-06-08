@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import companyService from './company.service';
 
 class CompanyController {
@@ -17,7 +18,7 @@ class CompanyController {
     }
   }
 
-  async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getMe(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       // User is verified in authenticate middleware
       // req.user contains the decoded token payload
@@ -37,7 +38,7 @@ class CompanyController {
     }
   }
 
-  async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user?.id;
       if (!companyId) {

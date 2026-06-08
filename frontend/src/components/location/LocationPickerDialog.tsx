@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import ReactMapGL, { Marker } from '@goongmaps/goong-map-react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import { Button } from '../common/Button';
 import { RescueLocation } from '../../types/rescue.type';
 import { locationService } from '../../services/location.service';
 
@@ -201,11 +202,11 @@ export function LocationPickerDialog({ open, value, onClose, onConfirm }: Locati
           </Box>
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button onClick={onClose} variant="ghost">
           Hủy
         </Button>
-        <Button onClick={handleConfirm} variant="contained" disabled={!mapTilesKey}>
+        <Button onClick={handleConfirm} variant="primary" disabled={!mapTilesKey}>
           Xác nhận vị trí
         </Button>
       </DialogActions>

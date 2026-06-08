@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
-import { Service } from '@/types/service.types';
+import { Service } from '@/types/service.type';
 import { BuildRounded as WrenchIcon } from '@mui/icons-material';
 
 interface ServiceCardProps {
@@ -31,7 +31,7 @@ export const ServiceCard = ({ service, onViewDetail }: ServiceCardProps) => {
           <Typography
             sx={{
               fontWeight: 'bold',
-              fontSize: '1.1rem',
+              fontSize: '15px',
               color: 'secondary.main',
               mb: 0.5,
             }}
@@ -40,7 +40,7 @@ export const ServiceCard = ({ service, onViewDetail }: ServiceCardProps) => {
           </Typography>
           <Typography
             sx={{
-              fontSize: '1rem',
+              fontSize: '13px',
               fontWeight: 500,
               color: 'secondary.main',
             }}

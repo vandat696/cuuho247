@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '../common/Button';
 
 interface CancelRequestSheetProps {
   isOpen: boolean;
@@ -89,17 +90,12 @@ export function CancelRequestSheet({ isOpen, isLoading = false, onClose, onConfi
 
         {/* Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
-          <button
-            type="button"
-            className="btn btn--md btn--full btn--primary"
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? <span className="btn__spinner" /> : 'Xác nhận hủy'}
-          </button>
-          <button type="button" className="btn btn--md btn--full btn--ghost" onClick={handleClose} disabled={isLoading}>
+          <Button variant="primary" fullWidth onClick={handleConfirm} loading={isLoading}>
+            Xác nhận hủy
+          </Button>
+          <Button variant="ghost" fullWidth onClick={handleClose} disabled={isLoading}>
             Giữ lại yêu cầu
-          </button>
+          </Button>
         </div>
       </div>
     </>

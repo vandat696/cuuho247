@@ -5,14 +5,9 @@ import toast from 'react-hot-toast';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { CancelRequestSheet } from '@/components/rescue-customer/CancelRequestSheet';
+import { CustomerRescueRequest, customerRescueService } from '@/services/customer-rescue.service';
 import { CustomerHistoryCard } from '@/components/rescue-customer/CustomerHistoryCard';
-import {
-  CustomerRescueRequest,
-  rescueRequestService,
-} from '@/services/rescueRequestCustomer.service';
-
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
+import { NAVY, ORANGE } from '@/constants/colors';
 
 const getRequestTimestamp = (request: CustomerRescueRequest) => {
   const value = request.updated_at || request.created_at;
@@ -33,7 +28,7 @@ export default function CustomerHistoryPage() {
 
   const fetchRequests = async () => {
     try {
-      const response = await rescueRequestService.getMyRequests();
+      const response = await customerRescueService.getMyRequests();
       if (response.status === 'success') {
         setRequests(response.data.requests);
       }
@@ -63,7 +58,7 @@ export default function CustomerHistoryPage() {
 
     setCancelling(true);
     try {
-      const response = await rescueRequestService.cancelRequest(selectedRequest._id, reason);
+      const response = await customerRescueService.cancelRequest(selectedRequest._id, reason);
       if (response.status === 'success') {
         setRequests((current) =>
           current.map((request) => (request._id === selectedRequest._id ? response.data : request))

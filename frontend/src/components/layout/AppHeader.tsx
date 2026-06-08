@@ -8,9 +8,11 @@ interface AppHeaderProps {
   backFallback?: string;
   showBack?: boolean;
   rightSlot?: ReactNode;
+  /** Icon hiển thị bên trái khi showBack=false. Mặc định là ApartmentIcon. */
+  logoIcon?: ReactNode;
 }
 
-export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot }: AppHeaderProps) {
+export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot, logoIcon }: AppHeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,6 +26,7 @@ export function AppHeader({ title, onBack, backFallback = '/', showBack = true, 
     }
   };
 
+  const defaultLogo = logoIcon ?? <ApartmentIcon sx={{ fontSize: 24 }} />;
   const role = localStorage.getItem('role');
   const homePath = role === 'company' ? '/company/home' : '/customer/home';
   const isAlreadyHome =
@@ -51,7 +54,7 @@ export function AppHeader({ title, onBack, backFallback = '/', showBack = true, 
         </button>
       ) : (
         <div className="app-header__logo" aria-hidden="true">
-          <ApartmentIcon sx={{ fontSize: 24 }} />
+          {defaultLogo}
         </div>
       )}
 

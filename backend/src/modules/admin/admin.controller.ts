@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import adminService from './admin.service';
 
 class AdminController {
@@ -11,7 +12,7 @@ class AdminController {
     }
   }
 
-  async approveCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async approveCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { companyId } = req.params;
       const { reason } = req.body;
@@ -23,7 +24,7 @@ class AdminController {
     }
   }
 
-  async rejectCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async rejectCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { companyId } = req.params;
       const { reason } = req.body;
@@ -35,7 +36,7 @@ class AdminController {
     }
   }
 
-  async requestDocuments(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async requestDocuments(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { companyId } = req.params;
       const { reason } = req.body;

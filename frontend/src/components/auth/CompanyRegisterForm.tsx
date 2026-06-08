@@ -13,7 +13,7 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { LocationPickerDialog } from '../location/LocationPickerDialog';
-import { SERVICE_AREAS } from '../../constants/serviceAreas';
+import { SERVICE_AREAS } from '../../constants/service-areas';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '../../types/rescue.type';
 
@@ -486,20 +486,8 @@ const CompanyRegisterForm = () => {
           )}
         </Box>
 
-        {/* Nút đăng ký */}
-        <Button
-          type="submit"
-          disabled={isLoading}
-          sx={{
-            py: 1.5,
-            bgcolor: 'secondary.main',
-            color: 'white',
-            fontWeight: 'bold',
-            '&:hover': { bgcolor: 'secondary.dark' },
-            '&:disabled': { bgcolor: 'action.disabled' },
-          }}
-        >
-          {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
+        <Button type="submit" variant="primary" fullWidth loading={isLoading}>
+          Đăng ký
         </Button>
 
         <Box sx={{ textAlign: 'center' }}>

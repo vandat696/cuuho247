@@ -12,39 +12,16 @@ import {
 } from '@mui/icons-material';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { InfoField } from '@/components/common/InfoField';
 import { Company } from '@/types/common.type';
 import { toast } from 'react-hot-toast';
 import { companyService } from '@/services/company.service';
-
-const NAVY = '#1B3A5D';
-const CARD_RADIUS = '12px';
-const BUTTON_RADIUS = '8px';
-const CIRCLE_RADIUS = '9999px';
-
-interface InfoRowProps {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}
-
-const InfoRow = ({ icon, label, value }: InfoRowProps) => (
-  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-    <Box sx={{ mt: 0.25, color: NAVY, flexShrink: 0, display: 'flex' }}>{icon}</Box>
-    <Box sx={{ minWidth: 0 }}>
-      <Typography sx={{ fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>{label}</Typography>
-      <Typography sx={{ mt: 0.25, fontSize: 16, fontWeight: 500, color: '#111827', lineHeight: 1.35 }}>
-        {value}
-      </Typography>
-    </Box>
-  </Box>
-);
+import { NAVY, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
 
 const getAddressText = (company: Company) => {
   const address = company.address;
   if (!address) return '45 Giải Phóng, Hai Bà Trưng, Hà Nội';
-
   if (typeof address === 'string') return address;
-
   return (
     address.street ||
     address.detail ||
@@ -112,6 +89,7 @@ const CompanyProfilePage = () => {
       <AppHeader title="Thông tin công ty" backFallback="/company/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
+        {/* Hero card – dùng CompanyHeroCard nhưng cần layout khác (căn giữa) */}
         <Box
           sx={{
             p: 3,
@@ -140,6 +118,7 @@ const CompanyProfilePage = () => {
           </Box>
         </Box>
 
+        {/* Info detail card */}
         <Box
           sx={{
             p: 2,
@@ -149,24 +128,24 @@ const CompanyProfilePage = () => {
             bgcolor: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            gap: 1.5,
+            gap: 0,
           }}
         >
-          <Typography sx={{ mb: 0.5, fontSize: 16, fontWeight: 800, color: NAVY }}>Thông tin chi tiết</Typography>
-          <InfoRow icon={<PersonIcon sx={{ fontSize: 20 }} />} label="Họ và tên giám đốc" value={directorName} />
-          <InfoRow icon={<EmailIcon sx={{ fontSize: 20 }} />} label="Email công ty" value={email} />
-          <InfoRow icon={<PhoneIcon sx={{ fontSize: 20 }} />} label="Số điện thoại công ty" value={phone} />
-          <InfoRow
+          <Typography sx={{ mb: 1.5, fontSize: 16, fontWeight: 800, color: NAVY }}>Thông tin chi tiết</Typography>
+          <InfoField icon={<PersonIcon sx={{ fontSize: 20 }} />} label="Họ và tên giám đốc" value={directorName} />
+          <InfoField icon={<EmailIcon sx={{ fontSize: 20 }} />} label="Email công ty" value={email} />
+          <InfoField icon={<PhoneIcon sx={{ fontSize: 20 }} />} label="Số điện thoại công ty" value={phone} />
+          <InfoField
             icon={<LocationIcon sx={{ fontSize: 20 }} />}
             label="Địa chỉ công ty"
             value={getAddressText(company)}
           />
-          <InfoRow
+          <InfoField
             icon={<LocationIcon sx={{ fontSize: 20 }} />}
             label="Phạm vi hoạt động"
             value={getServiceArea(company)}
           />
-          <InfoRow
+          <InfoField
             icon={<DocumentIcon sx={{ fontSize: 20 }} />}
             label="Giấy phép kinh doanh"
             value={
@@ -177,6 +156,7 @@ const CompanyProfilePage = () => {
           />
         </Box>
 
+        {/* Edit button */}
         <Box
           component="button"
           type="button"
@@ -185,7 +165,7 @@ const CompanyProfilePage = () => {
             width: '100%',
             px: 3,
             py: 1.5,
-            borderRadius: BUTTON_RADIUS,
+            borderRadius: '8px',
             bgcolor: NAVY,
             color: '#fff',
             fontSize: 16,
