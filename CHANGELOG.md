@@ -4,6 +4,54 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
+## [2.0.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v1.1.0...cuuho247-v2.0.0) (2026-06-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **backend:** Reorganized backend folder structure to module-based design.
+
+### Features
+
+* add accept pending request functionality for companies ([7481ab2](https://github.com/vandat696/cuuho247/commit/7481ab29d13e6f2a2bd4ba235c6772bc1cfcd92f))
+* add chat feature ([432c8f6](https://github.com/vandat696/cuuho247/commit/432c8f61f70e37ea37b068c19df3473e564ca25f))
+* add chat feature ([1871c2d](https://github.com/vandat696/cuuho247/commit/1871c2d710e9fa2195332770b24dda7948c364fd))
+* add company rescue manage ([88c5226](https://github.com/vandat696/cuuho247/commit/88c522666d68fc31265f3d55dff14111e809cec5))
+* add rescue tracking ([d2bb5a5](https://github.com/vandat696/cuuho247/commit/d2bb5a59964ee10dedd93bd8d60644ba50c3a41f))
+* add rescue tracking ([f972732](https://github.com/vandat696/cuuho247/commit/f97273253a6ef66ce684fe1ed5a863fd609e777d))
+* add upload image feature ([c04d251](https://github.com/vandat696/cuuho247/commit/c04d2514d80b4908e24a3f976cd0b4caddfc8c84))
+* **backend:** implement cancel rescue request API ([01f9c0b](https://github.com/vandat696/cuuho247/commit/01f9c0b8a45557e40d9ed0768c1bb113e0ee04e1))
+* **customer:** add CustomerHomePage and update routing for customer navigation ([016938e](https://github.com/vandat696/cuuho247/commit/016938e47f57d1c3a7d77ebfb422d7b6350c90d5))
+* enhance company and service details with pricing and ETA, add new searchable company method ([5d57097](https://github.com/vandat696/cuuho247/commit/5d57097719186689ee039533600c19d4409fc7a9))
+* **frontend:** create CancelButton and CancelRequestSheet components ([3c1cea3](https://github.com/vandat696/cuuho247/commit/3c1cea3a07a2ed1fca23530fd8de6af857b2a8f1))
+* implement completion of active rescue requests with payment processing ([e19fe58](https://github.com/vandat696/cuuho247/commit/e19fe585330ac9e44292d200e491512a91dc38ce))
+* implement customer request history page and enhance rescue request management ([eceff27](https://github.com/vandat696/cuuho247/commit/eceff272704e6e9c5359914786d90827e7b4fd61))
+* refactor rescue and service controllers to use company-specific services ([69356e4](https://github.com/vandat696/cuuho247/commit/69356e46450b91d5840e495d4280cde8f4b1679d))
+* refactor rescue request types and shared components for improved structure and readability ([e3f2823](https://github.com/vandat696/cuuho247/commit/e3f2823761c0f7a90f3c8c95e8d90b446449507a))
+* refine cancellation logic and update ETA text for consistency across components ([5c93ee4](https://github.com/vandat696/cuuho247/commit/5c93ee4ed6bb3ae66a63dea68e54a3aa2b8d9690))
+* reorder route definitions for active company requests for improved readability ([696f46e](https://github.com/vandat696/cuuho247/commit/696f46e3e6d49651f0e608c12aa504e0acf78ef5))
+* update AppHeader to use backFallback for navigation in multiple pages ([d52bbf3](https://github.com/vandat696/cuuho247/commit/d52bbf32d85f0da5d109f446dc9967960236cd58))
+* update navigation after successful rescue request submission to redirect to customer home ([ce7462b](https://github.com/vandat696/cuuho247/commit/ce7462ba392d5dc8326bf9dc192e63239e4b8279))
+* update rescue request messages and routes for consistency in Vietnamese localization ([90bc711](https://github.com/vandat696/cuuho247/commit/90bc711ffd45f6efceee2d8790dc15b149a003c0))
+
+
+### Bug Fixes
+
+* **backend:** sync upload path, fix validator imports, and update gitignore ([a1ae6c4](https://github.com/vandat696/cuuho247/commit/a1ae6c4af9de9a3e15dfd3164687791d703c8a80))
+* encode uploaded filename ([5a85dad](https://github.com/vandat696/cuuho247/commit/5a85dadbc76ae01bbd45339a82dd50edb08371fd))
+* encode uploaded filename ([3790991](https://github.com/vandat696/cuuho247/commit/379099144989566e2374013efb7dfaa6d44b63e1))
+* fix access control and chat page UI ([664e84b](https://github.com/vandat696/cuuho247/commit/664e84b4d82cfbd4e1ded7ca630b528a5aa3a916))
+* fix chat page UI ([38cfe25](https://github.com/vandat696/cuuho247/commit/38cfe256dfb37d245d0aab2aaefdafa5a688267e))
+* fix type check ([847a8c1](https://github.com/vandat696/cuuho247/commit/847a8c19834bd2722a8900c8fdabf9bb3c2fe83b))
+* fix UI for customer ([d0b5c65](https://github.com/vandat696/cuuho247/commit/d0b5c65c7dac5e99011f05d553fa04adc6ae2b89))
+* **ux:** remove loading page when passing wrong login email/pass ([f2e483b](https://github.com/vandat696/cuuho247/commit/f2e483b8f6a0ffd1e98103474b49d4b48992245c))
+* **ux:** remove loading page when passing wrong login email/pass ([2f0ae05](https://github.com/vandat696/cuuho247/commit/2f0ae05867665d0d842597b512a34bd4f6cf1910))
+
+
+### Code Refactoring
+
+* **backend:** migrate to modular monolith architecture ([5d8bd06](https://github.com/vandat696/cuuho247/commit/5d8bd06c68d20f3f5d896a075f372a239b2da193))
+
 ## [1.1.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v1.0.0...cuuho247-v1.1.0) (2026-05-24)
 
 ### Features
