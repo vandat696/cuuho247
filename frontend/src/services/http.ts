@@ -32,6 +32,9 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.config.url.includes('login')) {
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('role');
