@@ -36,7 +36,9 @@ class AuthController {
 
   async registerCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const licenseFileUrl = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : undefined;
+      const licenseFileUrl = req.file
+        ? `${req.protocol}://${req.get('host')}/uploads/${encodeURIComponent(req.file.filename)}`
+        : undefined;
       const requestBody = {
         ...req.body,
         ...(licenseFileUrl ? { license_file_url: licenseFileUrl } : {}),
