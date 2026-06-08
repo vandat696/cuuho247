@@ -2,7 +2,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import { connectDB } from '../shared/config/db';
-import { Company, Service, ServiceCategory, User, Vehicle, RescueRequest } from '../shared/models';
+import { Company, Service, ServiceCategory, User, Vehicle, RescueRequest, Admin } from '../shared/models';
 
 const DEFAULT_PASSWORD = 'Password123!';
 const SALT_ROUNDS = 10;
@@ -10,6 +10,7 @@ const SALT_ROUNDS = 10;
 const companySeed = {
   email: 'company@cuuho247.test',
   company_name: 'Cuu Ho 247 Sài Gòn',
+  director_name: 'Nguyễn Văn Giám Đốc',
   phone: '0901234567',
   address: {
     province: 'TP. Hồ Chí Minh',
@@ -17,6 +18,7 @@ const companySeed = {
     ward: 'Phường 12',
     detail: '123 Lê Hồng Phong',
   },
+  service_area: 'Các quận trung tâm TP.HCM',
   location: {
     type: 'Point' as const,
     coordinates: [106.665, 10.771] as [number, number],
@@ -32,6 +34,11 @@ const customerSeed = {
   email: 'customer@cuuho247.test',
   full_name: 'Nguyễn Văn Test',
   phone: '0912345678',
+};
+
+const adminSeed = {
+  email: 'admin@cuuho247.test',
+  full_name: 'Hệ Thống Admin',
 };
 
 const categorySeeds = [
@@ -108,6 +115,15 @@ async function main() {
     }
   );
 
+  await upsertOne<any>(
+    Admin,
+    { email: adminSeed.email },
+    {
+      ...adminSeed,
+      password_hash: hashedPassword,
+    }
+  );
+
   const categories: Array<any> = [];
   for (const seed of categorySeeds) {
     const category = await upsertOne<any>(
@@ -161,6 +177,7 @@ async function main() {
   console.log('Seed completed successfully');
   console.log(`Company login: ${companySeed.email} / ${DEFAULT_PASSWORD}`);
   console.log(`Customer login: ${customerSeed.email} / ${DEFAULT_PASSWORD}`);
+  console.log(`Admin login: ${adminSeed.email} / ${DEFAULT_PASSWORD}`);
   console.log(`Seeded company: ${company.company_name}`);
   console.log(`Seeded vehicles: ${vehicleSeeds.length}`);
   console.log(`Seeded services: ${serviceSeeds.length}`);

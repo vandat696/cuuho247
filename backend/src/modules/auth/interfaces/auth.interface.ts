@@ -51,9 +51,15 @@ export interface CompanyProfile {
   status?: string;
 }
 
+export interface AdminProfile {
+  _id: string;
+  email: string;
+  full_name: string;
+}
+
 export interface LoginResult {
-  user: UserProfile | CompanyProfile;
-  role: 'customer' | 'company';
+  user: UserProfile | CompanyProfile | AdminProfile;
+  role: 'customer' | 'company' | 'admin';
   access_token: string;
 }
 

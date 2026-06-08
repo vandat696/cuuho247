@@ -3,78 +3,31 @@ import rescueCompanyController from './company.controller';
 import rescueCustomerController from './customer.controller';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { authorize } from '@/shared/middleware/authorize.middleware';
+import { checkCompanyActive } from '@/shared/middleware/checkCompanyActive.middleware';
 
 const router = Router();
 
+// Apply auth and active status check for all company-scoped endpoints
+router.use('/company', authenticate, authorize(['company']), checkCompanyActive);
+
 // ─── Company-side routes (/api/rescue/company/...) ────────────────────────────
-router.get('/company/active', authenticate, authorize(['company']), rescueCompanyController.getCompanyActiveRequests);
-router.patch(
-  '/company/active/:requestId/complete',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.completeCompanyActiveRequest
-);
-router.patch(
-  '/company/active/:requestId/start',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.startCompanyActiveRequest
-);
-router.patch(
-  '/company/active/:requestId/arrive',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.arriveCompanyActiveRequest
-);
-router.get(
-  '/company/active/:requestId',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyActiveRequestDetail
-);
-router.get(
-  '/company/completed',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyCompletedRequests
-);
-router.get(
-  '/company/completed/:requestId',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyCompletedRequestDetail
-);
-router.get(
-  '/company/canceled',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyCanceledRequests
-);
-router.get(
-  '/company/canceled/:requestId',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyCanceledRequestDetail
-);
-router.get('/company/pending', authenticate, authorize(['company']), rescueCompanyController.getCompanyPendingRequests);
-router.patch(
-  '/company/pending/:requestId/accept',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.acceptCompanyPendingRequest
-);
-router.get(
-  '/company/pending/:requestId',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyPendingRequestDetail
-);
-router.get(
-  '/company/requests/:requestId/route',
-  authenticate,
-  authorize(['company']),
-  rescueCompanyController.getCompanyRequestRouteEstimate
-);
+router.get('/company/active', rescueCompanyController.getCompanyActiveRequests);
+router.patch('/company/active/:requestId/complete', rescueCompanyController.completeCompanyActiveRequest);
+router.patch('/company/active/:requestId/start', rescueCompanyController.startCompanyActiveRequest);
+router.patch('/company/active/:requestId/arrive', rescueCompanyController.arriveCompanyActiveRequest);
+router.get('/company/active/:requestId', rescueCompanyController.getCompanyActiveRequestDetail);
+
+router.get('/company/completed', rescueCompanyController.getCompanyCompletedRequests);
+router.get('/company/completed/:requestId', rescueCompanyController.getCompanyCompletedRequestDetail);
+
+router.get('/company/canceled', rescueCompanyController.getCompanyCanceledRequests);
+router.get('/company/canceled/:requestId', rescueCompanyController.getCompanyCanceledRequestDetail);
+
+router.get('/company/pending', rescueCompanyController.getCompanyPendingRequests);
+router.patch('/company/pending/:requestId/accept', rescueCompanyController.acceptCompanyPendingRequest);
+router.get('/company/pending/:requestId', rescueCompanyController.getCompanyPendingRequestDetail);
+
+router.get('/company/requests/:requestId/route', rescueCompanyController.getCompanyRequestRouteEstimate);
 
 // Public search route
 router.get('/companies', rescueCompanyController.searchCompanies);

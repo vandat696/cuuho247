@@ -23,6 +23,42 @@ class CompanyService implements ICompanyService {
     const { password_hash: _passwordHash, ...companyData } = company.toObject();
     return companyData as Omit<ICompany, 'password_hash'>;
   }
+
+  async updateCompanyProfile(
+    companyId: string,
+    data: import('./interfaces/company.interface').UpdateCompanyProfileInput
+  ): Promise<Omit<ICompany, 'password_hash'>> {
+    if (!companyId) {
+      throw new ApiError(400, 'Company ID is required');
+    }
+
+    const company = await companyRepository.findById(companyId);
+    if (!company) {
+      throw new ApiError(404, 'Company not found');
+    }
+
+    // Set status to pending verification as per requirements
+    const updateData: Partial<ICompany> = {
+      ...data,
+      status: 'pending_verification',
+      is_verified: false,
+    };
+
+    if (data.location?.coordinates) {
+      updateData.location = {
+        type: 'Point',
+        coordinates: data.location.coordinates,
+      };
+    }
+
+    const updatedCompany = await companyRepository.updateById(companyId, updateData);
+    if (!updatedCompany) {
+      throw new ApiError(500, 'Failed to update company profile');
+    }
+
+    const { password_hash: _passwordHash, ...companyData } = updatedCompany.toObject();
+    return companyData as Omit<ICompany, 'password_hash'>;
+  }
 }
 
 export default new CompanyService();

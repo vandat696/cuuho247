@@ -13,6 +13,7 @@ import vehicleRoutes from './modules/vehicle/vehicle.route';
 import rescueRoutes from './modules/rescue/rescue.route';
 import { serviceRouter, serviceCategoryRouter } from './modules/service-catalog/service-catalog.route';
 import messageRoutes from './modules/message/message.route';
+import adminRoutes from './modules/admin/admin.route';
 
 const router = Router();
 
@@ -36,5 +37,8 @@ router.use('/rescue', rescueRoutes);
 
 // Message Routes
 router.use('/messages', messageRoutes);
+
+// Admin Routes
+router.use('/admin', adminRoutes);
 
 export default router;
