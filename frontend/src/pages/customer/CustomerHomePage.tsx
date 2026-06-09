@@ -310,7 +310,7 @@ export default function CustomerHomePage() {
           <QuickActionButton
             icon={<GroupsOutlined sx={{ fontSize: 34 }} />}
             label="Cộng đồng"
-            onClick={() => navigate('/customer/community')}
+            onClick={() => navigate('/community')}
           />
         </Box>
 

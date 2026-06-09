@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Container, Pagination } from '@mui/material';
+import { Box, Typography, CircularProgress, Pagination } from '@mui/material';
 import { toast } from 'react-hot-toast';
 import { reviewService, Review } from '../../services/review.service';
 import { CompanyReviewItem } from '../../components/rescue-company/review/CompanyReviewItem';

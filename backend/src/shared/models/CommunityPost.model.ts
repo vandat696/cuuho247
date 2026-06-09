@@ -10,6 +10,8 @@ export interface ICommunityPost extends Document {
   removed_by?: Types.ObjectId;
   removal_reason?: string;
   removed_at?: Date;
+  like_count: number;
+  comment_count: number;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -21,10 +23,12 @@ const CommunityPostSchema = new Schema<ICommunityPost>(
     content: { type: String, required: true },
     images: [{ type: String }],
     tags: [{ type: Schema.Types.ObjectId, ref: 'ServiceCategory' }],
-    is_visible: { type: Boolean },
+    is_visible: { type: Boolean, default: true },
     removed_by: { type: Schema.Types.ObjectId, ref: 'Admin' },
     removal_reason: { type: String },
     removed_at: { type: Date },
+    like_count: { type: Number, default: 0 },
+    comment_count: { type: Number, default: 0 },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

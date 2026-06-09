@@ -45,4 +45,8 @@ router.use('/admin', adminRoutes);
 // Ratings Routes
 router.use('/ratings', reviewRoutes);
 
+// Community Routes
+import communityRoutes from './modules/community/community.route';
+router.use('/community', communityRoutes);
+
 export default router;

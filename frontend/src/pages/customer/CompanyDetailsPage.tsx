@@ -61,7 +61,7 @@ export default function CompanyDetailsPage() {
     if (reviews.length === 0) {
       setLoadingReviews(true);
       try {
-        const res = await reviewService.getCompanyReviews(company._id || company.company_id, 1, 20);
+        const res = await reviewService.getCompanyReviews(company._id, 1, 20);
         setReviews(res.data.reviews || []);
       } catch (error) {
         toast.error('Lỗi khi tải danh sách đánh giá');

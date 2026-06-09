@@ -22,6 +22,11 @@ const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'));
 // Chat Pages
 const ChatPage = React.lazy(() => import('@/pages/chat/ChatPage'));
 
+// Community Pages
+const CommunityListPage = React.lazy(() => import('@/pages/community/CommunityListPage'));
+const CommunityCreatePage = React.lazy(() => import('@/pages/community/CommunityCreatePage'));
+const CommunityDetailPage = React.lazy(() => import('@/pages/community/CommunityDetailPage'));
+
 function App() {
   return (
     <BrowserRouter>
@@ -50,6 +55,11 @@ function App() {
           <Route path="/customer/*" element={<CustomerRoutes />} />
           <Route path="/company/*" element={<CompanyRoutes />} />
           <Route path="/admin/*" element={<AdminRoutes />} />
+
+          {/* Community Routes */}
+          <Route path="/community" element={<CommunityListPage />} />
+          <Route path="/community/create" element={<CommunityCreatePage />} />
+          <Route path="/community/:id" element={<CommunityDetailPage />} />
 
           {/* Chat Routes */}
           <Route path="/chat/:rescueRequestId" element={<ChatPage />} />

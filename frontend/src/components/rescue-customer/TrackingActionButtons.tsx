@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { ChatBubbleOutline, StarOutline } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+// removed toast
 
 import { NAVY, ORANGE } from '@/components/rescue-company/RescueCompanyRequestShared';
 import { CancelButton } from '@/components/rescue-customer/CancelButton';

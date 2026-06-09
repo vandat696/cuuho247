@@ -1,4 +1,4 @@
-import { Box, Typography, Rating, Paper } from '@mui/material';
+import { Typography, Rating, Paper } from '@mui/material';
 
 interface OverallRatingCardProps {
   companyName: string;
