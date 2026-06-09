@@ -7,6 +7,7 @@ import {
   LocalShippingOutlined as VehiclesIcon,
   LogoutRounded as LogoutIcon,
   NotificationsNoneRounded as NotificationsIcon,
+  StarOutlineRounded as StarOutlineIcon,
 } from '@mui/icons-material';
 
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -14,6 +15,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { StatCard } from '@/components/rescue-company/StatCard';
 import { ActionCard } from '@/components/rescue-company/ActionCard';
 import { CompanyHeroCard } from '@/components/rescue-company/CompanyHeroCard';
+import { CompanyPendingStatus } from '@/components/rescue-company/CompanyPendingStatus';
 import { Company } from '@/types/common.type';
 import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
@@ -22,47 +24,81 @@ import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 
 const NOTIFICATION_POLL_MS = 15000;
+// Poll profile every 30s when pending — so company sees admin feedback (rejection reason, doc request) without a manual refresh
+const PENDING_PROFILE_POLL_MS = 30000;
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({ waiting: 0, inProgress: 3, done: 12, cancelled: 2 });
+  const [counts, setCounts] = useState({ waiting: 0, inProgress: 0, done: 0, cancelled: 0 });
   const [company, setCompany] = useState<Company | null>(null);
   const [pendingRequests, setPendingRequests] = useState<PendingRescueRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const knownPendingIdsRef = useRef<Set<string>>(new Set());
   const hasInitializedNotificationsRef = useRef(false);
+  const companyStatusRef = useRef<string | null>(null);
 
   useEffect(() => {
+    let rescueIntervalId: number | undefined;
+    let profileIntervalId: number | undefined;
+
     const initialize = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchCompanyProfile(),
-        fetchActiveRequestsCount(),
-        fetchCompletedRequestsCount(),
-        fetchCanceledRequestsCount(),
-        fetchPendingRequests({ notifyNew: false }),
-      ]);
+      const isActive = await fetchCompanyProfile();
+
+      if (isActive) {
+        await Promise.all([
+          fetchActiveRequestsCount(),
+          fetchCompletedRequestsCount(),
+          fetchCanceledRequestsCount(),
+          fetchPendingRequests({ notifyNew: false }),
+        ]);
+
+        rescueIntervalId = window.setInterval(() => {
+          fetchPendingRequests({ notifyNew: true });
+        }, NOTIFICATION_POLL_MS);
+      } else {
+        // Poll profile every 30s when pending/rejected so admin feedback appears automatically
+        profileIntervalId = window.setInterval(async () => {
+          const nowActive = await fetchCompanyProfile();
+          if (nowActive && companyStatusRef.current !== 'active') {
+            // Company just got approved — stop profile polling and start full dashboard
+            window.clearInterval(profileIntervalId);
+            await Promise.all([
+              fetchActiveRequestsCount(),
+              fetchCompletedRequestsCount(),
+              fetchCanceledRequestsCount(),
+              fetchPendingRequests({ notifyNew: false }),
+            ]);
+            rescueIntervalId = window.setInterval(() => {
+              fetchPendingRequests({ notifyNew: true });
+            }, NOTIFICATION_POLL_MS);
+          }
+        }, PENDING_PROFILE_POLL_MS);
+      }
       setLoading(false);
     };
 
     initialize();
 
-    const intervalId = window.setInterval(() => {
-      fetchPendingRequests({ notifyNew: true });
-    }, NOTIFICATION_POLL_MS);
-
-    return () => window.clearInterval(intervalId);
+    return () => {
+      if (rescueIntervalId) window.clearInterval(rescueIntervalId);
+      if (profileIntervalId) window.clearInterval(profileIntervalId);
+    };
   }, []);
 
-  const fetchCompanyProfile = async () => {
+  const fetchCompanyProfile = async (): Promise<boolean> => {
     try {
       const response = await companyService.getProfile();
       if (response.status === 'success') {
         setCompany(response.data);
+        companyStatusRef.current = response.data.status ?? null;
+        return response.data.status === 'active';
       }
+      return false;
     } catch (error) {
       console.error('Error fetching company profile:', error);
       toast.error('Không thể tải thông tin công ty');
+      return false;
     }
   };
 
@@ -146,6 +182,7 @@ export default function CompanyHomePage() {
   };
 
   const companyName = company?.company_name || 'Cứu hộ Minh Anh';
+  const isCompanyActive = company?.status === 'active';
 
   return (
     <MobileLayout>
@@ -153,28 +190,30 @@ export default function CompanyHomePage() {
         title="Cứu hộ 247"
         showBack={false}
         rightSlot={
-          <IconButton
-            aria-label="Thông báo yêu cầu cứu hộ"
-            size="small"
-            onClick={() => navigate('/company/notifications')}
-            sx={{ p: 1, color: '#fff' }}
-          >
-            <Badge
-              badgeContent={pendingRequests.length}
-              color="error"
-              overlap="circular"
-              sx={{
-                '& .MuiBadge-badge': {
-                  minWidth: 16,
-                  height: 16,
-                  fontSize: 10,
-                  fontWeight: 700,
-                },
-              }}
+          isCompanyActive ? (
+            <IconButton
+              aria-label="Thông báo yêu cầu cứu hộ"
+              size="small"
+              onClick={() => navigate('/company/notifications')}
+              sx={{ p: 1, color: '#fff' }}
             >
-              <NotificationsIcon sx={{ fontSize: 24 }} />
-            </Badge>
-          </IconButton>
+              <Badge
+                badgeContent={pendingRequests.length}
+                color="error"
+                overlap="circular"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    minWidth: 16,
+                    height: 16,
+                    fontSize: 10,
+                    fontWeight: 700,
+                  },
+                }}
+              >
+                <NotificationsIcon sx={{ fontSize: 24 }} />
+              </Badge>
+            </IconButton>
+          ) : undefined
         }
       />
 
@@ -183,7 +222,7 @@ export default function CompanyHomePage() {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
             <CircularProgress />
           </Box>
-        ) : (
+        ) : isCompanyActive ? (
           <>
             <CompanyHeroCard companyName={companyName} onClick={() => navigate('/company/profile')} />
 
@@ -239,6 +278,12 @@ export default function CompanyHomePage() {
                 description="Quản lý xe cứu hộ"
                 onClick={() => navigate('/company/vehicles')}
               />
+              <ActionCard
+                icon={<StarOutlineIcon sx={{ fontSize: 24 }} />}
+                title="Đánh giá khách hàng"
+                description="Xem và phản hồi đánh giá"
+                onClick={() => navigate('/company/reviews')}
+              />
             </Box>
 
             <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e5e7eb' }}>
@@ -262,6 +307,7 @@ export default function CompanyHomePage() {
                   transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
                   '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
                   '&:active': { transform: 'scale(0.99)' },
+                  cursor: 'pointer',
                 }}
               >
                 <LogoutIcon sx={{ fontSize: 22 }} />
@@ -269,6 +315,12 @@ export default function CompanyHomePage() {
               </Box>
             </Box>
           </>
+        ) : (
+          <CompanyPendingStatus
+            company={company}
+            handleLogout={handleLogout}
+            onEditProfile={() => navigate('/company/profile/edit')}
+          />
         )}
       </Box>
     </MobileLayout>

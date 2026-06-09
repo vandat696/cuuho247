@@ -1,6 +1,6 @@
 import { User, Company } from './common.type';
 
-export type AuthRole = 'customer' | 'company';
+export type AuthRole = 'customer' | 'company' | 'admin';
 
 // Login Data Type
 export interface LoginData {

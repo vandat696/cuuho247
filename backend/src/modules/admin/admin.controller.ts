@@ -53,7 +53,64 @@ class AdminController {
       const limit = parseInt(req.query.limit as string) || 50;
       const skip = parseInt(req.query.skip as string) || 0;
       const result = await adminService.getAuditLogs(limit, skip);
-      res.status(200).json({ status: 'success', data: result.logs, total: result.total });
+      res.status(200).json({ status: 'success', data: { logs: result.logs, total: result.total } });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const page = parseInt(req.query.page as string) || 1;
+      const result = await adminService.getReviews(limit, page);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async removeReview(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { reviewId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const review = await adminService.removeReview(reviewId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Đã gỡ đánh giá thành công', data: review });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async removeReviewReply(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { reviewId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const review = await adminService.removeReviewReply(reviewId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Đã gỡ phản hồi thành công', data: review });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async restoreReview(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { reviewId } = req.params;
+      const adminId = req.user?.id as string;
+      const review = await adminService.restoreReview(reviewId, adminId);
+      res.status(200).json({ status: 'success', message: 'Đã khôi phục đánh giá thành công', data: review });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async restoreReviewReply(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { reviewId } = req.params;
+      const adminId = req.user?.id as string;
+      const review = await adminService.restoreReviewReply(reviewId, adminId);
+      res.status(200).json({ status: 'success', message: 'Đã khôi phục phản hồi thành công', data: review });
     } catch (err) {
       next(err);
     }

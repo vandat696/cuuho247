@@ -66,6 +66,8 @@ export const useLogin = () => {
             navigate('/customer/home', { replace: true });
           } else if (response.data.role === 'company') {
             navigate('/company/home', { replace: true });
+          } else if (response.data.role === 'admin') {
+            navigate('/admin/home', { replace: true });
           }
         }
       } catch (error: unknown) {

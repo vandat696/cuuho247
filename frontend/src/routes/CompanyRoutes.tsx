@@ -4,6 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Company Pages
 const CompanyHomePage = React.lazy(() => import('@/pages/rescue-company/CompanyHomePage'));
 const CompanyProfilePage = React.lazy(() => import('@/pages/rescue-company/CompanyProfilePage'));
+const CompanyProfileEditPage = React.lazy(() => import('@/pages/rescue-company/CompanyProfileEditPage'));
+const CompanyReviewsPage = React.lazy(() => import('@/pages/rescue-company/CompanyReviewsPage'));
 const CompanyNotificationsPage = React.lazy(
   () => import('@/pages/rescue-company/notifications/CompanyNotificationsPage')
 );
@@ -25,7 +27,9 @@ export function CompanyRoutes() {
       <Route index element={<Navigate to="/company/home" replace />} />
       <Route path="home" element={<CompanyHomePage />} />
       <Route path="profile" element={<CompanyProfilePage />} />
+      <Route path="profile/edit" element={<CompanyProfileEditPage />} />
       <Route path="notifications" element={<CompanyNotificationsPage />} />
+      <Route path="reviews" element={<CompanyReviewsPage />} />
 
       {/* Company Vehicles */}
       <Route path="vehicles">

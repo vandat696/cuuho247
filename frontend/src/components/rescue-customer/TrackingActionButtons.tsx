@@ -16,6 +16,10 @@ interface TrackingActionButtonsProps {
 export const TrackingActionButtons = ({ requestId, status, onCancelClick }: TrackingActionButtonsProps) => {
   const navigate = useNavigate();
 
+  const handleReview = () => {
+    navigate(`/customer/review/${requestId}`);
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       {status && ['pending', 'accepted', 'in_progress', 'arrived'].includes(status) && (
@@ -70,7 +74,7 @@ export const TrackingActionButtons = ({ requestId, status, onCancelClick }: Trac
       {status === 'completed' && (
         <Box
           component="button"
-          onClick={() => toast.success('Tính năng đánh giá đang được phát triển')}
+          onClick={handleReview}
           sx={{
             width: '100%',
             bgcolor: ORANGE,

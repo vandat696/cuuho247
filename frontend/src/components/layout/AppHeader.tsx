@@ -28,11 +28,24 @@ export function AppHeader({ title, onBack, backFallback = '/', showBack = true, 
 
   const defaultLogo = logoIcon ?? <ApartmentIcon sx={{ fontSize: 24 }} />;
   const role = localStorage.getItem('role');
-  const homePath = role === 'company' ? '/company/home' : '/customer/home';
-  const isAlreadyHome =
-    location.pathname === '/company/home' || location.pathname === '/customer/home' || location.pathname === '/';
 
-  const showHomeButton = (role === 'customer' || role === 'company') && !isAlreadyHome;
+  const homePath =
+    role === 'company'
+      ? '/company/home'
+      : role === 'customer'
+        ? '/customer/home'
+        : role === 'admin'
+          ? '/admin/home'
+          : '/';
+
+  const isAlreadyHome =
+    location.pathname === '/company/home' ||
+    location.pathname === '/customer/home' ||
+    location.pathname === '/admin/home' ||
+    location.pathname === '/';
+
+  // Only show the home button when the user is logged in and not already on their home page
+  const showHomeButton = !!role && !isAlreadyHome;
 
   return (
     <header className="app-header">

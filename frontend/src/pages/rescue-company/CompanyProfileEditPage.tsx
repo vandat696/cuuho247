@@ -1,0 +1,506 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Button as MuiButton, IconButton, Stack, CircularProgress } from '@mui/material';
+import {
+  CheckCircleRounded as CheckCircleIcon,
+  CloseRounded as CloseIcon,
+  ImageOutlined as ImageIcon,
+  LocationOnRounded as LocationOnIcon,
+  UploadFileRounded as UploadFileIcon,
+  SaveOutlined as SaveIcon,
+} from '@mui/icons-material';
+
+import { AppHeader } from '@/components/layout/AppHeader';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { Input } from '@/components/common/Input';
+import { Select } from '@/components/common/Select';
+import { Button } from '@/components/common/Button';
+import { LocationPickerDialog } from '@/components/location/LocationPickerDialog';
+import { SERVICE_AREAS } from '@/constants/service-areas';
+import { companyService } from '@/services/company.service';
+import { toast } from 'react-hot-toast';
+import { RescueLocation } from '@/types/rescue.type';
+import { NAVY } from '@/constants/colors';
+
+interface CompanyProfileEditFormData {
+  company_name: string;
+  director_name: string;
+  phone: string;
+  address: string;
+  company_location: RescueLocation | null;
+  service_area: string;
+  license_file: File | null;
+  existing_license_url?: string;
+}
+
+interface FormErrors {
+  [key: string]: string;
+}
+
+const formatFileSize = (size: number) => {
+  if (size < 1024 * 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+export default function CompanyProfileEditPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<CompanyProfileEditFormData>({
+    company_name: '',
+    director_name: '',
+    phone: '',
+    address: '',
+    company_location: null,
+    service_area: '',
+    license_file: null,
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const response = await companyService.getProfile();
+      if (response.status === 'success') {
+        const company = response.data;
+
+        let addressStr = '';
+        if (company.address) {
+          if (typeof company.address === 'string') {
+            addressStr = company.address;
+          } else {
+            addressStr = company.address.detail || '';
+          }
+        }
+
+        let loc: RescueLocation | null = null;
+        if (company.location?.coordinates) {
+          loc = {
+            lng: company.location.coordinates[0],
+            lat: company.location.coordinates[1],
+            address: addressStr,
+          };
+        }
+
+        setFormData({
+          company_name: company.company_name || '',
+          director_name: company.director_name || '',
+          phone: company.phone || '',
+          address: addressStr,
+          company_location: loc,
+          service_area: company.service_area || '',
+          license_file: null,
+          existing_license_url: company.license_file_url || company.license_url,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile for edit:', error);
+      toast.error('Không thể tải thông tin hồ sơ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompanyLocationChange = (location: RescueLocation | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      company_location: location,
+    }));
+
+    if (errors.company_location) {
+      setErrors((prev) => ({
+        ...prev,
+        company_location: '',
+      }));
+    }
+  };
+
+  const handleConfirmCompanyLocation = (location: RescueLocation) => {
+    handleCompanyLocationChange(location);
+    if (location.address) {
+      setFormData((prev) => ({
+        ...prev,
+        address: location.address,
+      }));
+      if (errors.address) {
+        setErrors((prev) => ({
+          ...prev,
+          address: '',
+        }));
+      }
+    }
+    setIsLocationPickerOpen(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value } = target as any;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  };
+
+  const handleLicenseFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    setFormData((prev) => ({
+      ...prev,
+      license_file: file,
+    }));
+
+    if (errors.license_file) {
+      setErrors((prev) => ({
+        ...prev,
+        license_file: '',
+      }));
+    }
+  };
+
+  const handleRemoveLicenseFile = () => {
+    setFormData((prev) => ({
+      ...prev,
+      license_file: null,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      license_file: '',
+    }));
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.company_name.trim()) {
+      newErrors.company_name = 'Tên công ty là bắt buộc';
+    } else if (formData.company_name.trim().length < 2) {
+      newErrors.company_name = 'Tên công ty phải có ít nhất 2 ký tự';
+    }
+
+    if (!formData.director_name.trim()) {
+      newErrors.director_name = 'Họ và tên giám đốc là bắt buộc';
+    } else if (formData.director_name.trim().length < 2) {
+      newErrors.director_name = 'Họ và tên phải có ít nhất 2 ký tự';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Số điện thoại là bắt buộc';
+    } else if (!/^[0-9]{10,11}$/.test(formData.phone)) {
+      newErrors.phone = 'Số điện thoại không hợp lệ (phải từ 10-11 số)';
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = 'Địa chỉ là bắt buộc';
+    } else if (formData.address.trim().length < 5) {
+      newErrors.address = 'Địa chỉ phải có ít nhất 5 ký tự';
+    }
+
+    if (
+      !formData.company_location ||
+      typeof formData.company_location.lat !== 'number' ||
+      typeof formData.company_location.lng !== 'number' ||
+      formData.company_location.lat === 0 ||
+      formData.company_location.lng === 0
+    ) {
+      newErrors.company_location = 'Vui lòng chọn vị trí công ty trên bản đồ';
+    }
+
+    if (!formData.service_area.trim()) {
+      newErrors.service_area = 'Khu vực hoạt động là bắt buộc';
+    }
+
+    if (formData.license_file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(formData.license_file.type)) {
+        newErrors.license_file = 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP';
+      } else if (formData.license_file.size > 5 * 1024 * 1024) {
+        newErrors.license_file = 'Ảnh không được vượt quá 5MB';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('company_name', formData.company_name.trim());
+      formDataToSend.append('director_name', formData.director_name.trim());
+      formDataToSend.append('phone', formData.phone.trim());
+      formDataToSend.append('address', formData.address.trim());
+      formDataToSend.append('service_area', formData.service_area.trim());
+
+      if (formData.company_location) {
+        formDataToSend.append('latitude', String(formData.company_location.lat));
+        formDataToSend.append('longitude', String(formData.company_location.lng));
+      }
+
+      if (formData.license_file) {
+        formDataToSend.append('license_file', formData.license_file);
+      }
+
+      const response = await companyService.updateProfile(formDataToSend);
+
+      if (response.status === 'success') {
+        toast.success('Cập nhật thông tin hồ sơ thành công! Vui lòng đợi quản trị viên duyệt lại.');
+        navigate('/company/home', { replace: true });
+        return;
+      }
+    } catch (error: any) {
+      const apiData = error.response?.data;
+      const errorMessage = apiData?.message || 'Cập nhật hồ sơ thất bại';
+      toast.error(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <MobileLayout>
+      <AppHeader title="Chỉnh sửa hồ sơ" backFallback="/company/home" />
+
+      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Thông tin chung */}
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: NAVY }}>
+                Thông tin công ty
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Input
+                  label="Tên công ty"
+                  name="company_name"
+                  type="text"
+                  placeholder="Nhập tên công ty"
+                  value={formData.company_name}
+                  onChange={handleChange}
+                  error={errors.company_name}
+                />
+
+                <Input
+                  label="Họ và tên giám đốc"
+                  name="director_name"
+                  type="text"
+                  placeholder="Nhập họ và tên"
+                  value={formData.director_name}
+                  onChange={handleChange}
+                  error={errors.director_name}
+                />
+
+                <Input
+                  label="Số điện thoại công ty"
+                  name="phone"
+                  type="tel"
+                  placeholder="Nhập số điện thoại"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={errors.phone}
+                />
+              </Box>
+            </Box>
+
+            {/* Địa chỉ & Map */}
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: NAVY }}>
+                Địa chỉ hoạt động
+              </Typography>
+
+              <Input
+                label="Địa chỉ chi tiết"
+                name="address"
+                type="text"
+                placeholder="Nhập địa chỉ của công ty"
+                value={formData.address}
+                onChange={handleChange}
+                error={errors.address}
+              />
+
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 2,
+                  border: '1px solid',
+                  borderColor: errors.company_location ? 'error.main' : 'divider',
+                  borderRadius: 2,
+                  bgcolor: formData.company_location ? 'rgba(255, 107, 0, 0.04)' : 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <LocationOnIcon color={formData.company_location ? 'primary' : 'disabled'} />
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography sx={{ fontWeight: 700 }}>
+                      {formData.company_location ? 'Đã xác định vị trí' : 'Chưa chọn tọa độ bản đồ'}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: errors.company_location ? 'error.main' : 'text.secondary' }}
+                    >
+                      {errors.company_location ||
+                        (formData.company_location
+                          ? `${formData.company_location.lat.toFixed(6)}, ${formData.company_location.lng.toFixed(6)}`
+                          : 'Chọn vị trí công ty trên bản đồ để định vị cứu hộ')}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <MuiButton
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<LocationOnIcon />}
+                  sx={{ mt: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 700 }}
+                  onClick={() => setIsLocationPickerOpen(true)}
+                >
+                  {formData.company_location ? 'Thay đổi vị trí bản đồ' : 'Chọn vị trí trên bản đồ'}
+                </MuiButton>
+              </Box>
+            </Box>
+
+            {/* Khu vực hoạt động */}
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: NAVY }}>
+                Khu vực phục vụ
+              </Typography>
+
+              <Select
+                id="service_area"
+                label="Khu vực hoạt động"
+                name="service_area"
+                placeholder="Chọn khu vực hoạt động"
+                options={SERVICE_AREAS}
+                value={formData.service_area}
+                onChange={handleChange}
+                error={errors.service_area}
+                required
+              />
+            </Box>
+
+            {/* Giấy phép kinh doanh */}
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: NAVY }}>
+                Giấy phép kinh doanh / Hồ sơ pháp lý
+              </Typography>
+
+              <Box
+                sx={{
+                  border: '1.5px dashed',
+                  borderColor: errors.license_file ? 'error.main' : formData.license_file ? 'primary.main' : 'divider',
+                  borderRadius: 2,
+                  bgcolor: formData.license_file ? 'rgba(255, 107, 0, 0.04)' : 'background.default',
+                  p: 2,
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      bgcolor: formData.license_file ? 'primary.main' : 'action.hover',
+                      color: formData.license_file ? 'primary.contrastText' : 'text.secondary',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {formData.license_file ? <CheckCircleIcon /> : <ImageIcon />}
+                  </Box>
+
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>
+                      {formData.license_file
+                        ? formData.license_file.name
+                        : formData.existing_license_url
+                          ? 'Đã đính kèm giấy phép kinh doanh'
+                          : 'Ảnh giấy phép kinh doanh'}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: errors.license_file ? 'error.main' : 'text.secondary', mt: 0.5 }}
+                    >
+                      {errors.license_file ||
+                        (formData.license_file
+                          ? `Tập tin mới chọn - ${formatFileSize(formData.license_file.size)}`
+                          : formData.existing_license_url
+                            ? 'Chọn ảnh mới để thay đổi tập tin hiện có'
+                            : 'Chọn 1 ảnh JPG, PNG hoặc WEBP, tối đa 5MB')}
+                    </Typography>
+                  </Box>
+
+                  {formData.license_file ? (
+                    <IconButton aria-label="Bỏ ảnh đã chọn" onClick={handleRemoveLicenseFile} size="small">
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                </Stack>
+
+                <MuiButton
+                  component="label"
+                  variant="outlined"
+                  color={errors.license_file ? 'error' : 'primary'}
+                  fullWidth
+                  startIcon={<UploadFileIcon />}
+                  sx={{ mt: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 700 }}
+                >
+                  {formData.license_file || formData.existing_license_url
+                    ? 'Thay đổi hồ sơ pháp lý'
+                    : 'Tải lên hồ sơ pháp lý'}
+                  <input
+                    hidden
+                    name="license_file"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleLicenseFileChange}
+                  />
+                </MuiButton>
+              </Box>
+            </Box>
+
+            <Box sx={{ mt: 2 }}>
+              <Button type="submit" variant="primary" fullWidth loading={isSaving} startIcon={<SaveIcon />}>
+                Lưu thông tin hồ sơ
+              </Button>
+            </Box>
+          </form>
+        )}
+      </Box>
+
+      <LocationPickerDialog
+        open={isLocationPickerOpen}
+        value={formData.company_location}
+        onClose={() => setIsLocationPickerOpen(false)}
+        onConfirm={handleConfirmCompanyLocation}
+      />
+    </MobileLayout>
+  );
+}

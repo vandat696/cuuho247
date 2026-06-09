@@ -17,12 +17,8 @@ export const companyService = {
   /**
    * Update company profile
    */
-  updateProfile: async (data: Partial<Company>): Promise<ApiResponse<Company>> => {
-    const companyId = localStorage.getItem('companyId');
-    if (!companyId) {
-      throw new Error('Company ID not found');
-    }
-    const response = await http.patch<ApiResponse<Company>>(`/company/${companyId}`, data);
+  updateProfile: async (data: Partial<Company> | FormData): Promise<ApiResponse<Company>> => {
+    const response = await http.put<ApiResponse<Company>>('/company/profile', data);
     return response.data;
   },
 };

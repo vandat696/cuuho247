@@ -7,6 +7,7 @@ import { RegisterRoutes } from './routes/RegisterRoutes';
 import { RescueRoutes } from './routes/RescueRoutes';
 import { CustomerRoutes } from './routes/CustomerRoutes';
 import { CompanyRoutes } from './routes/CompanyRoutes';
+import { AdminRoutes } from './routes/AdminRoutes';
 
 // Suspense Fallback
 const SuspenseFallback = () => (
@@ -48,6 +49,7 @@ function App() {
           <Route path="/rescue/*" element={<RescueRoutes />} />
           <Route path="/customer/*" element={<CustomerRoutes />} />
           <Route path="/company/*" element={<CompanyRoutes />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
 
           {/* Chat Routes */}
           <Route path="/chat/:rescueRequestId" element={<ChatPage />} />

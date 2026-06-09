@@ -156,7 +156,8 @@ export function ConfirmRequestCard({
           <Box>
             <Typography sx={{ fontWeight: 700, fontSize: 16, color: '#0f172a' }}>{company.name}</Typography>
             <Typography sx={{ fontSize: 13, color: '#64748b', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <span style={{ color: '#eab308' }}>★</span> {company.rating} ({company.reviews} đánh giá)
+              <span style={{ color: '#eab308' }}>★</span>
+              {company.reviews > 0 ? `${company.rating} (${company.reviews} đánh giá)` : 'Chưa có đánh giá'}
             </Typography>
           </Box>
         </Box>

@@ -11,7 +11,9 @@ export type AdminAction =
   | 'remove_review'
   | 'remove_post'
   | 'remove_reply'
-  | 'request_more_docs';
+  | 'request_more_docs'
+  | 'restore_review'
+  | 'restore_reply';
 
 export type AdminTargetType = 'user' | 'company' | 'review' | 'community_post';
 
@@ -42,6 +44,8 @@ const AdminLogSchema = new Schema<IAdminLog>(
         'remove_post',
         'remove_reply',
         'request_more_docs',
+        'restore_review',
+        'restore_reply',
       ],
       required: true,
     },

@@ -14,6 +14,7 @@ import rescueRoutes from './modules/rescue/rescue.route';
 import { serviceRouter, serviceCategoryRouter } from './modules/service-catalog/service-catalog.route';
 import messageRoutes from './modules/message/message.route';
 import adminRoutes from './modules/admin/admin.route';
+import reviewRoutes from './modules/review/review.route';
 
 const router = Router();
 
@@ -40,5 +41,8 @@ router.use('/messages', messageRoutes);
 
 // Admin Routes
 router.use('/admin', adminRoutes);
+
+// Ratings Routes
+router.use('/ratings', reviewRoutes);
 
 export default router;

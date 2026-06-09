@@ -79,6 +79,18 @@ const CompanyRegisterForm = () => {
 
   const handleConfirmCompanyLocation = (location: RescueLocation) => {
     handleCompanyLocationChange(location);
+    if (location.address) {
+      setFormData((prev) => ({
+        ...prev,
+        address: location.address,
+      }));
+      if (errors.address) {
+        setErrors((prev) => ({
+          ...prev,
+          address: '',
+        }));
+      }
+    }
     setIsLocationPickerOpen(false);
   };
 

@@ -13,7 +13,13 @@ export const formatAddress = (address?: Record<string, unknown>) => {
 
   const parts = ['detail', 'ward', 'district', 'province']
     .map((key) => address[key])
-    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' &&
+        value.trim().length > 0 &&
+        value.trim().toLowerCase() !== 'chưa cập nhật' &&
+        value.trim().toLowerCase() !== 'chua cap nhat'
+    );
 
   return parts.length > 0 ? parts.join(', ') : 'Chưa có địa chỉ';
 };
@@ -151,6 +157,7 @@ export const PrimaryActionButton = ({
       disabled={disabled}
       sx={{
         width: '100%',
+        height: '100%',
         px: 3,
         py: 1.5,
         borderRadius: BUTTON_RADIUS,

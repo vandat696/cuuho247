@@ -38,17 +38,34 @@ class CompanyService implements ICompanyService {
     }
 
     // Set status to pending verification as per requirements
+    // Also clear any previous admin reason messages when company re-submits
     const updateData: any = {
       ...data,
       status: 'pending_verification',
       is_verified: false,
+      rejection_reason: null,
+      document_request_reason: null,
     };
+
+    if (typeof data.address === 'string') {
+      updateData.address = {
+        province: 'Chưa cập nhật',
+        district: 'Chưa cập nhật',
+        ward: 'Chưa cập nhật',
+        detail: data.address,
+      };
+    }
 
     if (data.location?.coordinates) {
       updateData.location = {
         type: 'Point',
         coordinates: data.location.coordinates,
       };
+    }
+
+    if (data.license_url) {
+      updateData.license_file_url = data.license_url;
+      delete updateData.license_url;
     }
 
     const updatedCompany = await companyRepository.updateById(companyId, updateData);

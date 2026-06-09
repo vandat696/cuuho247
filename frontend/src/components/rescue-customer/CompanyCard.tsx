@@ -50,8 +50,16 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
       {/* Rating Row */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <StarIcon sx={{ color: '#ffb400', fontSize: 20, mr: 0.5 }} />
-        <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>{company.rating_avg}</Typography>
-        <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+        {company.rating_count > 0 ? (
+          <>
+            <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>
+              {company.rating_avg}
+            </Typography>
+            <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+          </>
+        ) : (
+          <Typography sx={{ color: '#718096', fontSize: 14 }}>Chưa có đánh giá</Typography>
+        )}
       </Box>
 
       {/* Price and Time Info */}

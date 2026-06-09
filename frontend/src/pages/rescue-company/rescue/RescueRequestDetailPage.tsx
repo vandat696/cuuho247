@@ -9,6 +9,7 @@ import {
   PersonOutline as UserIcon,
   PhoneOutlined as PhoneIcon,
   ChatBubbleOutline,
+  StarOutline,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -466,6 +467,12 @@ export default function RescueRequestDetailPage() {
 
               {(status === 'completed' || status === 'canceled') && (
                 <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {status === 'completed' && (
+                    <PrimaryActionButton onClick={() => navigate('/company/reviews')} variant="orange">
+                      <StarOutline sx={{ fontSize: 20, mr: 1 }} />
+                      Xem đánh giá khách hàng
+                    </PrimaryActionButton>
+                  )}
                   <PrimaryActionButton onClick={() => navigate('/company/home')} variant="navy">
                     Quay về trang chủ
                   </PrimaryActionButton>

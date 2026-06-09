@@ -46,7 +46,21 @@ class CompanyController {
         return;
       }
 
-      const updateData = req.body;
+      const licenseFileUrl = req.file
+        ? `${req.protocol}://${req.get('host')}/uploads/${encodeURIComponent(req.file.filename)}`
+        : undefined;
+
+      const updateData = {
+        ...req.body,
+        ...(licenseFileUrl ? { license_url: licenseFileUrl } : {}),
+      };
+
+      if (req.body.latitude && req.body.longitude) {
+        updateData.location = {
+          coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)],
+        };
+      }
+
       const updatedCompany = await companyService.updateCompanyProfile(companyId, updateData);
 
       res.status(200).json({
