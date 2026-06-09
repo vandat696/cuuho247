@@ -18,8 +18,13 @@ import reviewRoutes from './modules/review/review.route';
 
 const router = Router();
 
+import userRoutes from './modules/user/user.route';
+
 // Auth routes
 router.use('/auth', authRoutes);
+
+// User routes
+router.use('/users', userRoutes);
 
 // Company services routes (phải đặt trước /company để avoid route conflict)
 router.use('/company/services', serviceRouter);
