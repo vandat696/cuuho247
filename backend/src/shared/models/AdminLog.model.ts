@@ -10,12 +10,15 @@ export type AdminAction =
   | 'verify_user'
   | 'remove_review'
   | 'remove_post'
+  | 'restore_post'
+  | 'remove_comment'
+  | 'restore_comment'
   | 'remove_reply'
   | 'request_more_docs'
   | 'restore_review'
   | 'restore_reply';
 
-export type AdminTargetType = 'user' | 'company' | 'review' | 'community_post';
+export type AdminTargetType = 'user' | 'company' | 'review' | 'community_post' | 'post' | 'comment';
 
 export interface IAdminLog extends Document {
   admin_id: Types.ObjectId;
@@ -42,6 +45,9 @@ const AdminLogSchema = new Schema<IAdminLog>(
         'verify_user',
         'remove_review',
         'remove_post',
+        'restore_post',
+        'remove_comment',
+        'restore_comment',
         'remove_reply',
         'request_more_docs',
         'restore_review',
@@ -51,7 +57,7 @@ const AdminLogSchema = new Schema<IAdminLog>(
     },
     target_type: {
       type: String,
-      enum: ['user', 'company', 'review', 'community_post'],
+      enum: ['user', 'company', 'review', 'community_post', 'post', 'comment'],
       required: true,
     },
     target_id: { type: Schema.Types.ObjectId, required: true },

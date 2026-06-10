@@ -151,4 +151,42 @@ export const adminService = {
     const response = await axiosInstance.get<ApiResponse<AuditLog[]>>(`/admin/companies/${companyId}/logs`);
     return response.data;
   },
+
+  getCommunityPosts: async (
+    search?: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<ApiResponse<{ posts: any[]; total: number }>> => {
+    const response = await axiosInstance.get<ApiResponse<{ posts: any[]; total: number }>>('/admin/community/posts', {
+      params: { search, page, limit },
+    });
+    return response.data;
+  },
+
+  getPostComments: async (postId: string): Promise<ApiResponse<any[]>> => {
+    const response = await axiosInstance.get<ApiResponse<any[]>>(`/admin/community/posts/${postId}/comments`);
+    return response.data;
+  },
+
+  removePost: async (postId: string, reason: string): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.put<ApiResponse<any>>(`/admin/community/posts/${postId}/remove`, { reason });
+    return response.data;
+  },
+
+  restorePost: async (postId: string): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.put<ApiResponse<any>>(`/admin/community/posts/${postId}/restore`);
+    return response.data;
+  },
+
+  removeComment: async (commentId: string, reason: string): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.put<ApiResponse<any>>(`/admin/community/comments/${commentId}/remove`, {
+      reason,
+    });
+    return response.data;
+  },
+
+  restoreComment: async (commentId: string): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.put<ApiResponse<any>>(`/admin/community/comments/${commentId}/restore`);
+    return response.data;
+  },
 };

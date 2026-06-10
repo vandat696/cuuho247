@@ -160,7 +160,7 @@ export default function AdminHomePage() {
               <ActionCard
                 icon={<AdminIcon sx={{ fontSize: 24 }} />}
                 title="Kiểm duyệt nội dung"
-                description="Xem và gỡ bỏ đánh giá, phản hồi vi phạm"
+                description="Gỡ bỏ đánh giá, phản hồi và bài viết/bình luận vi phạm"
                 onClick={() => navigate('/admin/reviews')}
               />
               <ActionCard

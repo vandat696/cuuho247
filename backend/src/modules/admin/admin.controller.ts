@@ -229,6 +229,74 @@ class AdminController {
       next(err);
     }
   }
+
+  async getCommunityPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const search = req.query.search as string;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const result = await adminService.getCommunityPosts(search, page, limit);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getPostComments(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const comments = await adminService.getPostComments(postId);
+      res.status(200).json({ status: 'success', data: comments });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async removePost(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const post = await adminService.removePost(postId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Đã gỡ bài viết thành công', data: post });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async restorePost(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { postId } = req.params;
+      const adminId = req.user?.id as string;
+      const post = await adminService.restorePost(postId, adminId);
+      res.status(200).json({ status: 'success', message: 'Đã khôi phục bài viết thành công', data: post });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async removeComment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { commentId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const comment = await adminService.removeComment(commentId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Đã gỡ bình luận thành công', data: comment });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async restoreComment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { commentId } = req.params;
+      const adminId = req.user?.id as string;
+      const comment = await adminService.restoreComment(commentId, adminId);
+      res.status(200).json({ status: 'success', message: 'Đã khôi phục bình luận thành công', data: comment });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export default new AdminController();

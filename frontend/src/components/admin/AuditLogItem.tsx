@@ -50,6 +50,26 @@ const actionLabels: Record<string, { label: string; color: string; icon: React.R
     color: GREEN,
     icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
   },
+  remove_post: {
+    label: 'Gỡ bài viết cộng đồng',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  restore_post: {
+    label: 'Khôi phục bài viết cộng đồng',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
+  remove_comment: {
+    label: 'Gỡ bình luận cộng đồng',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  restore_comment: {
+    label: 'Khôi phục bình luận cộng đồng',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
 };
 
 export const AuditLogItem = ({ log }: AuditLogItemProps) => {
@@ -96,6 +116,17 @@ export const AuditLogItem = ({ log }: AuditLogItemProps) => {
           ) : log.target_type === 'user' ? (
             <>
               <strong>Người dùng:</strong> {log.target_name || log.target_id}
+            </>
+          ) : log.target_type === 'post' ? (
+            <>
+              <strong>Bài viết:</strong> {log.details?.title || log.target_id}
+            </>
+          ) : log.target_type === 'comment' ? (
+            <>
+              <strong>Bình luận:</strong>{' '}
+              {log.details?.content
+                ? `"${(log.details.content as string).slice(0, 60)}${(log.details.content as string).length > 60 ? '...' : ''}"`
+                : log.target_id}
             </>
           ) : (
             <>

@@ -38,4 +38,12 @@ router.patch('/companies/:companyId/lock', adminController.lockCompany);
 router.patch('/companies/:companyId/unlock', adminController.unlockCompany);
 router.get('/companies/:companyId/logs', adminController.getCompanyLogs);
 
+// Community moderation
+router.get('/community/posts', adminController.getCommunityPosts);
+router.get('/community/posts/:postId/comments', adminController.getPostComments);
+router.put('/community/posts/:postId/remove', adminController.removePost);
+router.put('/community/posts/:postId/restore', adminController.restorePost);
+router.put('/community/comments/:commentId/remove', adminController.removeComment);
+router.put('/community/comments/:commentId/restore', adminController.restoreComment);
+
 export default router;

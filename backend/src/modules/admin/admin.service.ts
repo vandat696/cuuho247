@@ -5,6 +5,8 @@ import { Notification } from '@/shared/models/Notification.model';
 import { User } from '@/shared/models/User.model';
 import { Review } from '@/shared/models/Review.model';
 import { reviewRepository } from '../review/review.repository';
+import { CommunityPost } from '@/shared/models/CommunityPost.model';
+import { CommunityPostComment } from '@/shared/models/CommunityPostComment.model';
 
 class AdminService {
   async approveCompany(companyId: string, adminId: string, reason?: string) {
@@ -421,6 +423,122 @@ class AdminService {
       .populate('admin_id', 'full_name email')
       .exec();
     return logs;
+  }
+
+  async getCommunityPosts(search?: string, page: number = 1, limit: number = 20) {
+    const query: any = {};
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [{ title: regex }, { content: regex }];
+    }
+    const skip = (page - 1) * limit;
+    const [posts, total] = await Promise.all([
+      CommunityPost.find(query)
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('user_id', 'full_name avatar_url')
+        .populate('tags', 'name')
+        .exec(),
+      CommunityPost.countDocuments(query).exec(),
+    ]);
+    return { posts, total };
+  }
+
+  async getPostComments(postId: string) {
+    const comments = await CommunityPostComment.find({ post_id: postId })
+      .sort({ created_at: -1 })
+      .populate('user_id', 'full_name avatar_url')
+      .exec();
+    return comments;
+  }
+
+  async removePost(postId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do gỡ bài viết là bắt buộc');
+    const post = await CommunityPost.findById(postId);
+    if (!post) throw new ApiError(404, 'Bài viết không tồn tại');
+    if (!post.is_visible) throw new ApiError(400, 'Bài viết đã bị gỡ trước đó');
+
+    post.is_visible = false;
+    post.removed_by = adminId as any;
+    post.removal_reason = reason;
+    post.removed_at = new Date();
+    await post.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'remove_post',
+      target_type: 'post',
+      target_id: post._id,
+      details: { reason, title: post.title },
+    });
+
+    return post;
+  }
+
+  async restorePost(postId: string, adminId: string) {
+    const post = await CommunityPost.findById(postId);
+    if (!post) throw new ApiError(404, 'Bài viết không tồn tại');
+    if (post.is_visible) throw new ApiError(400, 'Bài viết đang hiển thị, không cần khôi phục');
+
+    post.is_visible = true;
+    post.removed_by = undefined;
+    post.removal_reason = undefined;
+    post.removed_at = undefined;
+    await post.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'restore_post',
+      target_type: 'post',
+      target_id: post._id,
+    });
+
+    return post;
+  }
+
+  async removeComment(commentId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do gỡ bình luận là bắt buộc');
+    const comment = await CommunityPostComment.findById(commentId);
+    if (!comment) throw new ApiError(404, 'Bình luận không tồn tại');
+    if (!comment.is_visible) throw new ApiError(400, 'Bình luận đã bị gỡ trước đó');
+
+    comment.is_visible = false;
+    comment.removed_by = adminId as any;
+    comment.removal_reason = reason;
+    comment.removed_at = new Date();
+    await comment.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'remove_comment',
+      target_type: 'comment',
+      target_id: comment._id,
+      details: { reason, content: comment.content },
+    });
+
+    return comment;
+  }
+
+  async restoreComment(commentId: string, adminId: string) {
+    const comment = await CommunityPostComment.findById(commentId);
+    if (!comment) throw new ApiError(404, 'Bình luận không tồn tại');
+    if (comment.is_visible) throw new ApiError(400, 'Bình luận đang hiển thị, không cần khôi phục');
+
+    comment.is_visible = true;
+    comment.removed_by = undefined;
+    comment.removal_reason = undefined;
+    comment.removed_at = undefined;
+    await comment.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'restore_comment',
+      target_type: 'comment',
+      target_id: comment._id,
+    });
+
+    return comment;
   }
 }
 
