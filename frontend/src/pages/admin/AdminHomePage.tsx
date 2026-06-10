@@ -154,7 +154,7 @@ export default function AdminHomePage() {
               <ActionCard
                 icon={<UserIcon sx={{ fontSize: 24 }} />}
                 title="Quản lý người dùng"
-                description="Xem thông tin và khóa/mở khóa tài khoản khách hàng"
+                description="Xem thông tin và khóa/mở khóa tài khoản"
                 onClick={() => navigate('/admin/users')}
               />
               <ActionCard

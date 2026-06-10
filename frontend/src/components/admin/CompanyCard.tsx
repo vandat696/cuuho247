@@ -87,7 +87,7 @@ export const CompanyCard = ({ company, onClick }: CompanyCardProps) => {
       </Box>
 
       <Button variant="secondary" fullWidth onClick={onClick}>
-        Xem chi tiết đối tác
+        Xem chi tiết công ty
       </Button>
     </Box>
   );

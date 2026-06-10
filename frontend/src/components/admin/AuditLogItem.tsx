@@ -41,12 +41,12 @@ const actionLabels: Record<string, { label: string; color: string; icon: React.R
     icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
   },
   lock_company: {
-    label: 'Khóa tài khoản đối tác',
+    label: 'Khóa tài khoản công ty',
     color: RED,
     icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
   },
   unlock_company: {
-    label: 'Mở khóa tài khoản đối tác',
+    label: 'Mở khóa tài khoản công ty',
     color: GREEN,
     icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
   },

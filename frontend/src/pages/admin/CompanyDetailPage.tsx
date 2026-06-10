@@ -82,7 +82,7 @@ export default function CompanyDetailPage() {
       }
     } catch (error) {
       console.error('Error fetching company detail:', error);
-      toast.error('Không thể tải chi tiết đối tác cứu hộ');
+      toast.error('Không thể tải chi tiết công ty cứu hộ');
       navigate('/admin/users', { replace: true });
     } finally {
       setLoading(false);
@@ -93,7 +93,7 @@ export default function CompanyDetailPage() {
     setDialogConfig({
       open: true,
       type,
-      title: type === 'lock' ? 'Khóa tài khoản đối tác' : 'Mở khóa tài khoản đối tác',
+      title: type === 'lock' ? 'Khóa tài khoản công ty' : 'Mở khóa tài khoản công ty',
       placeholder:
         type === 'lock'
           ? 'Nhập lý do cụ thể khóa tài khoản này (ví dụ: vi phạm chính sách, thái độ cứu hộ không tốt)...'
@@ -129,7 +129,7 @@ export default function CompanyDetailPage() {
   if (loading) {
     return (
       <MobileLayout>
-        <AppHeader title="Chi tiết đối tác" backFallback="/admin/users" />
+        <AppHeader title="Chi tiết công ty" backFallback="/admin/users" />
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
         </Box>
@@ -145,7 +145,7 @@ export default function CompanyDetailPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Chi tiết đối tác" backFallback="/admin/users" />
+      <AppHeader title="Chi tiết công ty" backFallback="/admin/users" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         {/* Basic Information Card */}

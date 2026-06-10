@@ -19,7 +19,7 @@ const PAGE_SIZE = 15;
 
 export default function UserListPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(0); // 0 = Khách hàng, 1 = Đối tác
+  const [activeTab, setActiveTab] = useState(0); // 0 = Khách hàng, 1 = Công ty
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [total, setTotal] = useState(0);
@@ -99,7 +99,7 @@ export default function UserListPage() {
       }
     } catch (error) {
       console.error('Error fetching companies:', error);
-      toast.error('Không thể tải danh sách đối tác cứu hộ');
+      toast.error('Không thể tải danh sách công ty cứu hộ');
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -148,7 +148,7 @@ export default function UserListPage() {
           }}
         >
           <Tab label="Khách hàng" id="tab-customers" />
-          <Tab label="Đối tác cứu hộ" id="tab-companies" />
+          <Tab label="Công ty cứu hộ" id="tab-companies" />
         </Tabs>
 
         {/* Search & Filter Controls */}
