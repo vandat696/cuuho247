@@ -116,13 +116,13 @@ const CommunityDetailPage: React.FC = () => {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5 }}>
               <Avatar
-                src={post.user_id.avatar_url || ''}
-                alt={post.user_id.full_name}
+                src={post.author_avatar || post.user_id?.avatar_url || ''}
+                alt={post.author_name || ''}
                 sx={{ width: 44, height: 44, mr: 1.5 }}
               />
               <Box>
                 <Typography sx={{ fontWeight: 600, fontSize: 15, color: '#1e293b' }}>
-                  {post.user_id.full_name}
+                  {post.author_name || post.user_id?.company_name || post.user_id?.full_name || ''}
                 </Typography>
                 <Typography sx={{ fontSize: 13, color: '#64748b' }}>{formatRelativeTime(post.created_at)}</Typography>
               </Box>
@@ -222,8 +222,8 @@ const CommunityDetailPage: React.FC = () => {
                 {post.comments.map((comment) => (
                   <Box key={comment._id} sx={{ display: 'flex', gap: 1.5 }}>
                     <Avatar
-                      src={comment.user_id.avatar_url || ''}
-                      alt={comment.user_id.full_name}
+                      src={comment.author_avatar || comment.user_id?.avatar_url || ''}
+                      alt={comment.author_name || ''}
                       sx={{ width: 36, height: 36 }}
                     />
                     <Box sx={{ flex: 1 }}>
@@ -231,7 +231,7 @@ const CommunityDetailPage: React.FC = () => {
                         sx={{ bgcolor: '#fff', p: 1.5, borderRadius: '0 12px 12px 12px', border: '1px solid #f1f5f9' }}
                       >
                         <Typography sx={{ fontWeight: 600, fontSize: 14, color: '#1e293b', mb: 0.5 }}>
-                          {comment.user_id.full_name}
+                          {comment.author_name || comment.user_id?.company_name || comment.user_id?.full_name || ''}
                         </Typography>
                         <Typography sx={{ fontSize: 14, color: '#334155', whiteSpace: 'pre-wrap' }}>
                           {comment.content}

@@ -15,6 +15,9 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const [isLiked, setIsLiked] = useState(!!post.is_liked);
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
 
+  const authorName = post.author_name || post.user_id?.company_name || post.user_id?.full_name || '';
+  const authorAvatar = post.author_avatar || post.user_id?.avatar_url || '';
+
   return (
     <Box
       onClick={() => navigate(`/community/${post._id}`)}
@@ -30,13 +33,9 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Avatar
-          src={post.user_id.avatar_url || ''}
-          alt={post.user_id.full_name}
-          sx={{ width: 40, height: 40, mr: 1.5 }}
-        />
+        <Avatar src={authorAvatar} alt={authorName} sx={{ width: 40, height: 40, mr: 1.5 }} />
         <Box>
-          <Typography sx={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>{post.user_id.full_name}</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>{authorName}</Typography>
           <Typography sx={{ fontSize: 12, color: '#64748b' }}>{formatRelativeTime(post.created_at)}</Typography>
         </Box>
       </Box>

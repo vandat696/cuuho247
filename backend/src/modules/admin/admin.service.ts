@@ -440,7 +440,7 @@ class AdminService {
         .sort({ created_at: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('user_id', 'full_name avatar_url')
+        .populate('user_id', 'full_name company_name avatar_url role')
         .populate('tags', 'name')
         .exec(),
       CommunityPost.countDocuments(query).exec(),
@@ -451,7 +451,7 @@ class AdminService {
   async getPostComments(postId: string) {
     const comments = await CommunityPostComment.find({ post_id: postId })
       .sort({ created_at: -1 })
-      .populate('user_id', 'full_name avatar_url')
+      .populate('user_id', 'full_name company_name avatar_url role')
       .exec();
     return comments;
   }

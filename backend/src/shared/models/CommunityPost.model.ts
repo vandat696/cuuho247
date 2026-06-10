@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ICommunityPost extends Document {
   user_id: Types.ObjectId;
+  user_type: 'User' | 'Company';
   title: string;
   content: string;
   images?: string[];
@@ -18,7 +19,8 @@ export interface ICommunityPost extends Document {
 
 const CommunityPostSchema = new Schema<ICommunityPost>(
   {
-    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: Schema.Types.ObjectId, refPath: 'user_type', required: true },
+    user_type: { type: String, enum: ['User', 'Company'], required: true, default: 'User' },
     title: { type: String, required: true },
     content: { type: String, required: true },
     images: [{ type: String }],

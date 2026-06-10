@@ -2,7 +2,8 @@ import { http as api } from './http';
 
 export interface User {
   _id: string;
-  full_name: string;
+  full_name?: string;
+  company_name?: string;
   avatar_url?: string;
   role: string;
 }
@@ -14,7 +15,9 @@ export interface Tag {
 
 export interface CommunityPost {
   _id: string;
-  user_id: User;
+  user_id: User | null;
+  author_name: string | null;
+  author_avatar: string | null;
   title: string;
   content: string;
   images?: string[];
@@ -28,7 +31,9 @@ export interface CommunityPost {
 export interface CommunityComment {
   _id: string;
   post_id: string;
-  user_id: User;
+  user_id: User | null;
+  author_name: string | null;
+  author_avatar: string | null;
   content: string;
   created_at: string;
 }

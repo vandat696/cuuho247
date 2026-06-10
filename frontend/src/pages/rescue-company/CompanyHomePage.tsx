@@ -8,6 +8,7 @@ import {
   LogoutRounded as LogoutIcon,
   NotificationsNoneRounded as NotificationsIcon,
   StarOutlineRounded as StarOutlineIcon,
+  PeopleOutlined as CommunityIcon,
 } from '@mui/icons-material';
 
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -283,6 +284,12 @@ export default function CompanyHomePage() {
                 title="Đánh giá khách hàng"
                 description="Xem và phản hồi đánh giá"
                 onClick={() => navigate('/company/reviews')}
+              />
+              <ActionCard
+                icon={<CommunityIcon sx={{ fontSize: 24 }} />}
+                title="Cộng đồng"
+                description="Chia sẻ và trao đổi cùng cộng đồng"
+                onClick={() => navigate('/community')}
               />
             </Box>
 

@@ -3,6 +3,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 export interface ICommunityPostComment extends Document {
   post_id: Types.ObjectId;
   user_id: Types.ObjectId;
+  user_type: 'User' | 'Company';
   content: string;
   is_visible?: boolean;
   removed_by?: Types.ObjectId;
@@ -15,7 +16,8 @@ export interface ICommunityPostComment extends Document {
 const CommunityPostCommentSchema = new Schema<ICommunityPostComment>(
   {
     post_id: { type: Schema.Types.ObjectId, ref: 'CommunityPost', required: true },
-    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: Schema.Types.ObjectId, refPath: 'user_type', required: true },
+    user_type: { type: String, enum: ['User', 'Company'], required: true, default: 'User' },
     content: { type: String, required: true },
     is_visible: { type: Boolean, default: true },
     removed_by: { type: Schema.Types.ObjectId, ref: 'Admin' },
