@@ -3,13 +3,15 @@ import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
 const AdminHomePage = React.lazy(() => import('@/pages/admin/AdminHomePage'));
-const PendingCompaniesPage = React.lazy(() => import('@/pages/admin/PendingCompaniesPage'));
-const CompanyVerificationDetailPage = React.lazy(() => import('@/pages/admin/CompanyVerificationDetailPage'));
-const AdminLogsPage = React.lazy(() => import('@/pages/admin/AdminLogsPage'));
-const AdminReviewsPage = React.lazy(() => import('@/pages/admin/AdminReviewsPage'));
-const UserListPage = React.lazy(() => import('@/pages/admin/UserListPage'));
-const UserDetailPage = React.lazy(() => import('@/pages/admin/UserDetailPage'));
-const CompanyDetailPage = React.lazy(() => import('@/pages/admin/CompanyDetailPage'));
+const PendingCompaniesPage = React.lazy(() => import('@/pages/admin/companies/PendingCompaniesPage'));
+const CompanyVerificationDetailPage = React.lazy(() => import('@/pages/admin/companies/CompanyVerificationDetailPage'));
+const AdminLogsPage = React.lazy(() => import('@/pages/admin/logs/AdminLogsPage'));
+const AdminReviewsPage = React.lazy(() => import('@/pages/admin/reviews/AdminReviewsPage'));
+const UserListPage = React.lazy(() => import('@/pages/admin/users/UserListPage'));
+const UserDetailPage = React.lazy(() => import('@/pages/admin/users/UserDetailPage'));
+const CompanyDetailPage = React.lazy(() => import('@/pages/admin/companies/CompanyDetailPage'));
+const AdminReportsPage = React.lazy(() => import('@/pages/admin/reports/AdminReportsPage'));
+const AdminServiceQualityPage = React.lazy(() => import('@/pages/admin/reports/AdminServiceQualityPage'));
 
 export function AdminRoutes() {
   return (
@@ -51,6 +53,22 @@ export function AdminRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminReviewsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="reports"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="reports/service-quality"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminServiceQualityPage />
           </ProtectedRoute>
         }
       />

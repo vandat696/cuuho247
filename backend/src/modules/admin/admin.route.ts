@@ -32,6 +32,7 @@ router.patch('/users/:userId/unlock', adminController.unlockUser);
 router.get('/users/:userId/logs', adminController.getUserLogs);
 
 // Company lock/unlock management
+router.get('/companies/all', adminController.getAllCompanies);
 router.get('/companies', adminController.getCompanies);
 router.get('/companies/:companyId', adminController.getCompanyById);
 router.patch('/companies/:companyId/lock', adminController.lockCompany);
@@ -45,5 +46,9 @@ router.put('/community/posts/:postId/remove', adminController.removePost);
 router.put('/community/posts/:postId/restore', adminController.restorePost);
 router.put('/community/comments/:commentId/remove', adminController.removeComment);
 router.put('/community/comments/:commentId/restore', adminController.restoreComment);
+
+// Reports
+router.get('/reports/rescue-activities', adminController.getRescueActivitiesReport);
+router.get('/reports/service-quality', adminController.getServiceQualityReport);
 
 export default router;

@@ -25,6 +25,77 @@ export interface GetAuditLogsResult {
   total: number;
 }
 
+export interface ServiceTypeStat {
+  categoryId: string;
+  name: string;
+  count: number;
+  percentage: number;
+}
+
+export interface StatusStat {
+  status: string;
+  count: number;
+}
+
+export interface TimeSeriesPoint {
+  date: string;
+  count: number;
+  completed: number;
+  cancelled: number;
+}
+
+export interface RescueActivitiesReport {
+  summary: {
+    totalRequests: number;
+    completedRequests: number;
+    cancelledRequests: number;
+    successRate: number;
+    totalRevenue: number;
+  };
+  serviceTypeStats: ServiceTypeStat[];
+  statusStats: StatusStat[];
+  timeSeries: TimeSeriesPoint[];
+}
+
+export interface DetailedRatingsAvg {
+  response_time: number;
+  service_quality: number;
+  staff_attitude: number;
+  pricing: number;
+}
+
+export interface CompanyQualityBreakdown {
+  companyId: string;
+  companyName: string;
+  totalRequests: number;
+  responseRate: number;
+  avgResponseTime: number;
+  avgRating: number;
+  reviewCount: number;
+}
+
+export interface QualityTimeSeriesPoint {
+  date: string;
+  totalRequests: number;
+  responseRate: number;
+  avgRating: number;
+  reviewCount: number;
+}
+
+export interface ServiceQualityReport {
+  summary: {
+    totalRequests: number;
+    respondedRequests: number;
+    responseRate: number;
+    avgResponseTime: number;
+    totalReviews: number;
+    avgRating: number;
+    detailedRatingsAvg?: DetailedRatingsAvg;
+  };
+  companyBreakdown?: CompanyQualityBreakdown[];
+  timeSeries: QualityTimeSeriesPoint[];
+}
+
 export const adminService = {
   getPendingCompanies: async (): Promise<ApiResponse<Company[]>> => {
     const response = await axiosInstance.get<ApiResponse<Company[]>>('/admin/companies/pending');
@@ -187,6 +258,36 @@ export const adminService = {
 
   restoreComment: async (commentId: string): Promise<ApiResponse<any>> => {
     const response = await axiosInstance.put<ApiResponse<any>>(`/admin/community/comments/${commentId}/restore`);
+    return response.data;
+  },
+
+  getRescueActivitiesReport: async (params: {
+    startDate?: string;
+    endDate?: string;
+    serviceCategoryId?: string;
+    groupBy?: 'day' | 'week' | 'month';
+  }): Promise<ApiResponse<RescueActivitiesReport>> => {
+    const response = await axiosInstance.get<ApiResponse<RescueActivitiesReport>>('/admin/reports/rescue-activities', {
+      params,
+    });
+    return response.data;
+  },
+
+  getAllCompaniesForFilter: async (): Promise<ApiResponse<{ _id: string; company_name: string }[]>> => {
+    const response =
+      await axiosInstance.get<ApiResponse<{ _id: string; company_name: string }[]>>('/admin/companies/all');
+    return response.data;
+  },
+
+  getServiceQualityReport: async (params: {
+    startDate?: string;
+    endDate?: string;
+    companyId?: string;
+    groupBy?: 'day' | 'week' | 'month';
+  }): Promise<ApiResponse<ServiceQualityReport>> => {
+    const response = await axiosInstance.get<ApiResponse<ServiceQualityReport>>('/admin/reports/service-quality', {
+      params,
+    });
     return response.data;
   },
 };

@@ -7,6 +7,8 @@ import {
   HistoryToggleOffOutlined as HistoryIcon,
   LogoutRounded as LogoutIcon,
   ManageAccountsOutlined as UserIcon,
+  BarChartOutlined as ChartIcon,
+  StarBorderOutlined as QualityIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -162,6 +164,18 @@ export default function AdminHomePage() {
                 title="Kiểm duyệt nội dung"
                 description="Gỡ bỏ đánh giá, phản hồi và bài viết/bình luận vi phạm"
                 onClick={() => navigate('/admin/reviews')}
+              />
+              <ActionCard
+                icon={<ChartIcon sx={{ fontSize: 24 }} />}
+                title="Báo cáo hoạt động"
+                description="Xem thống kê yêu cầu cứu hộ và tần suất sử dụng dịch vụ"
+                onClick={() => navigate('/admin/reports')}
+              />
+              <ActionCard
+                icon={<QualityIcon sx={{ fontSize: 24 }} />}
+                title="Chất lượng dịch vụ"
+                description="Xem thống kê tỷ lệ phản hồi và mức độ hài lòng của khách hàng"
+                onClick={() => navigate('/admin/reports/service-quality')}
               />
               <ActionCard
                 icon={<HistoryIcon sx={{ fontSize: 24 }} />}

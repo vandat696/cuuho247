@@ -7,6 +7,9 @@ import { Review } from '@/shared/models/Review.model';
 import { reviewRepository } from '../review/review.repository';
 import { CommunityPost } from '@/shared/models/CommunityPost.model';
 import { CommunityPostComment } from '@/shared/models/CommunityPostComment.model';
+import { RescueRequest } from '@/shared/models/RescueRequest.model';
+import { ServiceCategory } from '@/shared/models/ServiceCategory.model';
+import { Types } from 'mongoose';
 
 class AdminService {
   async approveCompany(companyId: string, adminId: string, reason?: string) {
@@ -539,6 +542,595 @@ class AdminService {
     });
 
     return comment;
+  }
+
+  async getRescueActivitiesReport(
+    startDateStr?: string,
+    endDateStr?: string,
+    serviceCategoryId?: string,
+    groupBy: 'day' | 'week' | 'month' = 'day'
+  ) {
+    // 1. Establish default dates (last 7 days if not provided)
+    let end = new Date();
+    let start = new Date();
+    start.setDate(end.getDate() - 6); // default to 7 days including today
+
+    if (startDateStr) {
+      const parsedStart = new Date(startDateStr);
+      if (isNaN(parsedStart.getTime())) {
+        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
+      }
+      start = parsedStart;
+    }
+
+    if (endDateStr) {
+      const parsedEnd = new Date(endDateStr);
+      if (isNaN(parsedEnd.getTime())) {
+        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
+      }
+      end = parsedEnd;
+    }
+
+    // Adjust boundaries to local full days in UTC (Vietnam time zone offset)
+    const startBoundary = new Date(start);
+    startBoundary.setHours(0, 0, 0, 0);
+
+    const endBoundary = new Date(end);
+    endBoundary.setHours(23, 59, 59, 999);
+
+    // Validate date logic
+    if (startBoundary > endBoundary) {
+      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
+    }
+
+    // Validate max range (366 days)
+    const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
+    if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
+      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
+    }
+
+    // 2. Fetch all service categories first (to map category names)
+    const categories = await ServiceCategory.find().lean().exec();
+    const categoryMap = new Map(categories.map((c) => [c._id.toString(), c.name]));
+
+    // 3. Build match query for database
+    const matchQuery: any = {
+      created_at: { $gte: startBoundary, $lte: endBoundary },
+    };
+
+    if (serviceCategoryId) {
+      // Validate serviceCategoryId format
+      if (!Types.ObjectId.isValid(serviceCategoryId)) {
+        throw new ApiError(400, 'ID danh mục dịch vụ không hợp lệ');
+      }
+      matchQuery.service_types = new Types.ObjectId(serviceCategoryId);
+    }
+
+    // 4. Fetch requests with only relevant fields
+    const requests = await RescueRequest.find(matchQuery, 'created_at status service_types payment').lean().exec();
+
+    // 5. Calculate overall summary statistics
+    const totalRequests = requests.length;
+    const completedRequests = requests.filter((r) => r.status === 'completed').length;
+    const cancelledRequests = requests.filter((r) =>
+      ['cancelled', 'rejected', 'timeout'].includes(r.status || '')
+    ).length;
+    const successRate = totalRequests > 0 ? Math.round((completedRequests / totalRequests) * 10000) / 100 : 0;
+    const totalRevenue = requests
+      .filter((r) => r.status === 'completed')
+      .reduce((sum, r) => sum + (r.payment?.amount || 0), 0);
+
+    // 6. Calculate status breakdown
+    const statusCounts: Record<string, number> = {};
+    requests.forEach((r) => {
+      const status = r.status || 'unknown';
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    });
+    const statusStats = Object.entries(statusCounts).map(([status, count]) => ({
+      status,
+      count,
+    }));
+
+    // 7. Calculate service types breakdown
+    const serviceCounts: Record<string, number> = {};
+    // Initialize all active categories with 0 count
+    categories.forEach((cat) => {
+      serviceCounts[cat._id.toString()] = 0;
+    });
+
+    requests.forEach((r) => {
+      if (r.service_types && Array.isArray(r.service_types)) {
+        r.service_types.forEach((typeId) => {
+          const idStr = typeId.toString();
+          if (idStr in serviceCounts) {
+            serviceCounts[idStr] += 1;
+          } else {
+            serviceCounts[idStr] = 1;
+          }
+        });
+      }
+    });
+
+    const serviceTypeStats = Object.entries(serviceCounts)
+      .map(([id, count]) => {
+        const name = categoryMap.get(id) || 'Khác/Chưa phân loại';
+        const percentage = totalRequests > 0 ? Math.round((count / totalRequests) * 10000) / 100 : 0;
+        return {
+          categoryId: id,
+          name,
+          count,
+          percentage,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+
+    // 8. Generate time-series keys for gap filling
+    const timeKeys = this.generateTimeKeys(startBoundary, endBoundary, groupBy);
+    const timeSeriesMap: Record<string, { count: number; completed: number; cancelled: number }> = {};
+
+    timeKeys.forEach((key) => {
+      timeSeriesMap[key] = { count: 0, completed: 0, cancelled: 0 };
+    });
+
+    requests.forEach((r) => {
+      const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+      if (!timeSeriesMap[key]) {
+        timeSeriesMap[key] = { count: 0, completed: 0, cancelled: 0 };
+      }
+      timeSeriesMap[key].count += 1;
+      if (r.status === 'completed') {
+        timeSeriesMap[key].completed += 1;
+      } else if (['cancelled', 'rejected', 'timeout'].includes(r.status || '')) {
+        timeSeriesMap[key].cancelled += 1;
+      }
+    });
+
+    const timeSeries = Object.entries(timeSeriesMap)
+      .map(([date, stats]) => ({
+        date,
+        ...stats,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      summary: {
+        totalRequests,
+        completedRequests,
+        cancelledRequests,
+        successRate,
+        totalRevenue,
+      },
+      serviceTypeStats,
+      statusStats,
+      timeSeries,
+    };
+  }
+
+  async getAllCompanies() {
+    return await Company.find({ status: 'active' }, '_id company_name').lean().exec();
+  }
+
+  async getServiceQualityReport(
+    startDateStr?: string,
+    endDateStr?: string,
+    companyId?: string,
+    groupBy: 'day' | 'week' | 'month' = 'day'
+  ) {
+    // 1. Establish default dates (last 7 days if not provided)
+    let end = new Date();
+    let start = new Date();
+    start.setDate(end.getDate() - 6);
+
+    if (startDateStr) {
+      const parsedStart = new Date(startDateStr);
+      if (isNaN(parsedStart.getTime())) {
+        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
+      }
+      start = parsedStart;
+    }
+
+    if (endDateStr) {
+      const parsedEnd = new Date(endDateStr);
+      if (isNaN(parsedEnd.getTime())) {
+        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
+      }
+      end = parsedEnd;
+    }
+
+    // Set local boundaries
+    const startBoundary = new Date(start);
+    startBoundary.setHours(0, 0, 0, 0);
+
+    const endBoundary = new Date(end);
+    endBoundary.setHours(23, 59, 59, 999);
+
+    if (startBoundary > endBoundary) {
+      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
+    }
+
+    const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
+    if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
+      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
+    }
+
+    // 2. Fetch active companies to build lookup or compare
+    const activeCompanies = await Company.find({ status: 'active' }, '_id company_name').lean().exec();
+    const companyNameMap = new Map(activeCompanies.map((c) => [c._id.toString(), c.company_name]));
+
+    // 3. Build match queries
+    const requestMatch: any = {
+      created_at: { $gte: startBoundary, $lte: endBoundary },
+    };
+    const reviewMatch: any = {
+      created_at: { $gte: startBoundary, $lte: endBoundary },
+      is_visible: { $ne: false },
+    };
+
+    if (companyId) {
+      if (!Types.ObjectId.isValid(companyId)) {
+        throw new ApiError(400, 'ID công ty cứu hộ không hợp lệ');
+      }
+      requestMatch['company.company_id'] = new Types.ObjectId(companyId);
+      reviewMatch.company_id = new Types.ObjectId(companyId);
+    }
+
+    // 4. Fetch requests and reviews with minimal fields
+    const requests = await RescueRequest.find(
+      requestMatch,
+      'created_at status company.company_id company.company_name accepted_at'
+    )
+      .lean()
+      .exec();
+
+    const reviews = await Review.find(reviewMatch, 'created_at rating detailed_ratings company_id').lean().exec();
+
+    // 5. Generate time-series keys for gap filling
+    const timeKeys = this.generateTimeKeys(startBoundary, endBoundary, groupBy);
+
+    // 6. Calculate statistics
+    if (companyId) {
+      // Specific Company View
+      const totalRequests = requests.length;
+      // Responded requests: status is not pending and not timeout
+      const respondedRequests = requests.filter((r) => r.status !== 'pending' && r.status !== 'timeout').length;
+      const responseRate = totalRequests > 0 ? Math.round((respondedRequests / totalRequests) * 10000) / 100 : 0;
+
+      // Avg response time (for accepted requests where accepted_at is set)
+      const acceptedRequests = requests.filter((r) => r.accepted_at);
+      let avgResponseTime = 0;
+      if (acceptedRequests.length > 0) {
+        const totalDuration = acceptedRequests.reduce((sum, r) => {
+          const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
+          return sum + Math.max(diffMs / 60000, 0); // convert to minutes
+        }, 0);
+        avgResponseTime = Math.round((totalDuration / acceptedRequests.length) * 10) / 10;
+      }
+
+      // Ratings calculations
+      const totalReviews = reviews.length;
+      const avgRating =
+        totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 100) / 100 : 0;
+
+      // Detailed ratings calculation
+      const detailedRatingsAvg = {
+        response_time: 0,
+        service_quality: 0,
+        staff_attitude: 0,
+        pricing: 0,
+      };
+
+      if (totalReviews > 0) {
+        let countRT = 0,
+          countSQ = 0,
+          countSA = 0,
+          countP = 0;
+        let sumRT = 0,
+          sumSQ = 0,
+          sumSA = 0,
+          sumP = 0;
+
+        reviews.forEach((r) => {
+          if (r.detailed_ratings) {
+            if (r.detailed_ratings.response_time) {
+              sumRT += r.detailed_ratings.response_time;
+              countRT++;
+            }
+            if (r.detailed_ratings.service_quality) {
+              sumSQ += r.detailed_ratings.service_quality;
+              countSQ++;
+            }
+            if (r.detailed_ratings.staff_attitude) {
+              sumSA += r.detailed_ratings.staff_attitude;
+              countSA++;
+            }
+            if (r.detailed_ratings.pricing) {
+              sumP += r.detailed_ratings.pricing;
+              countP++;
+            }
+          }
+        });
+
+        detailedRatingsAvg.response_time = countRT > 0 ? Math.round((sumRT / countRT) * 10) / 10 : 0;
+        detailedRatingsAvg.service_quality = countSQ > 0 ? Math.round((sumSQ / countSQ) * 10) / 10 : 0;
+        detailedRatingsAvg.staff_attitude = countSA > 0 ? Math.round((sumSA / countSA) * 10) / 10 : 0;
+        detailedRatingsAvg.pricing = countP > 0 ? Math.round((sumP / countP) * 10) / 10 : 0;
+      }
+
+      // Construct specific company time series
+      const timeSeriesMap: Record<
+        string,
+        { totalRequests: number; respondedRequests: number; ratingSum: number; reviewCount: number }
+      > = {};
+      timeKeys.forEach((key) => {
+        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+      });
+
+      requests.forEach((r) => {
+        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+        if (!timeSeriesMap[key]) {
+          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+        }
+        timeSeriesMap[key].totalRequests += 1;
+        if (r.status !== 'pending' && r.status !== 'timeout') {
+          timeSeriesMap[key].respondedRequests += 1;
+        }
+      });
+
+      reviews.forEach((r) => {
+        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+        if (!timeSeriesMap[key]) {
+          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+        }
+        timeSeriesMap[key].reviewCount += 1;
+        timeSeriesMap[key].ratingSum += r.rating;
+      });
+
+      const timeSeries = Object.entries(timeSeriesMap)
+        .map(([date, val]) => {
+          const rate =
+            val.totalRequests > 0 ? Math.round((val.respondedRequests / val.totalRequests) * 10000) / 100 : 0;
+          const avg = val.reviewCount > 0 ? Math.round((val.ratingSum / val.reviewCount) * 100) / 100 : 0;
+          return {
+            date,
+            totalRequests: val.totalRequests,
+            responseRate: rate,
+            avgRating: avg,
+            reviewCount: val.reviewCount,
+          };
+        })
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        summary: {
+          totalRequests,
+          respondedRequests,
+          responseRate,
+          avgResponseTime,
+          totalReviews,
+          avgRating,
+          detailedRatingsAvg,
+        },
+        timeSeries,
+      };
+    } else {
+      // General All Companies View
+      const totalRequests = requests.length;
+      const respondedRequests = requests.filter((r) => r.status !== 'pending' && r.status !== 'timeout').length;
+      const responseRate = totalRequests > 0 ? Math.round((respondedRequests / totalRequests) * 10000) / 100 : 0;
+
+      const acceptedRequests = requests.filter((r) => r.accepted_at);
+      let avgResponseTime = 0;
+      if (acceptedRequests.length > 0) {
+        const totalDuration = acceptedRequests.reduce((sum, r) => {
+          const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
+          return sum + Math.max(diffMs / 60000, 0);
+        }, 0);
+        avgResponseTime = Math.round((totalDuration / acceptedRequests.length) * 10) / 10;
+      }
+
+      const totalReviews = reviews.length;
+      const avgRating =
+        totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 100) / 100 : 0;
+
+      // Group by company
+      const companyStatsMap: Record<
+        string,
+        {
+          totalRequests: number;
+          respondedRequests: number;
+          acceptedRequestsCount: number;
+          totalResponseTime: number;
+          ratingSum: number;
+          reviewCount: number;
+        }
+      > = {};
+
+      activeCompanies.forEach((comp) => {
+        companyStatsMap[comp._id.toString()] = {
+          totalRequests: 0,
+          respondedRequests: 0,
+          acceptedRequestsCount: 0,
+          totalResponseTime: 0,
+          ratingSum: 0,
+          reviewCount: 0,
+        };
+      });
+
+      requests.forEach((r) => {
+        if (r.company && r.company.company_id) {
+          const compIdStr = r.company.company_id.toString();
+          if (!companyStatsMap[compIdStr]) {
+            companyStatsMap[compIdStr] = {
+              totalRequests: 0,
+              respondedRequests: 0,
+              acceptedRequestsCount: 0,
+              totalResponseTime: 0,
+              ratingSum: 0,
+              reviewCount: 0,
+            };
+          }
+          const cStat = companyStatsMap[compIdStr];
+          cStat.totalRequests += 1;
+          if (r.status !== 'pending' && r.status !== 'timeout') {
+            cStat.respondedRequests += 1;
+          }
+          if (r.accepted_at) {
+            cStat.acceptedRequestsCount += 1;
+            const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
+            cStat.totalResponseTime += Math.max(diffMs / 60000, 0);
+          }
+        }
+      });
+
+      reviews.forEach((r) => {
+        if (r.company_id) {
+          const compIdStr = r.company_id.toString();
+          if (!companyStatsMap[compIdStr]) {
+            companyStatsMap[compIdStr] = {
+              totalRequests: 0,
+              respondedRequests: 0,
+              acceptedRequestsCount: 0,
+              totalResponseTime: 0,
+              ratingSum: 0,
+              reviewCount: 0,
+            };
+          }
+          const cStat = companyStatsMap[compIdStr];
+          cStat.reviewCount += 1;
+          cStat.ratingSum += r.rating;
+        }
+      });
+
+      const companyBreakdown = Object.entries(companyStatsMap)
+        .map(([id, stat]) => {
+          const name = companyNameMap.get(id) || 'Đơn vị đã hủy kích hoạt';
+          const rate =
+            stat.totalRequests > 0 ? Math.round((stat.respondedRequests / stat.totalRequests) * 10000) / 100 : 0;
+          const avgRespTime =
+            stat.acceptedRequestsCount > 0
+              ? Math.round((stat.totalResponseTime / stat.acceptedRequestsCount) * 10) / 10
+              : 0;
+          const avg = stat.reviewCount > 0 ? Math.round((stat.ratingSum / stat.reviewCount) * 100) / 100 : 0;
+
+          return {
+            companyId: id,
+            companyName: name,
+            totalRequests: stat.totalRequests,
+            responseRate: rate,
+            avgResponseTime: avgRespTime,
+            avgRating: avg,
+            reviewCount: stat.reviewCount,
+          };
+        })
+        .sort((a, b) => b.avgRating - a.avgRating || b.totalRequests - a.totalRequests);
+
+      // System-wide time series
+      const timeSeriesMap: Record<
+        string,
+        { totalRequests: number; respondedRequests: number; ratingSum: number; reviewCount: number }
+      > = {};
+      timeKeys.forEach((key) => {
+        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+      });
+
+      requests.forEach((r) => {
+        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+        if (!timeSeriesMap[key]) {
+          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+        }
+        timeSeriesMap[key].totalRequests += 1;
+        if (r.status !== 'pending' && r.status !== 'timeout') {
+          timeSeriesMap[key].respondedRequests += 1;
+        }
+      });
+
+      reviews.forEach((r) => {
+        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+        if (!timeSeriesMap[key]) {
+          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+        }
+        timeSeriesMap[key].reviewCount += 1;
+        timeSeriesMap[key].ratingSum += r.rating;
+      });
+
+      const timeSeries = Object.entries(timeSeriesMap)
+        .map(([date, val]) => {
+          const rate =
+            val.totalRequests > 0 ? Math.round((val.respondedRequests / val.totalRequests) * 10000) / 100 : 0;
+          const avg = val.reviewCount > 0 ? Math.round((val.ratingSum / val.reviewCount) * 100) / 100 : 0;
+          return {
+            date,
+            totalRequests: val.totalRequests,
+            responseRate: rate,
+            avgRating: avg,
+            reviewCount: val.reviewCount,
+          };
+        })
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        summary: {
+          totalRequests,
+          respondedRequests,
+          responseRate,
+          avgResponseTime,
+          totalReviews,
+          avgRating,
+        },
+        companyBreakdown,
+        timeSeries,
+      };
+    }
+  }
+
+  private formatDateTimeKey(date: Date, groupBy: 'day' | 'week' | 'month'): string {
+    const vnDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    const year = vnDate.getUTCFullYear();
+    const month = vnDate.getUTCMonth() + 1;
+    const day = vnDate.getUTCDate();
+
+    if (groupBy === 'month') {
+      return `${year}-${String(month).padStart(2, '0')}`;
+    } else if (groupBy === 'week') {
+      const utcdai = vnDate.getUTCDay();
+      const diffToMonday = utcdai === 0 ? -6 : 1 - utcdai;
+      const monday = new Date(vnDate.getTime() + diffToMonday * 24 * 60 * 60 * 1000);
+      return `${monday.getUTCFullYear()}-${String(monday.getUTCMonth() + 1).padStart(2, '0')}-${String(monday.getUTCDate()).padStart(2, '0')}`;
+    } else {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+  }
+
+  private generateTimeKeys(start: Date, end: Date, groupBy: 'day' | 'week' | 'month'): string[] {
+    const keys: string[] = [];
+    let current = new Date(start.getTime());
+
+    if (groupBy === 'month') {
+      while (current <= end) {
+        keys.push(this.formatDateTimeKey(current, 'month'));
+        const vnDate = new Date(current.getTime() + 7 * 60 * 60 * 1000);
+        const nextMonthVN = new Date(Date.UTC(vnDate.getUTCFullYear(), vnDate.getUTCMonth() + 1, 1));
+        current = new Date(nextMonthVN.getTime() - 7 * 60 * 60 * 1000);
+      }
+    } else if (groupBy === 'week') {
+      const vnDate = new Date(current.getTime() + 7 * 60 * 60 * 1000);
+      const day = vnDate.getUTCDay();
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const monday = new Date(vnDate.getTime() + diffToMonday * 24 * 60 * 60 * 1000);
+      current = new Date(monday.getTime() - 7 * 60 * 60 * 1000);
+
+      while (current <= end) {
+        keys.push(this.formatDateTimeKey(current, 'week'));
+        current = new Date(current.getTime() + 7 * 24 * 60 * 60 * 1000);
+      }
+    } else {
+      while (current <= end) {
+        keys.push(this.formatDateTimeKey(current, 'day'));
+        current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
+      }
+    }
+
+    return Array.from(new Set(keys));
   }
 }
 
