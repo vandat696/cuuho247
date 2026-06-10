@@ -13,8 +13,7 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import {
   InfoCard,
   InfoRow,
@@ -93,7 +92,7 @@ export default function CompanyDetailPage() {
     setDialogConfig({
       open: true,
       type,
-      title: type === 'lock' ? 'Khóa tài khoản công ty' : 'Mở khóa tài khoản công ty',
+      title: type === 'lock' ? 'Khóa tài khoản công ty cứu hộ' : 'Mở khóa tài khoản công ty cứu hộ',
       placeholder:
         type === 'lock'
           ? 'Nhập lý do cụ thể khóa tài khoản này (ví dụ: vi phạm chính sách, thái độ cứu hộ không tốt)...'
@@ -128,12 +127,11 @@ export default function CompanyDetailPage() {
 
   if (loading) {
     return (
-      <MobileLayout>
-        <AppHeader title="Chi tiết công ty" backFallback="/admin/users" />
+      <AdminLayout title="Chi tiết công ty cứu hộ" backFallback="/admin/users" showBack={true}>
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
         </Box>
-      </MobileLayout>
+      </AdminLayout>
     );
   }
 
@@ -144,167 +142,178 @@ export default function CompanyDetailPage() {
   const hasLicense = !!(company.license_file_url || company.license_url);
 
   return (
-    <MobileLayout>
-      <AppHeader title="Chi tiết công ty" backFallback="/admin/users" />
+    <AdminLayout title="Chi tiết công ty cứu hộ" backFallback="/admin/users" showBack={true}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+          gap: 3,
+          alignItems: 'start',
+        }}
+      >
+        {/* Left Column: Basic Details & Business Profile */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Basic Information Card */}
+          <InfoCard title="Thông tin cơ bản">
+            <InfoRow icon={<CompanyIcon />} label="Tên công ty cứu hộ" value={company.company_name} />
+            <InfoRow icon={<PersonIcon />} label="Người đại diện" value={company.director_name} />
+            <InfoRow icon={<MailIcon />} label="Địa chỉ Email" value={company.email} />
+            <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={company.phone} />
+          </InfoCard>
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
-        {/* Basic Information Card */}
-        <InfoCard title="Thông tin cơ bản">
-          <InfoRow icon={<CompanyIcon />} label="Tên công ty" value={company.company_name} />
-          <InfoRow icon={<PersonIcon />} label="Người đại diện" value={company.director_name} />
-          <InfoRow icon={<MailIcon />} label="Địa chỉ Email" value={company.email} />
-          <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={company.phone} />
-        </InfoCard>
+          {/* Location & Service Area */}
+          <InfoCard title="Địa chỉ & Khu vực hoạt động">
+            <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
+            <InfoRow
+              icon={<AreaIcon />}
+              label="Khu vực hoạt động"
+              value={
+                SERVICE_AREAS.find((area) => area.id === company.service_area)?.label ||
+                company.service_area ||
+                'Chưa đăng ký'
+              }
+            />
+          </InfoCard>
 
-        {/* Location & Service Area */}
-        <InfoCard title="Địa chỉ & Khu vực hoạt động">
-          <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
-          <InfoRow
-            icon={<AreaIcon />}
-            label="Khu vực hoạt động"
-            value={
-              SERVICE_AREAS.find((area) => area.id === company.service_area)?.label ||
-              company.service_area ||
-              'Chưa đăng ký'
-            }
-          />
-        </InfoCard>
-
-        {/* License File Card */}
-        <InfoCard title="Giấy phép kinh doanh/Hồ sơ pháp lý">
-          {hasLicense ? (
-            <Box
-              component="a"
-              href={company.license_file_url || company.license_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                p: 2,
-                borderRadius: '8px',
-                bgcolor: 'rgba(255, 107, 0, 0.04)',
-                border: '1px solid rgba(255, 107, 0, 0.15)',
-                textDecoration: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s',
-                '&:hover': { bgcolor: 'rgba(255, 107, 0, 0.08)' },
-              }}
-            >
+          {/* License File Card */}
+          <InfoCard title="Giấy phép kinh doanh/Hồ sơ pháp lý">
+            {hasLicense ? (
               <Box
+                component="a"
+                href={company.license_file_url || company.license_url}
+                target="_blank"
+                rel="noopener noreferrer"
                 sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '8px',
-                  bgcolor: 'rgba(255, 107, 0, 0.1)',
-                  color: ORANGE,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
+                  gap: 2,
+                  p: 2,
+                  borderRadius: '8px',
+                  bgcolor: 'rgba(255, 107, 0, 0.04)',
+                  border: '1px solid rgba(255, 107, 0, 0.15)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s',
+                  '&:hover': { bgcolor: 'rgba(255, 107, 0, 0.08)' },
                 }}
               >
-                <LicenseIcon sx={{ fontSize: 28 }} />
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '8px',
+                    bgcolor: 'rgba(255, 107, 0, 0.1)',
+                    color: ORANGE,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <LicenseIcon sx={{ fontSize: 28 }} />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }} noWrap>
+                    Giấy phép kinh doanh
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, color: '#6b7280', mt: 0.5 }}>Nhấn để xem chi tiết</Typography>
+                </Box>
               </Box>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }} noWrap>
-                  Giấy phép kinh doanh
-                </Typography>
-                <Typography sx={{ fontSize: 12, color: '#6b7280', mt: 0.5 }}>Nhấn để xem chi tiết</Typography>
+            ) : (
+              <Typography sx={{ fontSize: 14, color: '#ef4444', fontWeight: 500 }}>
+                Công ty cứu hộ chưa tải lên tệp hồ sơ pháp lý.
+              </Typography>
+            )}
+          </InfoCard>
+
+          {/* Status indicator Card */}
+          <Box>
+            <Typography sx={{ fontSize: 14, fontWeight: 700, color: NAVY, mb: 1 }}>Trạng thái hiện tại</Typography>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: '8px',
+                bgcolor: cfg.bg,
+                border: `1px solid ${cfg.text}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography sx={{ fontSize: 15, fontWeight: 800, color: cfg.text }}>{cfg.label}</Typography>
+
+              <Box component="span" sx={{ fontSize: 13, color: '#6b7280' }}>
+                Đăng nhập cuối:{' '}
+                {company.last_login_at ? formatDateTime(company.last_login_at as any) : 'Chưa đăng nhập'}
               </Box>
             </Box>
-          ) : (
-            <Typography sx={{ fontSize: 14, color: '#ef4444', fontWeight: 500 }}>
-              Công ty chưa tải lên tệp hồ sơ pháp lý.
-            </Typography>
-          )}
-        </InfoCard>
+          </Box>
 
-        {/* Status indicator Card */}
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: NAVY, mb: 1 }}>Trạng thái hiện tại</Typography>
-          <Box
+          {/* Rejection / Request docs / Lock Reason details */}
+          {status === 'locked' && company.lock_reason && (
+            <Box sx={{ p: 2, borderRadius: '8px', bgcolor: 'rgba(220,38,38,0.05)', border: `1px solid ${RED}` }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: RED, mb: 0.5 }}>Lý do khóa tài khoản</Typography>
+              <Typography sx={{ fontSize: 13.5, color: '#4b5563', fontStyle: 'italic' }}>
+                &ldquo;{company.lock_reason}&rdquo;
+              </Typography>
+            </Box>
+          )}
+
+          {status === 'rejected' && company.rejection_reason && (
+            <Box sx={{ p: 2, borderRadius: '8px', bgcolor: 'rgba(220,38,38,0.05)', border: `1px solid ${RED}` }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: RED, mb: 0.5 }}>Lý do từ chối hồ sơ</Typography>
+              <Typography sx={{ fontSize: 13.5, color: '#4b5563', fontStyle: 'italic' }}>
+                &ldquo;{company.rejection_reason}&rdquo;
+              </Typography>
+            </Box>
+          )}
+
+          {/* Action Lock/Unlock buttons */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {status === 'locked' ? (
+              <PrimaryActionButton
+                onClick={() => handleOpenActionDialog('unlock')}
+                disabled={actionLoading}
+                variant="navy"
+              >
+                {actionLoading ? 'Đang xử lý...' : 'Mở khóa tài khoản'}
+              </PrimaryActionButton>
+            ) : status === 'active' ? (
+              <PrimaryActionButton
+                onClick={() => handleOpenActionDialog('lock')}
+                disabled={actionLoading}
+                variant="orange"
+              >
+                {actionLoading ? 'Đang xử lý...' : 'Khóa tài khoản'}
+              </PrimaryActionButton>
+            ) : status === 'pending_verification' ? (
+              <PrimaryActionButton onClick={() => navigate(`/admin/companies/${company._id}/verify`)} variant="navy">
+                Xem và duyệt hồ sơ đăng ký công ty cứu hộ
+              </PrimaryActionButton>
+            ) : null}
+          </Box>
+        </Box>
+
+        {/* Right Column: Change logs history timeline */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography
             sx={{
-              p: 2,
-              borderRadius: '8px',
-              bgcolor: cfg.bg,
-              border: `1px solid ${cfg.text}`,
+              fontSize: 15,
+              fontWeight: 800,
+              color: NAVY,
+              mb: 1,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              gap: 1,
             }}
           >
-            <Typography sx={{ fontSize: 15, fontWeight: 800, color: cfg.text }}>{cfg.label}</Typography>
+            <HistoryIcon sx={{ fontSize: 20 }} />
+            Lịch sử thay đổi trạng thái
+          </Typography>
 
-            <Box component="span" sx={{ fontSize: 13, color: '#6b7280' }}>
-              Đăng nhập cuối: {company.last_login_at ? formatDateTime(company.last_login_at as any) : 'Chưa đăng nhập'}
-            </Box>
+          <Box sx={{ pb: 4 }}>
+            <CompanyLogHistory logs={logs} />
           </Box>
-        </Box>
-
-        {/* Rejection / Request docs / Lock Reason details */}
-        {status === 'locked' && company.lock_reason && (
-          <Box sx={{ mb: 3, p: 2, borderRadius: '8px', bgcolor: 'rgba(220,38,38,0.05)', border: `1px solid ${RED}` }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, color: RED, mb: 0.5 }}>Lý do khóa tài khoản</Typography>
-            <Typography sx={{ fontSize: 13.5, color: '#4b5563', fontStyle: 'italic' }}>
-              &ldquo;{company.lock_reason}&rdquo;
-            </Typography>
-          </Box>
-        )}
-
-        {status === 'rejected' && company.rejection_reason && (
-          <Box sx={{ mb: 3, p: 2, borderRadius: '8px', bgcolor: 'rgba(220,38,38,0.05)', border: `1px solid ${RED}` }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, color: RED, mb: 0.5 }}>Lý do từ chối hồ sơ</Typography>
-            <Typography sx={{ fontSize: 13.5, color: '#4b5563', fontStyle: 'italic' }}>
-              &ldquo;{company.rejection_reason}&rdquo;
-            </Typography>
-          </Box>
-        )}
-
-        {/* Action Lock/Unlock buttons */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 4 }}>
-          {status === 'locked' ? (
-            <PrimaryActionButton
-              onClick={() => handleOpenActionDialog('unlock')}
-              disabled={actionLoading}
-              variant="navy"
-            >
-              {actionLoading ? 'Đang xử lý...' : 'Mở khóa tài khoản'}
-            </PrimaryActionButton>
-          ) : status === 'active' ? (
-            <PrimaryActionButton
-              onClick={() => handleOpenActionDialog('lock')}
-              disabled={actionLoading}
-              variant="orange"
-            >
-              {actionLoading ? 'Đang xử lý...' : 'Khóa tài khoản'}
-            </PrimaryActionButton>
-          ) : status === 'pending_verification' ? (
-            <PrimaryActionButton onClick={() => navigate(`/admin/companies/${company._id}/verify`)} variant="navy">
-              Xem và duyệt hồ sơ đăng ký
-            </PrimaryActionButton>
-          ) : null}
-        </Box>
-
-        {/* History Logs */}
-        <Typography
-          sx={{
-            fontSize: 15,
-            fontWeight: 800,
-            color: NAVY,
-            mb: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
-          <HistoryIcon sx={{ fontSize: 20 }} />
-          Lịch sử thay đổi trạng thái
-        </Typography>
-
-        <Box sx={{ pb: 4 }}>
-          <CompanyLogHistory logs={logs} />
         </Box>
       </Box>
 
@@ -317,6 +326,6 @@ export default function CompanyDetailPage() {
         onClose={() => setDialogConfig((prev) => ({ ...prev, open: false }))}
         onConfirm={handleDialogConfirm}
       />
-    </MobileLayout>
+    </AdminLayout>
   );
 }

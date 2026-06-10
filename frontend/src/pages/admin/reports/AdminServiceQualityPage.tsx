@@ -3,8 +3,7 @@ import { Box, Typography, CircularProgress, Button, Alert } from '@mui/material'
 import { DownloadOutlined as ExportIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { adminService, ServiceQualityReport } from '@/services/admin.service';
 import { NAVY, BUTTON_RADIUS } from '@/constants/colors';
 
@@ -115,7 +114,7 @@ export default function AdminServiceQualityPage() {
     const selectedCompanyName =
       filters.companyId === 'all'
         ? 'Tất cả công ty cứu hộ'
-        : companies.find((c) => c._id === filters.companyId)?.company_name || 'Đơn vị đã chọn';
+        : companies.find((c) => c._id === filters.companyId)?.company_name || 'Công ty cứu hộ đã chọn';
     csvContent += `Công ty cứu hộ: ${selectedCompanyName}\n`;
     csvContent += `Hiển thị theo: ${filters.groupBy === 'day' ? 'Theo ngày' : filters.groupBy === 'week' ? 'Theo tuần' : 'Theo tháng'}\n\n`;
 
@@ -149,9 +148,9 @@ export default function AdminServiceQualityPage() {
 
     // 4. Company Rank breakdown if "All Companies" selected
     if (filters.companyId === 'all' && reportData.companyBreakdown) {
-      csvContent += 'BẢNG XẾP HẠNG CHẤT LƯỢNG CÁC ĐƠN VỊ CỨU HỘ\n';
+      csvContent += 'BẢNG XẾP HẠNG CHẤT LƯỢNG CÁC CÔNG TY CỨU HỘ\n';
       csvContent +=
-        'Xếp hạng,Tên đơn vị,Tổng yêu cầu,Tỷ lệ phản hồi (%),Phản hồi trung bình (m),Điểm đánh giá trung bình,Lượt đánh giá\n';
+        'Xếp hạng,Tên công ty cứu hộ,Tổng yêu cầu,Tỷ lệ phản hồi (%),Phản hồi trung bình (m),Điểm đánh giá trung bình,Lượt đánh giá\n';
       reportData.companyBreakdown.forEach((row, index) => {
         csvContent += `${index + 1},"${row.companyName}",${row.totalRequests},${row.responseRate}%,${row.avgResponseTime > 0 ? row.avgResponseTime : 'N/A'},${row.avgRating > 0 ? row.avgRating : 'N/A'},${row.reviewCount}\n`;
       });
@@ -173,91 +172,85 @@ export default function AdminServiceQualityPage() {
   const hasData = reportData && (reportData.summary.totalRequests > 0 || reportData.summary.totalReviews > 0);
 
   return (
-    <MobileLayout>
-      <AppHeader title="Chất lượng dịch vụ" backFallback="/admin/home" />
+    <AdminLayout title="Chất lượng dịch vụ" backFallback="/admin/home">
+      {/* Filter component */}
+      <QualityFilters
+        filters={filters}
+        companies={companies}
+        onApply={handleApplyFilters}
+        loading={loading || loadingCompanies}
+      />
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Filter component */}
-        <QualityFilters
-          filters={filters}
-          companies={companies}
-          onApply={handleApplyFilters}
-          loading={loading || loadingCompanies}
-        />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      ) : !reportData ? (
+        <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
+          <Typography>Không có dữ liệu thống kê.</Typography>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* KPI Summary cards */}
+          <QualitySummaryCards summary={reportData.summary} />
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        ) : !reportData ? (
-          <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography>Không có dữ liệu thống kê.</Typography>
-          </Box>
-        ) : (
-          <>
-            {/* KPI Summary cards */}
-            <QualitySummaryCards summary={reportData.summary} />
-
-            {!hasData ? (
-              // Empty State
-              <Box
-                sx={{
-                  py: 6,
-                  px: 3,
-                  textAlign: 'center',
-                  bgcolor: '#f9fafb',
-                  borderRadius: 2,
-                  border: '1px dashed #d1d5db',
-                }}
-              >
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#4b5563', mb: 1 }}>
-                  Không có dữ liệu
-                </Typography>
-                <Typography sx={{ fontSize: 13, color: '#6b7280' }}>
-                  Không tìm thấy hoạt động cứu hộ hay lượt đánh giá nào trong tiêu chí lọc đã chọn.
-                </Typography>
-              </Box>
-            ) : (
-              // Active data displays
-              <>
-                {/* Export Data Button */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={handleExportCSV}
-                    startIcon={<ExportIcon />}
-                    sx={{
+          {!hasData ? (
+            // Empty State
+            <Box
+              sx={{
+                py: 6,
+                px: 3,
+                textAlign: 'center',
+                bgcolor: '#f9fafb',
+                borderRadius: 2,
+                border: '1px dashed #d1d5db',
+              }}
+            >
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#4b5563', mb: 1 }}>Không có dữ liệu</Typography>
+              <Typography sx={{ fontSize: 13, color: '#6b7280' }}>
+                Không tìm thấy hoạt động cứu hộ hay lượt đánh giá nào trong tiêu chí lọc đã chọn.
+              </Typography>
+            </Box>
+          ) : (
+            // Active data displays
+            <>
+              {/* Export Data Button */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  onClick={handleExportCSV}
+                  startIcon={<ExportIcon />}
+                  sx={{
+                    borderColor: NAVY,
+                    color: NAVY,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: BUTTON_RADIUS,
+                    '&:hover': {
+                      bgcolor: 'rgba(27, 58, 93, 0.05)',
                       borderColor: NAVY,
-                      color: NAVY,
-                      textTransform: 'none',
-                      fontWeight: 700,
-                      borderRadius: BUTTON_RADIUS,
-                      '&:hover': {
-                        bgcolor: 'rgba(27, 58, 93, 0.05)',
-                        borderColor: NAVY,
-                      },
-                    }}
-                  >
-                    Xuất báo cáo (CSV)
-                  </Button>
-                </Box>
+                    },
+                  }}
+                >
+                  Xuất báo cáo (CSV)
+                </Button>
+              </Box>
 
-                {/* SVG Trend line charts */}
-                <QualityCharts timeSeries={reportData.timeSeries} />
+              {/* SVG Trend line charts */}
+              <QualityCharts timeSeries={reportData.timeSeries} />
 
-                {/* Company Rank comparison table (only if viewing all companies) */}
-                {filters.companyId === 'all' && reportData.companyBreakdown && (
-                  <QualityCompanyTable breakdown={reportData.companyBreakdown} />
-                )}
-              </>
-            )}
-          </>
-        )}
-      </Box>
-    </MobileLayout>
+              {/* Company Rank comparison table (only if viewing all companies) */}
+              {filters.companyId === 'all' && reportData.companyBreakdown && (
+                <QualityCompanyTable breakdown={reportData.companyBreakdown} />
+              )}
+            </>
+          )}
+        </Box>
+      )}
+    </AdminLayout>
   );
 }

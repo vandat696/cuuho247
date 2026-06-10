@@ -190,5 +190,34 @@ export const theme = createTheme({
         },
       },
     },
+    MuiPaginationItem: {
+      styleOverrides: {
+        root: {
+          color: '#1b3a5d',
+          fontWeight: 600,
+          fontSize: '14px',
+          fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          borderRadius: '50%',
+          margin: '0 4px',
+          '&.Mui-selected': {
+            backgroundColor: '#ff6b00 !important',
+            color: '#ffffff !important',
+            '&:hover': {
+              backgroundColor: '#e05a00 !important',
+            },
+          },
+          '&.Mui-disabled': {
+            opacity: 0.3,
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(27, 58, 93, 0.05)',
+          },
+        },
+        page: {
+          border: 'none',
+          background: 'none',
+        },
+      },
+    },
   },
 });

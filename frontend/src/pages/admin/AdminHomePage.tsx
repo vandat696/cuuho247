@@ -5,15 +5,13 @@ import {
   AdminPanelSettingsOutlined as AdminIcon,
   PeopleAltOutlined as PeopleIcon,
   HistoryToggleOffOutlined as HistoryIcon,
-  LogoutRounded as LogoutIcon,
   ManageAccountsOutlined as UserIcon,
   BarChartOutlined as ChartIcon,
   StarBorderOutlined as QualityIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ActionCard } from '@/components/rescue-company/ActionCard';
 import { adminService } from '@/services/admin.service';
 import { NAVY, ORANGE, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
@@ -42,181 +40,145 @@ export default function AdminHomePage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('accountId');
-    localStorage.removeItem('accountPhone');
-    localStorage.removeItem('accountName');
-    localStorage.removeItem('companyId');
-    toast.success('Đăng xuất thành công');
-    navigate('/login', { replace: true });
-  };
-
   const adminName = localStorage.getItem('accountName') || 'Quản trị viên';
   const adminEmail = localStorage.getItem('accountEmail') || 'admin@cuuho247.vn';
 
   return (
-    <MobileLayout>
-      <AppHeader title="Admin Portal" showBack={false} logoIcon={<AdminIcon sx={{ fontSize: 24 }} />} />
-
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-            {/* Admin Profile Card */}
-            <Box
-              sx={{
-                p: 2.5,
-                mb: 3,
-                borderRadius: CARD_RADIUS,
-                background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
-                color: '#fff',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: CIRCLE_RADIUS,
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <AdminIcon sx={{ fontSize: 34, color: '#fff' }} />
-                </Box>
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.2 }} noWrap>
-                    {adminName}
-                  </Typography>
-                  <Typography sx={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.75)', mt: 0.5 }} noWrap>
-                    {adminEmail}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Metrics Alert */}
-            {pendingCount !== null && pendingCount > 0 && (
+    <AdminLayout title="Tổng quan" showBack={false}>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {/* Admin Profile Welcome Banner Card */}
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: CARD_RADIUS,
+              background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
+              color: '#fff',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box
-                onClick={() => navigate('/admin/companies/pending')}
                 sx={{
-                  p: 2,
-                  mb: 3,
-                  borderRadius: CARD_RADIUS,
-                  bgcolor: 'rgba(255, 107, 0, 0.1)',
-                  border: `2px solid ${ORANGE}`,
-                  cursor: 'pointer',
+                  width: 56,
+                  height: 56,
+                  borderRadius: CIRCLE_RADIUS,
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
                 }}
               >
-                <Box>
-                  <Typography sx={{ fontSize: 16, fontWeight: 800, color: ORANGE }}>Hồ sơ chờ duyệt</Typography>
-                  <Typography sx={{ fontSize: 13, color: '#4b5563', mt: 0.5 }}>
-                    Có {pendingCount} hồ sơ cứu hộ đang chờ xác minh
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: CIRCLE_RADIUS,
-                    bgcolor: ORANGE,
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: 14,
-                  }}
-                >
-                  {pendingCount}
-                </Box>
+                <AdminIcon sx={{ fontSize: 34, color: '#fff' }} />
               </Box>
-            )}
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.2 }} noWrap>
+                  Chào mừng trở lại, {adminName}
+                </Typography>
+                <Typography sx={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.75)', mt: 0.5 }} noWrap>
+                  Bạn đang đăng nhập dưới vai trò Quản trị viên hệ thống ({adminEmail})
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
 
-            <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Tính năng quản trị</Typography>
+          {/* Metrics Alert */}
+          {pendingCount !== null && pendingCount > 0 && (
+            <Box
+              onClick={() => navigate('/admin/companies/pending')}
+              sx={{
+                p: 2.5,
+                borderRadius: CARD_RADIUS,
+                bgcolor: 'rgba(255, 107, 0, 0.1)',
+                border: `2px solid ${ORANGE}`,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Box>
+                <Typography sx={{ fontSize: 16, fontWeight: 800, color: ORANGE }}>
+                  Hồ sơ công ty cứu hộ chờ duyệt
+                </Typography>
+                <Typography sx={{ fontSize: 13, color: '#4b5563', mt: 0.5 }}>
+                  Hệ thống ghi nhận có {pendingCount} hồ sơ đăng ký mới của công ty cứu hộ cần xác minh.
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: CIRCLE_RADIUS,
+                  bgcolor: ORANGE,
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: 15,
+                }}
+              >
+                {pendingCount}
+              </Box>
+            </Box>
+          )}
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {/* Action Cards Grid */}
+          <Box>
+            <Typography sx={{ mb: 2.5, fontSize: 16, fontWeight: 800, color: NAVY }}>Các chức năng chính</Typography>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+                gap: 2.5,
+                pb: 4,
+              }}
+            >
               <ActionCard
                 icon={<PeopleIcon sx={{ fontSize: 24 }} />}
-                title="Duyệt hồ sơ công ty"
-                description="Phê duyệt hồ sơ các đơn vị cứu hộ đăng ký mới"
+                title="Duyệt hồ sơ công ty cứu hộ"
+                description="Phê duyệt hồ sơ các công ty cứu hộ đăng ký mới vào hệ thống"
                 onClick={() => navigate('/admin/companies/pending')}
               />
               <ActionCard
                 icon={<UserIcon sx={{ fontSize: 24 }} />}
-                title="Quản lý người dùng"
-                description="Xem thông tin và khóa/mở khóa tài khoản"
+                title="Quản lý tài khoản"
+                description="Xem danh sách, thông tin chi tiết và khóa/mở khóa tài khoản khách hàng, công ty"
                 onClick={() => navigate('/admin/users')}
               />
               <ActionCard
                 icon={<AdminIcon sx={{ fontSize: 24 }} />}
-                title="Kiểm duyệt nội dung"
-                description="Gỡ bỏ đánh giá, phản hồi và bài viết/bình luận vi phạm"
+                title="Kiểm duyệt đánh giá"
+                description="Theo dõi và gỡ bỏ đánh giá, phản hồi vi phạm quy định"
                 onClick={() => navigate('/admin/reviews')}
               />
               <ActionCard
                 icon={<ChartIcon sx={{ fontSize: 24 }} />}
                 title="Báo cáo hoạt động"
-                description="Xem thống kê yêu cầu cứu hộ và tần suất sử dụng dịch vụ"
+                description="Thống kê số lượng yêu cầu cứu hộ và tần suất cuộc gọi theo thời gian"
                 onClick={() => navigate('/admin/reports')}
               />
               <ActionCard
                 icon={<QualityIcon sx={{ fontSize: 24 }} />}
-                title="Chất lượng dịch vụ"
-                description="Xem thống kê tỷ lệ phản hồi và mức độ hài lòng của khách hàng"
+                title="Thống kê chất lượng"
+                description="Theo dõi tỷ lệ phản hồi cuộc gọi và mức độ hài lòng khách hàng"
                 onClick={() => navigate('/admin/reports/service-quality')}
               />
               <ActionCard
                 icon={<HistoryIcon sx={{ fontSize: 24 }} />}
                 title="Nhật ký hoạt động"
-                description="Xem lịch sử phê duyệt, từ chối của admin"
+                description="Xem lịch sử phê duyệt, từ chối hoặc khóa tài khoản của quản trị viên"
                 onClick={() => navigate('/admin/logs')}
               />
             </Box>
-
-            {/* Logout */}
-            <Box sx={{ mt: 5, pt: 2, borderTop: '1px solid #e5e7eb' }}>
-              <Box
-                component="button"
-                type="button"
-                onClick={handleLogout}
-                sx={{
-                  width: '100%',
-                  p: 2,
-                  border: '2px solid #fee2e2',
-                  borderRadius: CARD_RADIUS,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 1,
-                  color: '#dc2626',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
-                  '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
-                  '&:active': { transform: 'scale(0.99)' },
-                  cursor: 'pointer',
-                }}
-              >
-                <LogoutIcon sx={{ fontSize: 22 }} />
-                Đăng xuất
-              </Box>
-            </Box>
-          </>
-        )}
-      </Box>
-    </MobileLayout>
+          </Box>
+        </>
+      )}
+    </AdminLayout>
   );
 }

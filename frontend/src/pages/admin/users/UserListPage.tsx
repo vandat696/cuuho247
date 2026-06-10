@@ -4,8 +4,7 @@ import { Box, Typography, CircularProgress, Tabs, Tab } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { UserCard } from '@/components/admin/UserCard';
 import { CompanyCard } from '@/components/admin/CompanyCard';
 import { Input } from '@/components/common/Input';
@@ -130,72 +129,75 @@ export default function UserListPage() {
   const hasMore = currentCount < total;
 
   return (
-    <MobileLayout>
-      <AppHeader title="Quản lý tài khoản" backFallback="/admin/home" />
+    <AdminLayout title="Quản lý tài khoản" backFallback="/admin/home">
+      {/* Toggle Tabs */}
+      <Tabs
+        value={activeTab}
+        onChange={handleTabChange}
+        indicatorColor="secondary"
+        textColor="secondary"
+        sx={{
+          mb: 3,
+          borderBottom: '1px solid #e5e7eb',
+          '& .MuiTab-root': { fontWeight: 700, fontSize: 14, py: 1.5 },
+        }}
+      >
+        <Tab label="Khách hàng" id="tab-customers" />
+        <Tab label="Công ty cứu hộ" id="tab-companies" />
+      </Tabs>
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3, display: 'flex', flexDirection: 'column' }}>
-        {/* Toggle Tabs */}
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          indicatorColor="secondary"
-          textColor="secondary"
-          variant="fullWidth"
-          sx={{
-            mb: 3,
-            borderBottom: '1px solid #e5e7eb',
-            '& .MuiTab-root': { fontWeight: 700, fontSize: 14 },
-          }}
-        >
-          <Tab label="Khách hàng" id="tab-customers" />
-          <Tab label="Công ty cứu hộ" id="tab-companies" />
-        </Tabs>
+      {/* Search & Filter Controls */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 3 }}>
+        <Input
+          placeholder={
+            activeTab === 0 ? 'Tìm theo tên, email hoặc SĐT...' : 'Tìm theo tên công ty, đại diện, email hoặc SĐT...'
+          }
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          leftIcon={<SearchIcon sx={{ color: '#9ca3af' }} />}
+        />
 
-        {/* Search & Filter Controls */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-          <Input
-            placeholder={
-              activeTab === 0 ? 'Tìm theo tên, email hoặc SĐT...' : 'Tìm theo tên công ty, đại diện, email hoặc SĐT...'
-            }
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            leftIcon={<SearchIcon sx={{ color: '#9ca3af' }} />}
-          />
+        <Select
+          label="Trạng thái tài khoản"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as string)}
+          options={
+            activeTab === 0
+              ? [
+                  { id: 'all', label: 'Tất cả trạng thái' },
+                  { id: 'active', label: 'Hoạt động' },
+                  { id: 'locked', label: 'Đã khóa' },
+                ]
+              : [
+                  { id: 'all', label: 'Tất cả trạng thái' },
+                  { id: 'active', label: 'Hoạt động' },
+                  { id: 'locked', label: 'Đã khóa' },
+                  { id: 'pending_verification', label: 'Chờ duyệt' },
+                  { id: 'rejected', label: 'Từ chối' },
+                ]
+          }
+        />
+      </Box>
 
-          <Select
-            label="Trạng thái tài khoản"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as string)}
-            options={
-              activeTab === 0
-                ? [
-                    { id: 'all', label: 'Tất cả trạng thái' },
-                    { id: 'active', label: 'Hoạt động' },
-                    { id: 'locked', label: 'Đã khóa' },
-                  ]
-                : [
-                    { id: 'all', label: 'Tất cả trạng thái' },
-                    { id: 'active', label: 'Hoạt động' },
-                    { id: 'locked', label: 'Đã khóa' },
-                    { id: 'pending_verification', label: 'Chờ duyệt' },
-                    { id: 'rejected', label: 'Từ chối' },
-                  ]
-            }
-          />
+      <Typography sx={{ mb: 2, fontSize: 15, fontWeight: 800, color: NAVY }}>Kết quả tìm kiếm ({total})</Typography>
+
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress />
         </Box>
-
-        <Typography sx={{ mb: 2, fontSize: 15, fontWeight: 800, color: NAVY }}>Kết quả tìm kiếm ({total})</Typography>
-
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-            <CircularProgress />
-          </Box>
-        ) : currentCount === 0 ? (
-          <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography sx={{ fontSize: 14 }}>Không tìm thấy tài khoản nào phù hợp.</Typography>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 4 }}>
+      ) : currentCount === 0 ? (
+        <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
+          <Typography sx={{ fontSize: 14 }}>Không tìm thấy tài khoản nào phù hợp.</Typography>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 4 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+              gap: 2,
+            }}
+          >
             {activeTab === 0
               ? users.map((user) => (
                   <UserCard key={user._id} user={user} onClick={() => navigate(`/admin/users/${user._id}`)} />
@@ -207,17 +209,19 @@ export default function UserListPage() {
                     onClick={() => navigate(`/admin/companies/${company._id}/detail`)}
                   />
                 ))}
+          </Box>
 
-            {hasMore && (
-              <Box sx={{ mt: 2 }}>
+          {hasMore && (
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ width: 200 }}>
                 <Button variant="outline" fullWidth onClick={handleLoadMore} disabled={loadingMore}>
                   {loadingMore ? 'Đang tải thêm...' : 'Xem thêm'}
                 </Button>
               </Box>
-            )}
-          </Box>
-        )}
-      </Box>
-    </MobileLayout>
+            </Box>
+          )}
+        </Box>
+      )}
+    </AdminLayout>
   );
 }

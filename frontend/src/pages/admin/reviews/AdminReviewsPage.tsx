@@ -27,8 +27,7 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { adminService } from '@/services/admin.service';
@@ -229,7 +228,7 @@ function ReviewsTab() {
 
                 {/* Company + Rating */}
                 <Typography sx={{ fontSize: 13, color: '#4b5563', mb: 0.5 }}>
-                  <strong>Công ty:</strong> {review.company_id?.company_name || 'Không xác định'}
+                  <strong>Công ty cứu hộ:</strong> {review.company_id?.company_name || 'Không xác định'}
                 </Typography>
                 <Rating value={review.rating} readOnly size="small" sx={{ color: '#f59e0b', mb: 1 }} />
 
@@ -260,7 +259,7 @@ function ReviewsTab() {
                           color: review.reply.is_visible === false ? '#991b1b' : '#166534',
                         }}
                       >
-                        Phản hồi từ công ty
+                        Phản hồi từ công ty cứu hộ
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <StatusChip visible={review.reply.is_visible !== false} />
@@ -637,29 +636,24 @@ export default function AdminReviewsPage() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <MobileLayout>
-      <AppHeader title="Kiểm duyệt nội dung" backFallback="/admin/home" />
+    <AdminLayout title="Quản lý đánh giá" backFallback="/admin/home">
+      {/* Tabs */}
+      <Tabs
+        value={activeTab}
+        onChange={(_, v) => setActiveTab(v)}
+        indicatorColor="secondary"
+        textColor="secondary"
+        sx={{
+          mb: 3,
+          borderBottom: '1px solid #e5e7eb',
+          '& .MuiTab-root': { fontWeight: 700, fontSize: 14, py: 1.5 },
+        }}
+      >
+        <Tab label="Đánh giá & Phản hồi" id="tab-reviews" />
+        <Tab label="Bài viết Cộng đồng" id="tab-community" />
+      </Tabs>
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3, display: 'flex', flexDirection: 'column' }}>
-        {/* Tabs */}
-        <Tabs
-          value={activeTab}
-          onChange={(_, v) => setActiveTab(v)}
-          indicatorColor="secondary"
-          textColor="secondary"
-          variant="fullWidth"
-          sx={{
-            mb: 3,
-            borderBottom: '1px solid #e5e7eb',
-            '& .MuiTab-root': { fontWeight: 700, fontSize: 14 },
-          }}
-        >
-          <Tab label="Đánh giá & Phản hồi" id="tab-reviews" />
-          <Tab label="Bài viết Cộng đồng" id="tab-community" />
-        </Tabs>
-
-        {activeTab === 0 ? <ReviewsTab /> : <CommunityTab />}
-      </Box>
-    </MobileLayout>
+      {activeTab === 0 ? <ReviewsTab /> : <CommunityTab />}
+    </AdminLayout>
   );
 }

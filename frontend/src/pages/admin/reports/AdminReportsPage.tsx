@@ -3,8 +3,7 @@ import { Box, Typography, CircularProgress, Button, Alert } from '@mui/material'
 import { DownloadOutlined as ExportIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { adminService, RescueActivitiesReport } from '@/services/admin.service';
 import { http } from '@/services/http';
 import { NAVY, BUTTON_RADIUS } from '@/constants/colors';
@@ -13,7 +12,6 @@ import ReportFilters from '@/components/admin/ReportFilters';
 import ReportSummaryCards from '@/components/admin/ReportSummaryCards';
 import ReportCharts from '@/components/admin/ReportCharts';
 import ReportServiceStats from '@/components/admin/ReportServiceStats';
-import ReportStatusStats from '@/components/admin/ReportStatusStats';
 
 interface FilterState {
   startDate: string;
@@ -178,92 +176,85 @@ export default function AdminReportsPage() {
   const hasData = reportData && reportData.summary.totalRequests > 0;
 
   return (
-    <MobileLayout>
-      <AppHeader title="Báo cáo hoạt động" backFallback="/admin/home" />
+    <AdminLayout title="Báo cáo hoạt động" backFallback="/admin/home">
+      {/* Filters */}
+      <ReportFilters
+        filters={filters}
+        categories={categories}
+        onApply={handleApplyFilters}
+        loading={loading || loadingCategories}
+      />
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Filters */}
-        <ReportFilters
-          filters={filters}
-          categories={categories}
-          onApply={handleApplyFilters}
-          loading={loading || loadingCategories}
-        />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      ) : !reportData ? (
+        <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
+          <Typography>Không có dữ liệu báo cáo.</Typography>
+        </Box>
+      ) : (
+        <>
+          {/* KPI Cards */}
+          <ReportSummaryCards summary={reportData.summary} />
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        ) : !reportData ? (
-          <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography>Không có dữ liệu báo cáo.</Typography>
-          </Box>
-        ) : (
-          <>
-            {/* KPI Cards */}
-            <ReportSummaryCards summary={reportData.summary} />
-
-            {!hasData ? (
-              // Empty State
-              <Box
-                sx={{
-                  py: 6,
-                  px: 3,
-                  textAlign: 'center',
-                  bgcolor: '#f9fafb',
-                  borderRadius: 2,
-                  border: '1px dashed #d1d5db',
-                }}
-              >
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#4b5563', mb: 1 }}>
-                  Không có dữ liệu
-                </Typography>
-                <Typography sx={{ fontSize: 13, color: '#6b7280' }}>
-                  Không tìm thấy yêu cầu cứu hộ nào trong khoảng thời gian và tiêu chí đã chọn.
-                </Typography>
-              </Box>
-            ) : (
-              // Active Report View
-              <>
-                {/* Export Data Bar */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={handleExportCSV}
-                    startIcon={<ExportIcon />}
-                    sx={{
+          {!hasData ? (
+            // Empty State
+            <Box
+              sx={{
+                py: 6,
+                px: 3,
+                textAlign: 'center',
+                bgcolor: '#f9fafb',
+                borderRadius: 2,
+                border: '1px dashed #d1d5db',
+              }}
+            >
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#4b5563', mb: 1 }}>Không có dữ liệu</Typography>
+              <Typography sx={{ fontSize: 13, color: '#6b7280' }}>
+                Không tìm thấy yêu cầu cứu hộ nào trong khoảng thời gian và tiêu chí đã chọn.
+              </Typography>
+            </Box>
+          ) : (
+            // Active Report View
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Export Data Bar */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  onClick={handleExportCSV}
+                  startIcon={<ExportIcon />}
+                  sx={{
+                    borderColor: NAVY,
+                    color: NAVY,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: BUTTON_RADIUS,
+                    '&:hover': {
+                      bgcolor: 'rgba(27, 58, 93, 0.05)',
                       borderColor: NAVY,
-                      color: NAVY,
-                      textTransform: 'none',
-                      fontWeight: 700,
-                      borderRadius: BUTTON_RADIUS,
-                      '&:hover': {
-                        bgcolor: 'rgba(27, 58, 93, 0.05)',
-                        borderColor: NAVY,
-                      },
-                    }}
-                  >
-                    Xuất báo cáo (CSV)
-                  </Button>
-                </Box>
+                    },
+                  }}
+                >
+                  Xuất báo cáo (CSV)
+                </Button>
+              </Box>
 
-                {/* SVG Time Series Charts */}
-                <ReportCharts timeSeries={reportData.timeSeries} />
+              {/* SVG Time Series Charts */}
+              <ReportCharts timeSeries={reportData.timeSeries} />
 
-                {/* Service Types Breakdown */}
+              {/* Service Types Breakdown */}
+              <Box sx={{ pb: 4 }}>
                 <ReportServiceStats stats={reportData.serviceTypeStats} />
-
-                {/* Status Breakdown */}
-                <ReportStatusStats stats={reportData.statusStats} totalRequests={reportData.summary.totalRequests} />
-              </>
-            )}
-          </>
-        )}
-      </Box>
-    </MobileLayout>
+              </Box>
+            </Box>
+          )}
+        </>
+      )}
+    </AdminLayout>
   );
 }

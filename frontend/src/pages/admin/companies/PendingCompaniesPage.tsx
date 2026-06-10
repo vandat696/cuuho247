@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { toast } from 'react-hot-toast';
 
-import { AppHeader } from '@/components/layout/AppHeader';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { CompanyVerificationCard } from '@/components/admin/CompanyVerificationCard';
 import { adminService } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
@@ -35,34 +34,37 @@ export default function PendingCompaniesPage() {
   };
 
   return (
-    <MobileLayout>
-      <AppHeader title="Hồ sơ chờ duyệt" backFallback="/admin/home" />
+    <AdminLayout title="Công ty cứu hộ chờ duyệt" backFallback="/admin/home">
+      <Typography sx={{ mb: 2.5, fontSize: 16, fontWeight: 800, color: NAVY }}>
+        Tổng số: {companies.length} công ty cứu hộ chờ duyệt
+      </Typography>
 
-      <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
-        <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>
-          Tổng số: {companies.length} công ty chờ duyệt
-        </Typography>
-
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-            <CircularProgress />
-          </Box>
-        ) : companies.length === 0 ? (
-          <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
-            <Typography sx={{ fontSize: 14 }}>Không có hồ sơ nào đang chờ duyệt.</Typography>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {companies.map((company) => (
-              <CompanyVerificationCard
-                key={company._id}
-                company={company}
-                onClick={() => navigate(`/admin/companies/${company._id}/verify`)}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
-    </MobileLayout>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress />
+        </Box>
+      ) : companies.length === 0 ? (
+        <Box sx={{ py: 5, textAlign: 'center', color: '#6b7280' }}>
+          <Typography sx={{ fontSize: 14 }}>Không có hồ sơ công ty cứu hộ nào đang chờ duyệt.</Typography>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+            gap: 2.5,
+            pb: 4,
+          }}
+        >
+          {companies.map((company) => (
+            <CompanyVerificationCard
+              key={company._id}
+              company={company}
+              onClick={() => navigate(`/admin/companies/${company._id}/verify`, { state: { company } })}
+            />
+          ))}
+        </Box>
+      )}
+    </AdminLayout>
   );
 }

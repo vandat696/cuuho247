@@ -52,7 +52,7 @@ export default function QualityCompanyTable({ breakdown }: QualityCompanyTablePr
       }}
     >
       <Typography sx={{ fontSize: 16, fontWeight: 800, color: NAVY, mb: 2 }}>
-        Bảng so sánh chất lượng các công ty
+        Bảng so sánh chất lượng các công ty cứu hộ
       </Typography>
 
       <TableContainer
