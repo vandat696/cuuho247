@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 const AdminHomePage = React.lazy(() => import('@/pages/admin/AdminHomePage'));
 const PendingCompaniesPage = React.lazy(() => import('@/pages/admin/companies/PendingCompaniesPage'));
 const CompanyVerificationDetailPage = React.lazy(() => import('@/pages/admin/companies/CompanyVerificationDetailPage'));
-const AdminLogsPage = React.lazy(() => import('@/pages/admin/logs/AdminLogsPage'));
+const AdminLogsPage = React.lazy(() => import('@/pages/admin/activity-logs/AdminLogsPage'));
 const AdminReviewsPage = React.lazy(() => import('@/pages/admin/reviews/AdminReviewsPage'));
 const UserListPage = React.lazy(() => import('@/pages/admin/users/UserListPage'));
 const UserDetailPage = React.lazy(() => import('@/pages/admin/users/UserDetailPage'));
