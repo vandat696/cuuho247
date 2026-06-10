@@ -16,6 +16,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
+  confirmColor?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
 }
 
 export function ConfirmDialog({
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   confirmText = 'Xác nhận',
   cancelText = 'Hủy',
   loading = false,
+  confirmColor = 'error',
 }: ConfirmDialogProps) {
   return (
     <MuiDialog
@@ -53,7 +55,7 @@ export function ConfirmDialog({
         </Button>
         <Button
           onClick={onConfirm}
-          color="error"
+          color={confirmColor}
           variant="contained"
           fullWidth
           disabled={loading}

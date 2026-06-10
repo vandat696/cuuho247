@@ -25,6 +25,24 @@ export interface ICompanyRepository {
 
 // ─── Service Contract ──────────────────────────────────────────────────────────
 
+export interface UpdateCompanyProfileInput {
+  company_name?: string;
+  director_name?: string;
+  phone?: string;
+  address?: {
+    province?: string;
+    district?: string;
+    ward?: string;
+    detail?: string;
+  };
+  location?: {
+    coordinates: [number, number];
+  };
+  service_area?: string;
+  license_url?: string;
+}
+
 export interface ICompanyService {
   getCompanyById(companyId: string): Promise<Omit<ICompany, 'password_hash'>>;
+  updateCompanyProfile(companyId: string, data: UpdateCompanyProfileInput): Promise<Omit<ICompany, 'password_hash'>>;
 }

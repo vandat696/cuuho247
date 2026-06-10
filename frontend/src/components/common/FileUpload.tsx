@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Box, Button as MuiButton, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
+import { Button } from './Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -137,9 +138,9 @@ export const FileUpload = ({
               </Typography>
             </Box>
           </Box>
-          <MuiButton size="small" onClick={handleRemove} startIcon={<CancelIcon />} sx={{ textTransform: 'none' }}>
+          <Button size="sm" variant="ghost" onClick={handleRemove} startIcon={<CancelIcon />}>
             Xóa
-          </MuiButton>
+          </Button>
         </Box>
       )}
 

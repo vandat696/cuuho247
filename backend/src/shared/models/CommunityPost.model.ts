@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ICommunityPost extends Document {
   user_id: Types.ObjectId;
+  user_type: 'User' | 'Company';
   title: string;
   content: string;
   images?: string[];
@@ -10,21 +11,26 @@ export interface ICommunityPost extends Document {
   removed_by?: Types.ObjectId;
   removal_reason?: string;
   removed_at?: Date;
+  like_count: number;
+  comment_count: number;
   created_at?: Date;
   updated_at?: Date;
 }
 
 const CommunityPostSchema = new Schema<ICommunityPost>(
   {
-    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: Schema.Types.ObjectId, refPath: 'user_type', required: true },
+    user_type: { type: String, enum: ['User', 'Company'], required: true, default: 'User' },
     title: { type: String, required: true },
     content: { type: String, required: true },
     images: [{ type: String }],
     tags: [{ type: Schema.Types.ObjectId, ref: 'ServiceCategory' }],
-    is_visible: { type: Boolean },
+    is_visible: { type: Boolean, default: true },
     removed_by: { type: Schema.Types.ObjectId, ref: 'Admin' },
     removal_reason: { type: String },
     removed_at: { type: Date },
+    like_count: { type: Number, default: 0 },
+    comment_count: { type: Number, default: 0 },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

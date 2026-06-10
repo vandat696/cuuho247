@@ -14,6 +14,9 @@ export interface ICompany extends Document {
   service_area: string;
   license_file_url?: string;
   status?: CompanyStatus;
+  rejection_reason?: string;
+  document_request_reason?: string;
+  lock_reason?: string;
   rating_avg?: number;
   rating_count?: number;
   is_verified?: boolean;
@@ -37,6 +40,9 @@ const CompanySchema = new Schema<ICompany>(
       type: String,
       enum: ['pending_verification', 'active', 'rejected', 'locked'],
     },
+    rejection_reason: { type: String },
+    document_request_reason: { type: String },
+    lock_reason: { type: String },
     rating_avg: { type: Number },
     rating_count: { type: Number },
     is_verified: { type: Boolean, default: false },

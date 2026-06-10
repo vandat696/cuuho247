@@ -6,7 +6,7 @@ import { Card } from '@/components/common/Card';
 import { useServiceDetail } from '@/hooks/useServiceDetail';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { CompanyInfoCard } from '@/components/company/CompanyInfoCard';
+import { CompanyInfoCard } from '@/components/rescue-company/CompanyInfoCard';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 import toast from 'react-hot-toast';

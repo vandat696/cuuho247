@@ -44,5 +44,11 @@ export type { INotification, RecipientType, NotificationType } from './Notificat
 export { CommunityPost } from './CommunityPost.model';
 export type { ICommunityPost } from './CommunityPost.model';
 
+export { CommunityPostComment } from './CommunityPostComment.model';
+export type { ICommunityPostComment } from './CommunityPostComment.model';
+
+export { CommunityPostLike } from './CommunityPostLike.model';
+export type { ICommunityPostLike } from './CommunityPostLike.model';
+
 export { AdminLog } from './AdminLog.model';
 export type { IAdminLog, AdminAction, AdminTargetType } from './AdminLog.model';

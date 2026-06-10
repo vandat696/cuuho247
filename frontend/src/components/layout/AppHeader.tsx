@@ -8,9 +8,11 @@ interface AppHeaderProps {
   backFallback?: string;
   showBack?: boolean;
   rightSlot?: ReactNode;
+  /** Icon hiển thị bên trái khi showBack=false. Mặc định là ApartmentIcon. */
+  logoIcon?: ReactNode;
 }
 
-export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot }: AppHeaderProps) {
+export function AppHeader({ title, onBack, backFallback = '/', showBack = true, rightSlot, logoIcon }: AppHeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,12 +26,26 @@ export function AppHeader({ title, onBack, backFallback = '/', showBack = true, 
     }
   };
 
+  const defaultLogo = logoIcon ?? <ApartmentIcon sx={{ fontSize: 24 }} />;
   const role = localStorage.getItem('role');
-  const homePath = role === 'company' ? '/company/home' : '/customer/home';
-  const isAlreadyHome =
-    location.pathname === '/company/home' || location.pathname === '/customer/home' || location.pathname === '/';
 
-  const showHomeButton = (role === 'customer' || role === 'company') && !isAlreadyHome;
+  const homePath =
+    role === 'company'
+      ? '/company/home'
+      : role === 'customer'
+        ? '/customer/home'
+        : role === 'admin'
+          ? '/admin/home'
+          : '/';
+
+  const isAlreadyHome =
+    location.pathname === '/company/home' ||
+    location.pathname === '/customer/home' ||
+    location.pathname === '/admin/home' ||
+    location.pathname === '/';
+
+  // Only show the home button when the user is logged in and not already on their home page
+  const showHomeButton = !!role && !isAlreadyHome;
 
   return (
     <header className="app-header">
@@ -51,7 +67,7 @@ export function AppHeader({ title, onBack, backFallback = '/', showBack = true, 
         </button>
       ) : (
         <div className="app-header__logo" aria-hidden="true">
-          <ApartmentIcon sx={{ fontSize: 24 }} />
+          {defaultLogo}
         </div>
       )}
 

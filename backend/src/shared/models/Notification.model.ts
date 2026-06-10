@@ -12,6 +12,7 @@ export type NotificationType =
   | 'request_timeout'
   | 'company_approved'
   | 'company_rejected'
+  | 'company_document_requested'
   | 'chat_message'
   | 'content_removed'
   | 'eta_updated';
@@ -45,6 +46,7 @@ const NotificationSchema = new Schema<INotification>(
         'request_timeout',
         'company_approved',
         'company_rejected',
+        'company_document_requested',
         'chat_message',
         'content_removed',
         'eta_updated',

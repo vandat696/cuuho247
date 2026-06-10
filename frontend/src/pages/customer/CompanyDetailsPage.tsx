@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { Dialog, DialogTitle, DialogContent, CircularProgress, Avatar, Rating, IconButton } from '@mui/material';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
+import { InfoField } from '@/components/common/InfoField';
 import { CompanyResult, RescueFormData } from '@/types/rescue.type';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -13,10 +16,18 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StarIcon from '@mui/icons-material/Star';
+import CloseIcon from '@mui/icons-material/Close';
+import { formatPriceRange, formatEta } from '@/utils/format';
+import { reviewService } from '@/services/review.service';
+import { toast } from 'react-hot-toast';
 
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
   const locationState = useLocation().state as { formData: RescueFormData; company: CompanyResult } | null;
+
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   if (!locationState) {
     return (
@@ -34,17 +45,30 @@ export default function CompanyDetailsPage() {
 
   const { formData, company } = locationState;
 
-  const formatPrice = (price: number | null) => (price === null ? null : new Intl.NumberFormat('vi-VN').format(price));
-  const priceText =
-    company.min_price !== null && company.max_price !== null
-      ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
-      : 'Chưa cập nhật giá';
-  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có thời gian dự kiến';
+  const priceText = formatPriceRange(company.min_price, company.max_price);
+  const etaText = formatEta(company.eta_minutes);
+
+  const addressText = [company.address.detail, company.address.ward, company.address.district, company.address.province]
+    .filter(Boolean)
+    .join(', ');
 
   const handleNext = () => {
-    navigate('/rescue/confirm', {
-      state: { formData, company },
-    });
+    navigate('/rescue/confirm', { state: { formData, company } });
+  };
+
+  const handleOpenReviews = async () => {
+    setIsReviewsModalOpen(true);
+    if (reviews.length === 0) {
+      setLoadingReviews(true);
+      try {
+        const res = await reviewService.getCompanyReviews(company._id, 1, 20);
+        setReviews(res.data.reviews || []);
+      } catch (error) {
+        toast.error('Lỗi khi tải danh sách đánh giá');
+      } finally {
+        setLoadingReviews(false);
+      }
+    }
   };
 
   return (
@@ -56,16 +80,25 @@ export default function CompanyDetailsPage() {
         sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fff', p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         {/* Header Hero */}
-        <Box sx={{ bgcolor: '#1e3a8a', color: 'white', borderRadius: '12px', p: 2.5 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontSize: 20 }}>
+        <Box sx={{ bgcolor: '#1e3a8a', color: '#ffffff', borderRadius: '12px', p: 2.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontSize: 20, color: '#ffffff' }}>
             {company.company_name}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <StarIcon sx={{ color: '#fbbf24', fontSize: 18, mr: 0.5 }} />
-            <Typography sx={{ fontWeight: 700, mr: 1 }}>{company.rating_avg}</Typography>
-            <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+            {company.rating_count > 0 ? (
+              <>
+                <Typography sx={{ fontWeight: 700, mr: 1, color: '#ffffff' }}>{company.rating_avg}</Typography>
+                <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+              </>
+            ) : (
+              <Typography sx={{ color: '#93c5fd', fontSize: 14 }}>Chưa có đánh giá</Typography>
+            )}
           </Box>
-          <Typography sx={{ color: '#bfdbfe', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}>
+          <Typography
+            onClick={handleOpenReviews}
+            sx={{ color: '#bfdbfe', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}
+          >
             Xem tất cả đánh giá
           </Typography>
         </Box>
@@ -75,43 +108,10 @@ export default function CompanyDetailsPage() {
           <Typography variant="h6" sx={{ fontSize: 16, fontWeight: 700, color: '#0f172a', mb: 2 }}>
             Thông tin công ty
           </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <PersonIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Giám đốc</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.director_name}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <PhoneIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Số điện thoại</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.phone}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <EmailIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Email</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{company.email}</Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <LocationOnIcon sx={{ color: '#64748b', fontSize: 20 }} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#64748b' }}>Địa chỉ</Typography>
-              <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>
-                {company.address.detail ? `${company.address.detail}, ` : ''}
-                {company.address.ward ? `${company.address.ward}, ` : ''}
-                {company.address.district ? `${company.address.district}, ` : ''}
-                {company.address.province}
-              </Typography>
-            </Box>
-          </Box>
+          <InfoField icon={<PersonIcon sx={{ fontSize: 20 }} />} label="Giám đốc" value={company.director_name} />
+          <InfoField icon={<PhoneIcon sx={{ fontSize: 20 }} />} label="Số điện thoại" value={company.phone} />
+          <InfoField icon={<EmailIcon sx={{ fontSize: 20 }} />} label="Email" value={company.email} />
+          <InfoField icon={<LocationOnIcon sx={{ fontSize: 20 }} />} label="Địa chỉ" value={addressText} />
         </Box>
 
         {/* Service Info Overview */}
@@ -119,30 +119,13 @@ export default function CompanyDetailsPage() {
           <Typography variant="h6" sx={{ fontSize: 16, fontWeight: 700, color: '#0f172a', mb: 2 }}>
             Thông tin dịch vụ
           </Typography>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <PaidIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Giá dự kiến</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{priceText}</Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <AccessTimeIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Thời gian đến</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#ea580c' }}>{etaText}</Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: '#64748b' }}>
-              <LocationOnIcon sx={{ fontSize: 18, mr: 1 }} />
-              <Typography sx={{ fontSize: 14 }}>Khoảng cách</Typography>
-            </Box>
-            <Typography sx={{ fontWeight: 700, color: '#1e293b' }}>{company.distance_km} km</Typography>
-          </Box>
+          <InfoField icon={<PaidIcon sx={{ fontSize: 20 }} />} label="Giá dự kiến" value={priceText} />
+          <InfoField icon={<AccessTimeIcon sx={{ fontSize: 20 }} />} label="Thời gian đến" value={etaText} />
+          <InfoField
+            icon={<LocationOnIcon sx={{ fontSize: 20 }} />}
+            label="Khoảng cách"
+            value={`${company.distance_km} km`}
+          />
         </Box>
 
         {/* Provided Services */}
@@ -176,6 +159,89 @@ export default function CompanyDetailsPage() {
           </Button>
         </Box>
       </Box>
+
+      {/* Reviews Modal */}
+      <Dialog
+        open={isReviewsModalOpen}
+        onClose={() => setIsReviewsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3, maxHeight: '80vh' } }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Đánh giá công ty
+          <IconButton onClick={() => setIsReviewsModalOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {loadingReviews ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : reviews.length === 0 ? (
+            <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>Chưa có đánh giá nào.</Typography>
+          ) : (
+            reviews.map((review: any) => (
+              <Box
+                key={review._id}
+                sx={{
+                  mb: 3,
+                  pb: 3,
+                  borderBottom: '1px solid #f1f5f9',
+                  '&:last-child': { borderBottom: 'none', mb: 0, pb: 0 },
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
+                  <Avatar src={review.user_id?.avatar_url} sx={{ width: 36, height: 36 }} />
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      {review.user_id?.full_name || 'Khách hàng'}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Rating value={review.rating} readOnly size="small" sx={{ color: '#f59e0b' }} />
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(review.created_at).toLocaleDateString('vi-VN')}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                {review.content && (
+                  <Typography variant="body2" sx={{ ml: 6 }}>
+                    {review.content}
+                  </Typography>
+                )}
+                {review.reply && (
+                  <Box
+                    sx={{
+                      ml: 6,
+                      mt: 1.5,
+                      p: 1.5,
+                      bgcolor: review.reply.is_visible === false ? '#f8fafc' : '#f0fdf4',
+                      borderRadius: 2,
+                    }}
+                  >
+                    {review.reply.is_visible === false ? (
+                      <Typography variant="body2" sx={{ color: '#64748b', fontStyle: 'italic' }}>
+                        Phản hồi đã bị gỡ bởi quản trị viên.
+                      </Typography>
+                    ) : (
+                      <>
+                        <Typography variant="caption" sx={{ color: '#166534', fontWeight: 600 }}>
+                          Phản hồi từ công ty
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#14532d', mt: 0.5 }}>
+                          {review.reply.content}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            ))
+          )}
+        </DialogContent>
+      </Dialog>
     </MobileLayout>
   );
 }

@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { vehicleController } from './vehicle.controller';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { authorize } from '@/shared/middleware/authorize.middleware';
+import { checkCompanyActive } from '@/shared/middleware/checkCompanyActive.middleware';
 
 const router = Router();
 
 router.use(authenticate);
 router.use(authorize(['company']));
+router.use(checkCompanyActive);
 
 router.get('/', vehicleController.getVehicles);
 router.get('/:id', vehicleController.getVehicle);

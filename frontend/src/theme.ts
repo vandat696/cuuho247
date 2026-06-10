@@ -38,16 +38,16 @@ export const theme = createTheme({
     divider: '#e2e8f0',
   },
   typography: {
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     fontSize: 14,
     h1: {
-      fontSize: '28px',
+      fontSize: '24px',
       fontWeight: 700,
       lineHeight: 1.2,
       color: '#1b3a5d',
     },
     h2: {
-      fontSize: '22px',
+      fontSize: '20px',
       fontWeight: 700,
       lineHeight: 1.3,
       color: '#1b3a5d',
@@ -63,16 +63,26 @@ export const theme = createTheme({
       fontWeight: 600,
       color: '#1b3a5d',
     },
+    h5: {
+      fontSize: '15px',
+      fontWeight: 600,
+      color: '#1b3a5d',
+    },
+    h6: {
+      fontSize: '14px',
+      fontWeight: 600,
+      color: '#1b3a5d',
+    },
     body1: {
-      fontSize: '16px',
+      fontSize: '15px',
       color: '#4a5568',
     },
     body2: {
-      fontSize: '14px',
+      fontSize: '13px',
       color: '#4a5568',
     },
     caption: {
-      fontSize: '12px',
+      fontSize: '11px',
     },
     button: {
       textTransform: 'none',
@@ -177,6 +187,35 @@ export const theme = createTheme({
           backgroundColor: '#f5f7fa',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
+        },
+      },
+    },
+    MuiPaginationItem: {
+      styleOverrides: {
+        root: {
+          color: '#1b3a5d',
+          fontWeight: 600,
+          fontSize: '14px',
+          fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          borderRadius: '50%',
+          margin: '0 4px',
+          '&.Mui-selected': {
+            backgroundColor: '#ff6b00 !important',
+            color: '#ffffff !important',
+            '&:hover': {
+              backgroundColor: '#e05a00 !important',
+            },
+          },
+          '&.Mui-disabled': {
+            opacity: 0.3,
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(27, 58, 93, 0.05)',
+          },
+        },
+        page: {
+          border: 'none',
+          background: 'none',
         },
       },
     },

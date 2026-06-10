@@ -5,6 +5,7 @@ import StarIcon from '@mui/icons-material/Star';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
+import { formatPriceRange, formatEta } from '@/utils/format';
 
 interface CompanyCardProps {
   company: CompanyResult;
@@ -12,12 +13,8 @@ interface CompanyCardProps {
 }
 
 export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
-  const formatPrice = (price: number | null) => (price === null ? null : new Intl.NumberFormat('vi-VN').format(price));
-  const priceText =
-    company.min_price !== null && company.max_price !== null
-      ? `${formatPrice(company.min_price)} - ${formatPrice(company.max_price)}đ`
-      : 'Chưa cập nhật giá';
-  const etaText = company.eta_minutes ? `~${company.eta_minutes} phút` : 'Chưa có thời gian dự kiến';
+  const priceText = formatPriceRange(company.min_price, company.max_price);
+  const etaText = formatEta(company.eta_minutes);
 
   return (
     <Box
@@ -53,8 +50,16 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
       {/* Rating Row */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <StarIcon sx={{ color: '#ffb400', fontSize: 20, mr: 0.5 }} />
-        <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>{company.rating_avg}</Typography>
-        <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+        {company.rating_count > 0 ? (
+          <>
+            <Typography sx={{ fontWeight: 700, fontSize: 15, mr: 1, color: '#1e3a5f' }}>
+              {company.rating_avg}
+            </Typography>
+            <Typography sx={{ color: '#718096', fontSize: 14 }}>({company.rating_count} đánh giá)</Typography>
+          </>
+        ) : (
+          <Typography sx={{ color: '#718096', fontSize: 14 }}>Chưa có đánh giá</Typography>
+        )}
       </Box>
 
       {/* Price and Time Info */}

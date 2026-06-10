@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
 import { ChatBubbleOutline, StarOutline } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+// removed toast
 
 import { NAVY, ORANGE } from '@/components/rescue-company/RescueCompanyRequestShared';
 import { CancelButton } from '@/components/rescue-customer/CancelButton';
-import { CustomerRescueRequestStatus } from '@/services/rescueRequestCustomer.service';
+import { CustomerRescueRequestStatus } from '@/services/customer-rescue.service';
 
 interface TrackingActionButtonsProps {
   requestId: string;
@@ -15,6 +15,10 @@ interface TrackingActionButtonsProps {
 
 export const TrackingActionButtons = ({ requestId, status, onCancelClick }: TrackingActionButtonsProps) => {
   const navigate = useNavigate();
+
+  const handleReview = () => {
+    navigate(`/customer/review/${requestId}`);
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -70,7 +74,7 @@ export const TrackingActionButtons = ({ requestId, status, onCancelClick }: Trac
       {status === 'completed' && (
         <Box
           component="button"
-          onClick={() => toast.success('Tính năng đánh giá đang được phát triển')}
+          onClick={handleReview}
           sx={{
             width: '100%',
             bgcolor: ORANGE,

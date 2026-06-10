@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { IncidentType, RescueFormData, RescueFormErrors, RescueLocation } from '../types/rescue.type';
-import { rescueService } from '../services/rescueRequestCompany.service';
-import { rescueRequestService } from '../services/rescueRequestCustomer.service';
+import { customerRescueService } from '../services/customer-rescue.service';
 import { useCurrentLocation } from './useCurrentLocation';
 
 export function useRescueRequest() {
@@ -29,7 +28,7 @@ export function useRescueRequest() {
   useEffect(() => {
     const checkActiveRequest = async () => {
       try {
-        const response = await rescueRequestService.getMyRequests();
+        const response = await customerRescueService.getMyRequests();
         if (response.status === 'success') {
           const requests = response.data.requests || [];
           const active = requests.find(
@@ -116,7 +115,7 @@ export function useRescueRequest() {
 
     setIsSearching(true);
     try {
-      const res = await rescueService.searchCompanies({
+      const res = await customerRescueService.searchCompanies({
         lat: loc.lat,
         lng: loc.lng,
         incident_type: form.incident_type?.slug,

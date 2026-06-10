@@ -1,47 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import {
-  ChatBubbleOutlineRounded as MessageIcon,
-  CheckCircleOutlineRounded as CheckIcon,
-  ErrorOutlineRounded as AlertIcon,
-} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescueRequestCompany.service';
+import { NotificationCard, CompanyNotificationData } from '@/components/rescue-company/NotificationCard';
+import { companyRescueService } from '@/services/company-rescue.service';
+import { formatTimeAgo } from '@/components/rescue-company/RescueCompanyRequestShared';
 import {
   ActiveRescueRequest,
   CanceledRescueRequest,
   CompletedRescueRequest,
   PendingRescueRequest,
 } from '@/types/rescue.type';
+import { NAVY, ORANGE } from '@/constants/colors';
 
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
-const CARD_RADIUS = '12px';
-const CIRCLE_RADIUS = '9999px';
 const READ_NOTIFICATION_IDS_KEY = 'companyReadNotificationIds';
-
-type NotificationKind = 'success' | 'message' | 'warning';
-
-interface CompanyNotification {
-  id: string;
-  title: string;
-  body: string;
-  timeAgo: string;
-  createdAt: number;
-  kind: NotificationKind;
-  isRead: boolean;
-  detailPath: string;
-}
-
-const iconByKind = {
-  success: <CheckIcon sx={{ fontSize: 24, color: '#22c55e' }} />,
-  message: <MessageIcon sx={{ fontSize: 24, color: '#3b82f6' }} />,
-  warning: <AlertIcon sx={{ fontSize: 24, color: '#eab308' }} />,
-};
 
 const getReadNotificationIds = () => {
   try {
@@ -56,33 +31,14 @@ const saveReadNotificationIds = (ids: Set<string>) => {
   localStorage.setItem(READ_NOTIFICATION_IDS_KEY, JSON.stringify(Array.from(ids)));
 };
 
-const formatTimeAgo = (dateValue?: string) => {
-  if (!dateValue) return 'Vừa xong';
-
-  const createdAt = new Date(dateValue).getTime();
-  if (Number.isNaN(createdAt)) return 'Vừa xong';
-
-  const diffMinutes = Math.max(0, Math.floor((Date.now() - createdAt) / 60000));
-
-  if (diffMinutes < 1) return 'Vừa xong';
-  if (diffMinutes < 60) return `${diffMinutes} phút trước`;
-
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours} giờ trước`;
-
-  return `${Math.floor(diffHours / 24)} ngày trước`;
-};
-
 const toTimestamp = (dateValue?: string) => {
   if (!dateValue) return 0;
-
   const timestamp = new Date(dateValue).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
 };
 
-const buildPendingNotification = (request: PendingRescueRequest, readIds: Set<string>): CompanyNotification => {
+const buildPendingNotification = (request: PendingRescueRequest, readIds: Set<string>): CompanyNotificationData => {
   const id = `pending-${request._id}`;
-
   return {
     id,
     title: 'Yêu cầu cứu hộ mới',
@@ -95,9 +51,8 @@ const buildPendingNotification = (request: PendingRescueRequest, readIds: Set<st
   };
 };
 
-const buildActiveNotification = (request: ActiveRescueRequest, readIds: Set<string>): CompanyNotification => {
+const buildActiveNotification = (request: ActiveRescueRequest, readIds: Set<string>): CompanyNotificationData => {
   const id = `active-${request._id}`;
-
   return {
     id,
     title: 'Yêu cầu đang thực hiện',
@@ -110,9 +65,8 @@ const buildActiveNotification = (request: ActiveRescueRequest, readIds: Set<stri
   };
 };
 
-const buildCompletedNotification = (request: CompletedRescueRequest, readIds: Set<string>): CompanyNotification => {
+const buildCompletedNotification = (request: CompletedRescueRequest, readIds: Set<string>): CompanyNotificationData => {
   const id = `completed-${request._id}`;
-
   return {
     id,
     title: 'Cứu hộ hoàn thành',
@@ -125,10 +79,9 @@ const buildCompletedNotification = (request: CompletedRescueRequest, readIds: Se
   };
 };
 
-const buildCanceledNotification = (request: CanceledRescueRequest, readIds: Set<string>): CompanyNotification => {
+const buildCanceledNotification = (request: CanceledRescueRequest, readIds: Set<string>): CompanyNotificationData => {
   const id = `canceled-${request._id}`;
   const reason = request.cancellation?.reason ? ` Lý do: ${request.cancellation.reason}.` : '';
-
   return {
     id,
     title: 'Yêu cầu đã hủy',
@@ -141,46 +94,9 @@ const buildCanceledNotification = (request: CanceledRescueRequest, readIds: Set<
   };
 };
 
-const NotificationCard = ({ notification, onClick }: { notification: CompanyNotification; onClick: () => void }) => (
-  <Box
-    component="button"
-    type="button"
-    onClick={onClick}
-    sx={{
-      width: '100%',
-      p: 2,
-      border: '2px solid',
-      borderColor: notification.isRead ? '#e5e7eb' : ORANGE,
-      borderRadius: CARD_RADIUS,
-      bgcolor: notification.isRead ? '#fff' : 'rgba(255, 107, 0, 0.05)',
-      textAlign: 'left',
-      cursor: 'pointer',
-      transition: 'border-color 0.15s, background 0.15s, transform 0.1s',
-      '&:hover': { borderColor: notification.isRead ? '#cbd5e1' : ORANGE, bgcolor: '#fff7ed' },
-      '&:active': { transform: 'scale(0.99)' },
-    }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-      <Box sx={{ flexShrink: 0 }}>{iconByKind[notification.kind]}</Box>
-
-      <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography sx={{ mb: 0.5, fontSize: 16, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>
-          {notification.title}
-        </Typography>
-        <Typography sx={{ mb: 1, fontSize: 14, color: '#374151', lineHeight: 1.35 }}>{notification.body}</Typography>
-        <Typography sx={{ fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>{notification.timeAgo}</Typography>
-      </Box>
-
-      {!notification.isRead && (
-        <Box sx={{ mt: 1, width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: ORANGE, flexShrink: 0 }} />
-      )}
-    </Box>
-  </Box>
-);
-
 export default function CompanyNotificationsPage() {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<CompanyNotification[]>([]);
+  const [notifications, setNotifications] = useState<CompanyNotificationData[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(() => getReadNotificationIds());
   const [loading, setLoading] = useState(true);
 
@@ -191,10 +107,10 @@ export default function CompanyNotificationsPage() {
 
       try {
         const [pendingResponse, activeResponse, completedResponse, canceledResponse] = await Promise.all([
-          rescueService.getCompanyPendingRequests(),
-          rescueService.getCompanyActiveRequests(),
-          rescueService.getCompanyCompletedRequests(),
-          rescueService.getCompanyCanceledRequests(),
+          companyRescueService.getCompanyPendingRequests(),
+          companyRescueService.getCompanyActiveRequests(),
+          companyRescueService.getCompanyCompletedRequests(),
+          companyRescueService.getCompanyCanceledRequests(),
         ]);
 
         const nextNotifications = [
@@ -236,7 +152,7 @@ export default function CompanyNotificationsPage() {
     setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
   };
 
-  const openNotification = (notification: CompanyNotification) => {
+  const openNotification = (notification: CompanyNotificationData) => {
     const nextReadIds = new Set(readIds);
     nextReadIds.add(notification.id);
     saveReadNotificationIds(nextReadIds);

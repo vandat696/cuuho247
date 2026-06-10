@@ -3,6 +3,7 @@ import companyRepository from '@/modules/company/company.repository';
 import { comparePassword, hashPassword } from '@/shared/utils/password.util';
 import { generateToken } from '@/shared/utils/jwt.util';
 import { ApiError } from '@/shared/utils/apiError.util';
+import { Admin } from '@/shared/models/Admin.model';
 import type {
   IAuthService,
   CustomerRegisterInput,
@@ -31,7 +32,6 @@ class AuthService implements IAuthService {
       full_name,
       phone,
       status: 'active',
-      is_verified: true,
     });
 
     const userResponse = newUser.toObject();
@@ -80,8 +80,8 @@ class AuthService implements IAuthService {
       },
       service_area,
       license_file_url,
-      status: 'active',
-      is_verified: true,
+      status: 'pending_verification',
+      is_verified: false,
     });
 
     const companyResponse = newCompany.toObject();
@@ -94,13 +94,23 @@ class AuthService implements IAuthService {
     const { email, password } = userData;
 
     let account: any = await userRepository.findByEmail(email);
-    let role: 'customer' | 'company' = 'customer';
+    let role: 'customer' | 'company' | 'admin' = 'customer';
     let repository: any = userRepository;
 
     if (!account) {
       account = await companyRepository.findByEmail(email);
-      role = 'company';
-      repository = companyRepository;
+      if (account) {
+        role = 'company';
+        repository = companyRepository;
+      }
+    }
+
+    if (!account) {
+      account = await Admin.findOne({ email }).exec();
+      if (account) {
+        role = 'admin';
+        repository = null;
+      }
     }
 
     if (!account || !account.password_hash) {
@@ -121,10 +131,18 @@ class AuthService implements IAuthService {
     // Company approval is temporarily disabled. Companies can log in as long
     // as the account is not locked.
     if (role === 'company' && account.status === 'locked') {
-      throw new ApiError(403, 'Tài khoản công ty đã bị khóa');
+      throw new ApiError(403, `Tài khoản công ty đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
     }
 
-    await repository.updateById(account._id.toString(), { last_login_at: new Date() });
+    if (role === 'customer' && account.status === 'locked') {
+      throw new ApiError(403, `Tài khoản của bạn đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
+    }
+
+    if (role === 'admin') {
+      await Admin.findByIdAndUpdate(account._id, { last_login_at: new Date() }).exec();
+    } else if (repository) {
+      await repository.updateById(account._id.toString(), { last_login_at: new Date() });
+    }
 
     const accessToken = generateToken(account._id.toString(), account.email, role);
 

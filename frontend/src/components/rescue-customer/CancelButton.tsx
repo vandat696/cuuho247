@@ -1,3 +1,4 @@
+import { Button } from '../common/Button';
 import type { RequestStatus } from '@/types/rescue.type';
 
 interface CancelButtonProps {
@@ -11,13 +12,21 @@ export function CancelButton({ status, onCancel }: CancelButtonProps) {
   const canCancel = CANCELLABLE.includes(status);
 
   return (
-    <button
-      type="button"
-      className="btn btn--md btn--full btn--cancel"
+    <Button
+      variant="outline"
+      fullWidth
       onClick={canCancel ? onCancel : undefined}
       disabled={!canCancel}
+      sx={{
+        color: 'var(--clr-error)',
+        borderColor: 'var(--clr-error)',
+        '&:hover': {
+          backgroundColor: 'var(--clr-error-light)',
+          borderColor: 'var(--clr-error)',
+        },
+      }}
     >
       Hủy yêu cầu
-    </button>
+    </Button>
   );
 }

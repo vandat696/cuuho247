@@ -3,6 +3,10 @@ import { Schema, model, Document, Types } from 'mongoose';
 export interface IReviewReply {
   content?: string;
   replied_at?: Date;
+  is_visible?: boolean;
+  removed_by?: Types.ObjectId;
+  removal_reason?: string;
+  removed_at?: Date;
 }
 
 export interface IReview extends Document {
@@ -10,6 +14,12 @@ export interface IReview extends Document {
   user_id: Types.ObjectId;
   company_id: Types.ObjectId;
   rating: number;
+  detailed_ratings?: {
+    response_time?: number;
+    service_quality?: number;
+    staff_attitude?: number;
+    pricing?: number;
+  };
   content?: string;
   is_visible?: boolean;
   removed_by?: Types.ObjectId;
@@ -24,6 +34,10 @@ const ReplySchema = new Schema<IReviewReply>(
   {
     content: { type: String },
     replied_at: { type: Date },
+    is_visible: { type: Boolean, default: true },
+    removed_by: { type: Schema.Types.ObjectId, ref: 'Admin' },
+    removal_reason: { type: String },
+    removed_at: { type: Date },
   },
   { _id: false }
 );
@@ -34,8 +48,14 @@ const ReviewSchema = new Schema<IReview>(
     user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     company_id: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
+    detailed_ratings: {
+      response_time: { type: Number, min: 1, max: 5 },
+      service_quality: { type: Number, min: 1, max: 5 },
+      staff_attitude: { type: Number, min: 1, max: 5 },
+      pricing: { type: Number, min: 1, max: 5 },
+    },
     content: { type: String },
-    is_visible: { type: Boolean },
+    is_visible: { type: Boolean, default: true },
     removed_by: { type: Schema.Types.ObjectId, ref: 'Admin' },
     removal_reason: { type: String },
     removed_at: { type: Date },

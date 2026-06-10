@@ -17,7 +17,9 @@ const start = async () => {
   // Initialize Socket.IO
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: CLIENT_URL,
+      origin: (origin, callback) => {
+        callback(null, true);
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },

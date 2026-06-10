@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { Box, Typography, TextField, MenuItem, Select, FormControl, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, TextField, MenuItem, Select, FormControl, CircularProgress } from '@mui/material';
+import { Button } from '@/components/common/Button';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { useServiceForm } from '@/hooks/useServiceForm';
@@ -137,37 +138,11 @@ export default function ServiceFormPage() {
 
         {/* Buttons */}
         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleSubmit}
-            disabled={isLoading || categoriesLoading}
-            sx={{
-              bgcolor: 'secondary.main',
-              '&:hover': { bgcolor: '#152943' },
-              py: 1.5,
-              textTransform: 'none',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
-          >
+          <Button variant="primary" fullWidth onClick={handleSubmit} loading={isLoading || categoriesLoading}>
             Lưu thay đổi
           </Button>
 
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={handleCancel}
-            disabled={isLoading}
-            sx={{
-              borderColor: 'secondary.main',
-              color: 'secondary.main',
-              py: 1.5,
-              textTransform: 'none',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
-          >
+          <Button variant="outline" fullWidth onClick={handleCancel} disabled={isLoading}>
             Hủy
           </Button>
         </Box>

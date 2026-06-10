@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
+import { User } from '@/shared/models/User.model';
+import { Company } from '@/shared/models/Company.model';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -9,7 +11,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get token from header
     const authHeader = req.header('Authorization');
@@ -33,10 +35,44 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
       return;
     }
 
+    const userId = decoded.id as string;
+    const role = decoded.role as string;
+
+    // Check account status if it is a user or company
+    if (role === 'customer') {
+      const userObj = await User.findById(userId).select('status lock_reason').exec();
+      if (!userObj) {
+        res.status(401).json({ status: 'error', message: 'Tài khoản không tồn tại' });
+        return;
+      }
+      if (userObj.status === 'locked') {
+        res.status(403).json({
+          status: 'error',
+          message: `Tài khoản của bạn đã bị khóa. Lý do: ${userObj.lock_reason || 'Không rõ lý do'}`,
+          code: 'USER_LOCKED',
+        });
+        return;
+      }
+    } else if (role === 'company') {
+      const companyObj = await Company.findById(userId).select('status lock_reason').exec();
+      if (!companyObj) {
+        res.status(401).json({ status: 'error', message: 'Tài khoản công ty không tồn tại' });
+        return;
+      }
+      if (companyObj.status === 'locked') {
+        res.status(403).json({
+          status: 'error',
+          message: `Tài khoản công ty của bạn đã bị khóa. Lý do: ${companyObj.lock_reason || 'Không rõ lý do'}`,
+          code: 'COMPANY_LOCKED',
+        });
+        return;
+      }
+    }
+
     // Save data to request
     req.user = {
-      id: decoded.id as string,
-      role: decoded.role as string,
+      id: userId,
+      role: role,
       ...decoded,
     };
 

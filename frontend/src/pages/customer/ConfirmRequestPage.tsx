@@ -6,7 +6,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
 import { ConfirmRequestCard } from '@/components/rescue-customer/ConfirmRequestCard';
-import { rescueRequestService } from '@/services/rescueRequestCustomer.service';
+import { customerRescueService } from '@/services/customer-rescue.service';
 import { CompanyResult } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
 
@@ -64,7 +64,7 @@ export default function ConfirmRequestPage() {
         service_types: formData.incident_type ? [formData.incident_type] : undefined,
       };
 
-      const res = await rescueRequestService.createRequest(payload);
+      const res = await customerRescueService.createRequest(payload);
 
       toast.success('Gửi yêu cầu thành công!');
       navigate(`/customer/tracking/${res.data._id}`, { replace: true });

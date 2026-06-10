@@ -1,154 +1,111 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Badge, Box, IconButton, Typography, CircularProgress } from '@mui/material';
+import { Badge, Box, IconButton, CircularProgress } from '@mui/material';
 import {
   ApartmentOutlined as ApartmentIcon,
   DescriptionOutlined as ServicesIcon,
   LocalShippingOutlined as VehiclesIcon,
   LogoutRounded as LogoutIcon,
   NotificationsNoneRounded as NotificationsIcon,
+  StarOutlineRounded as StarOutlineIcon,
+  PeopleOutlined as CommunityIcon,
 } from '@mui/icons-material';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { StatCard } from '@/components/rescue-company/StatCard';
+import { ActionCard } from '@/components/rescue-company/ActionCard';
+import { CompanyHeroCard } from '@/components/rescue-company/CompanyHeroCard';
+import { CompanyPendingStatus } from '@/components/rescue-company/CompanyPendingStatus';
 import { Company } from '@/types/common.type';
 import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
-import { rescueService } from '@/services/rescueRequestCompany.service';
+import { companyRescueService } from '@/services/company-rescue.service';
 import { toast } from 'react-hot-toast';
+import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 
-const NAVY = '#1B3A5D';
-const ORANGE = '#FF6B00';
-const CARD_RADIUS = '12px';
-const CIRCLE_RADIUS = '9999px';
 const NOTIFICATION_POLL_MS = 15000;
-
-const StatCard = ({
-  value,
-  label,
-  color,
-  hoverColor,
-  onClick,
-}: {
-  value: number | string;
-  label: string;
-  color: string;
-  hoverColor: string;
-  onClick?: () => void;
-}) => (
-  <Box
-    component="button"
-    type="button"
-    onClick={onClick}
-    sx={{
-      minHeight: 92,
-      p: 2,
-      border: '2px solid #e5e7eb',
-      borderRadius: CARD_RADIUS,
-      bgcolor: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'border-color 0.15s, transform 0.1s',
-      '&:hover': { borderColor: hoverColor },
-      '&:active': { transform: 'scale(0.99)' },
-    }}
-  >
-    <Typography sx={{ fontSize: 24, lineHeight: 1, fontWeight: 800, color }}>{value}</Typography>
-    <Typography sx={{ mt: 1, fontSize: 12, color: '#4b5563', lineHeight: 1.2 }}>{label}</Typography>
-  </Box>
-);
-
-const ActionCard = ({
-  icon,
-  title,
-  description,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-}) => (
-  <Box
-    component="button"
-    type="button"
-    onClick={onClick}
-    sx={{
-      width: '100%',
-      p: 2,
-      border: '2px solid #e5e7eb',
-      borderRadius: CARD_RADIUS,
-      bgcolor: '#fff',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1.5,
-      textAlign: 'left',
-      color: NAVY,
-      transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
-      '&:hover': { bgcolor: '#F5F7FA', borderColor: '#e5e7eb' },
-      '&:active': { transform: 'scale(0.99)' },
-    }}
-  >
-    <Box sx={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      {icon}
-    </Box>
-    <Box sx={{ minWidth: 0, flex: 1 }}>
-      <Typography sx={{ fontSize: 16, fontWeight: 500, color: NAVY, lineHeight: 1.25 }}>{title}</Typography>
-      <Typography sx={{ mt: 0.25, fontSize: 12, color: '#6b7280', lineHeight: 1.25 }}>{description}</Typography>
-    </Box>
-  </Box>
-);
+// Poll profile every 30s when pending — so company sees admin feedback (rejection reason, doc request) without a manual refresh
+const PENDING_PROFILE_POLL_MS = 30000;
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({ waiting: 0, inProgress: 3, done: 12, cancelled: 2 });
+  const [counts, setCounts] = useState({ waiting: 0, inProgress: 0, done: 0, cancelled: 0 });
   const [company, setCompany] = useState<Company | null>(null);
   const [pendingRequests, setPendingRequests] = useState<PendingRescueRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const knownPendingIdsRef = useRef<Set<string>>(new Set());
   const hasInitializedNotificationsRef = useRef(false);
+  const companyStatusRef = useRef<string | null>(null);
 
   useEffect(() => {
+    let rescueIntervalId: number | undefined;
+    let profileIntervalId: number | undefined;
+
     const initialize = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchCompanyProfile(),
-        fetchActiveRequestsCount(),
-        fetchCompletedRequestsCount(),
-        fetchCanceledRequestsCount(),
-        fetchPendingRequests({ notifyNew: false }),
-      ]);
+      const isActive = await fetchCompanyProfile();
+
+      if (isActive) {
+        await Promise.all([
+          fetchActiveRequestsCount(),
+          fetchCompletedRequestsCount(),
+          fetchCanceledRequestsCount(),
+          fetchPendingRequests({ notifyNew: false }),
+        ]);
+
+        rescueIntervalId = window.setInterval(() => {
+          fetchPendingRequests({ notifyNew: true });
+        }, NOTIFICATION_POLL_MS);
+      } else {
+        // Poll profile every 30s when pending/rejected so admin feedback appears automatically
+        profileIntervalId = window.setInterval(async () => {
+          const nowActive = await fetchCompanyProfile();
+          if (nowActive && companyStatusRef.current !== 'active') {
+            // Company just got approved — stop profile polling and start full dashboard
+            window.clearInterval(profileIntervalId);
+            await Promise.all([
+              fetchActiveRequestsCount(),
+              fetchCompletedRequestsCount(),
+              fetchCanceledRequestsCount(),
+              fetchPendingRequests({ notifyNew: false }),
+            ]);
+            rescueIntervalId = window.setInterval(() => {
+              fetchPendingRequests({ notifyNew: true });
+            }, NOTIFICATION_POLL_MS);
+          }
+        }, PENDING_PROFILE_POLL_MS);
+      }
       setLoading(false);
     };
 
     initialize();
 
-    const intervalId = window.setInterval(() => {
-      fetchPendingRequests({ notifyNew: true });
-    }, NOTIFICATION_POLL_MS);
-
-    return () => window.clearInterval(intervalId);
+    return () => {
+      if (rescueIntervalId) window.clearInterval(rescueIntervalId);
+      if (profileIntervalId) window.clearInterval(profileIntervalId);
+    };
   }, []);
 
-  const fetchCompanyProfile = async () => {
+  const fetchCompanyProfile = async (): Promise<boolean> => {
     try {
       const response = await companyService.getProfile();
       if (response.status === 'success') {
         setCompany(response.data);
+        companyStatusRef.current = response.data.status ?? null;
+        return response.data.status === 'active';
       }
+      return false;
     } catch (error) {
       console.error('Error fetching company profile:', error);
       toast.error('Không thể tải thông tin công ty');
+      return false;
     }
   };
 
   const fetchPendingRequests = async ({ notifyNew }: { notifyNew: boolean }) => {
     try {
-      const response = await rescueService.getCompanyPendingRequests();
+      const response = await companyRescueService.getCompanyPendingRequests();
       if (response.status !== 'success') return;
 
       const requests = response.data.requests;
@@ -182,7 +139,7 @@ export default function CompanyHomePage() {
 
   const fetchActiveRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyActiveRequests();
+      const response = await companyRescueService.getCompanyActiveRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, inProgress: response.data.total }));
       }
@@ -193,7 +150,7 @@ export default function CompanyHomePage() {
 
   const fetchCompletedRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyCompletedRequests();
+      const response = await companyRescueService.getCompanyCompletedRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, done: response.data.total }));
       }
@@ -204,7 +161,7 @@ export default function CompanyHomePage() {
 
   const fetchCanceledRequestsCount = async () => {
     try {
-      const response = await rescueService.getCompanyCanceledRequests();
+      const response = await companyRescueService.getCompanyCanceledRequests();
       if (response.status === 'success') {
         setCounts((prev) => ({ ...prev, cancelled: response.data.total }));
       }
@@ -226,6 +183,7 @@ export default function CompanyHomePage() {
   };
 
   const companyName = company?.company_name || 'Cứu hộ Minh Anh';
+  const isCompanyActive = company?.status === 'active';
 
   return (
     <MobileLayout>
@@ -233,28 +191,30 @@ export default function CompanyHomePage() {
         title="Cứu hộ 247"
         showBack={false}
         rightSlot={
-          <IconButton
-            aria-label="Thông báo yêu cầu cứu hộ"
-            size="small"
-            onClick={() => navigate('/company/notifications')}
-            sx={{ p: 1, color: '#fff' }}
-          >
-            <Badge
-              badgeContent={pendingRequests.length}
-              color="error"
-              overlap="circular"
-              sx={{
-                '& .MuiBadge-badge': {
-                  minWidth: 16,
-                  height: 16,
-                  fontSize: 10,
-                  fontWeight: 700,
-                },
-              }}
+          isCompanyActive ? (
+            <IconButton
+              aria-label="Thông báo yêu cầu cứu hộ"
+              size="small"
+              onClick={() => navigate('/company/notifications')}
+              sx={{ p: 1, color: '#fff' }}
             >
-              <NotificationsIcon sx={{ fontSize: 24 }} />
-            </Badge>
-          </IconButton>
+              <Badge
+                badgeContent={pendingRequests.length}
+                color="error"
+                overlap="circular"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    minWidth: 16,
+                    height: 16,
+                    fontSize: 10,
+                    fontWeight: 700,
+                  },
+                }}
+              >
+                <NotificationsIcon sx={{ fontSize: 24 }} />
+              </Badge>
+            </IconButton>
+          ) : undefined
         }
       />
 
@@ -263,27 +223,9 @@ export default function CompanyHomePage() {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
             <CircularProgress />
           </Box>
-        ) : (
+        ) : isCompanyActive ? (
           <>
-            <Box
-              onClick={() => navigate('/company/profile')}
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: CARD_RADIUS,
-                background: `linear-gradient(90deg, ${NAVY} 0%, #2a5082 100%)`,
-                color: '#fff',
-                cursor: 'pointer',
-              }}
-            >
-              <Typography sx={{ mb: 0.5, fontSize: 20, fontWeight: 800, lineHeight: 1.25, color: '#fff' }}>
-                {companyName}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: CIRCLE_RADIUS, bgcolor: '#4ade80' }} />
-                <Typography sx={{ fontSize: 14, color: '#fff', lineHeight: 1.25 }}>Đang hoạt động</Typography>
-              </Box>
-            </Box>
+            <CompanyHeroCard companyName={companyName} onClick={() => navigate('/company/profile')} />
 
             <Box sx={{ mb: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
               <StatCard
@@ -316,7 +258,7 @@ export default function CompanyHomePage() {
               />
             </Box>
 
-            <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Typography>
+            <Box sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>Quản lý nhanh</Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <ActionCard
@@ -336,6 +278,18 @@ export default function CompanyHomePage() {
                 title="Phương tiện cứu hộ"
                 description="Quản lý xe cứu hộ"
                 onClick={() => navigate('/company/vehicles')}
+              />
+              <ActionCard
+                icon={<StarOutlineIcon sx={{ fontSize: 24 }} />}
+                title="Đánh giá khách hàng"
+                description="Xem và phản hồi đánh giá"
+                onClick={() => navigate('/company/reviews')}
+              />
+              <ActionCard
+                icon={<CommunityIcon sx={{ fontSize: 24 }} />}
+                title="Cộng đồng"
+                description="Chia sẻ và trao đổi cùng cộng đồng"
+                onClick={() => navigate('/community')}
               />
             </Box>
 
@@ -360,6 +314,7 @@ export default function CompanyHomePage() {
                   transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
                   '&:hover': { bgcolor: '#fff5f5', borderColor: '#fecaca' },
                   '&:active': { transform: 'scale(0.99)' },
+                  cursor: 'pointer',
                 }}
               >
                 <LogoutIcon sx={{ fontSize: 22 }} />
@@ -367,6 +322,12 @@ export default function CompanyHomePage() {
               </Box>
             </Box>
           </>
+        ) : (
+          <CompanyPendingStatus
+            company={company}
+            handleLogout={handleLogout}
+            onEditProfile={() => navigate('/company/profile/edit')}
+          />
         )}
       </Box>
     </MobileLayout>

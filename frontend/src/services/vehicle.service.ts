@@ -1,6 +1,6 @@
 import { http } from './http';
 import { ApiResponse } from '../types/common.type';
-import { IVehicle, CreateVehicleDto, UpdateVehicleDto } from '../types/vehicle.types';
+import { IVehicle, CreateVehicleDto, UpdateVehicleDto } from '../types/vehicle.type';
 
 export const vehicleService = {
   getVehicles: async (): Promise<IVehicle[]> => {

@@ -2,48 +2,30 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
+// Routes Submodules
+import { RegisterRoutes } from './routes/RegisterRoutes';
+import { RescueRoutes } from './routes/RescueRoutes';
+import { CustomerRoutes } from './routes/CustomerRoutes';
+import { CompanyRoutes } from './routes/CompanyRoutes';
+import { AdminRoutes } from './routes/AdminRoutes';
+
 // Suspense Fallback
 const SuspenseFallback = () => (
   <div style={{ padding: 20, textAlign: 'center', fontFamily: 'var(--font)' }}>Đang tải...</div>
 );
 
-// Public & Auth Pages
+// Core / Public Pages
 const HomePage = React.lazy(() => import('@/pages/HomePage'));
 const ShowcasePage = React.lazy(() => import('@/pages/ShowcasePage'));
 const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'));
-const RoleSelectionPage = React.lazy(() => import('@/pages/auth/RoleSelectionPage'));
-const CustomerRegisterPage = React.lazy(() => import('@/pages/auth/CustomerRegisterPage'));
-const CompanyRegisterPage = React.lazy(() => import('@/pages/auth/CompanyRegisterPage'));
-
-// Customer Pages
-const CustomerHomePage = React.lazy(() => import('@/pages/customer/CustomerHomePage'));
-const CustomerHistoryPage = React.lazy(() => import('@/pages/customer/CustomerHistoryPage'));
-const RescueTrackingPage = React.lazy(() => import('@/pages/customer/RescueTrackingPage'));
-const RescueRequestPage = React.lazy(() => import('@/pages/customer/RescueRequestPage'));
-const RescueResultsPage = React.lazy(() => import('@/pages/customer/RescueResultsPage'));
-const CompanyDetailsPage = React.lazy(() => import('@/pages/customer/CompanyDetailsPage'));
-const ConfirmRequestPage = React.lazy(() => import('@/pages/customer/ConfirmRequestPage'));
-
-// Company Pages
-const CompanyHomePage = React.lazy(() => import('./pages/rescue-company/CompanyHomePage'));
-const CompanyProfilePage = React.lazy(() => import('@/pages/rescue-company/CompanyProfilePage'));
-const CompanyNotificationsPage = React.lazy(
-  () => import('./pages/rescue-company/notifications/CompanyNotificationsPage')
-);
-
-// Company Rescue Pages (Unified)
-const RescueRequestListPage = React.lazy(() => import('./pages/rescue-company/rescue/RescueRequestListPage'));
-const RescueRequestDetailPage = React.lazy(() => import('./pages/rescue-company/rescue/RescueRequestDetailPage'));
-
-// Company Service & Vehicle Pages
-const VehicleListPage = React.lazy(() => import('./pages/rescue-company/vehicle/VehicleListPage'));
-const VehicleFormPage = React.lazy(() => import('./pages/rescue-company/vehicle/VehicleFormPage'));
-const ServiceListPage = React.lazy(() => import('./pages/rescue-company/service/ServiceListPage'));
-const ServiceFormPage = React.lazy(() => import('./pages/rescue-company/service/ServiceFormPage'));
-const ServiceDetailPage = React.lazy(() => import('./pages/rescue-company/service/ServiceDetailPage'));
 
 // Chat Pages
 const ChatPage = React.lazy(() => import('@/pages/chat/ChatPage'));
+
+// Community Pages
+const CommunityListPage = React.lazy(() => import('@/pages/community/CommunityListPage'));
+const CommunityCreatePage = React.lazy(() => import('@/pages/community/CommunityCreatePage'));
+const CommunityDetailPage = React.lazy(() => import('@/pages/community/CommunityDetailPage'));
 
 function App() {
   return (
@@ -67,56 +49,17 @@ function App() {
           <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/register">
-            <Route index element={<RoleSelectionPage />} />
-            <Route path="customer" element={<CustomerRegisterPage />} />
-            <Route path="company" element={<CompanyRegisterPage />} />
-          </Route>
+          {/* Sub-routing Modules */}
+          <Route path="/register/*" element={<RegisterRoutes />} />
+          <Route path="/rescue/*" element={<RescueRoutes />} />
+          <Route path="/customer/*" element={<CustomerRoutes />} />
+          <Route path="/company/*" element={<CompanyRoutes />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
 
-          {/* Rescue Flow (Customer mix) */}
-          <Route path="/rescue">
-            <Route path="request" element={<RescueRequestPage />} />
-            <Route path="search" element={<RescueResultsPage />} />
-            <Route path="company/:id" element={<CompanyDetailsPage />} />
-            <Route path="confirm" element={<ConfirmRequestPage />} />
-          </Route>
-
-          {/* Customer Routes */}
-          <Route path="/customer">
-            <Route index element={<Navigate to="/customer/home" replace />} />
-            <Route path="home" element={<CustomerHomePage />} />
-            <Route path="history" element={<CustomerHistoryPage />} />
-            <Route path="tracking/:requestId" element={<RescueTrackingPage />} />
-          </Route>
-
-          {/* Company Routes */}
-          <Route path="/company">
-            <Route index element={<Navigate to="/company/home" replace />} />
-            <Route path="home" element={<CompanyHomePage />} />
-            <Route path="profile" element={<CompanyProfilePage />} />
-            <Route path="notifications" element={<CompanyNotificationsPage />} />
-
-            {/* Company Vehicles */}
-            <Route path="vehicles">
-              <Route index element={<VehicleListPage />} />
-              <Route path="new" element={<VehicleFormPage />} />
-              <Route path=":id/edit" element={<VehicleFormPage />} />
-            </Route>
-
-            {/* Company Services */}
-            <Route path="services">
-              <Route index element={<ServiceListPage />} />
-              <Route path="new" element={<ServiceFormPage />} />
-              <Route path=":serviceId" element={<ServiceDetailPage />} />
-              <Route path=":serviceId/edit" element={<ServiceFormPage />} />
-            </Route>
-
-            {/* Company Rescue Requests */}
-            <Route path="rescue">
-              <Route path=":status" element={<RescueRequestListPage />} />
-              <Route path=":status/:requestId" element={<RescueRequestDetailPage />} />
-            </Route>
-          </Route>
+          {/* Community Routes */}
+          <Route path="/community" element={<CommunityListPage />} />
+          <Route path="/community/create" element={<CommunityCreatePage />} />
+          <Route path="/community/:id" element={<CommunityDetailPage />} />
 
           {/* Chat Routes */}
           <Route path="/chat/:rescueRequestId" element={<ChatPage />} />

@@ -9,6 +9,7 @@ import {
   PersonOutline as UserIcon,
   PhoneOutlined as PhoneIcon,
   ChatBubbleOutline,
+  StarOutline,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -31,10 +32,10 @@ import {
 import { MiniMap } from '@/components/location/MiniMap';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { rescueService } from '@/services/rescueRequestCompany.service';
+import { companyRescueService } from '@/services/company-rescue.service';
 import { vehicleService } from '@/services/vehicle.service';
 import { getSocket } from '@/utils/socket';
-import { IVehicle } from '@/types/vehicle.types';
+import { IVehicle } from '@/types/vehicle.type';
 
 type RequestStatus = 'pending' | 'active' | 'completed' | 'canceled';
 
@@ -78,16 +79,16 @@ export default function RescueRequestDetailPage() {
         let response;
         switch (status) {
           case 'pending':
-            response = await rescueService.getCompanyPendingRequestDetail(requestId);
+            response = await companyRescueService.getCompanyPendingRequestDetail(requestId);
             break;
           case 'active':
-            response = await rescueService.getCompanyActiveRequestDetail(requestId);
+            response = await companyRescueService.getCompanyActiveRequestDetail(requestId);
             break;
           case 'completed':
-            response = await rescueService.getCompanyCompletedRequestDetail(requestId);
+            response = await companyRescueService.getCompanyCompletedRequestDetail(requestId);
             break;
           case 'canceled':
-            response = await rescueService.getCompanyCanceledRequestDetail(requestId);
+            response = await companyRescueService.getCompanyCanceledRequestDetail(requestId);
             break;
           default:
             throw new Error('Invalid status');
@@ -171,7 +172,7 @@ export default function RescueRequestDetailPage() {
 
     try {
       setAccepting(true);
-      await rescueService.acceptCompanyPendingRequest(requestId, {
+      await companyRescueService.acceptCompanyPendingRequest(requestId, {
         vehicle_id: vehicleId,
         eta_minutes: eta,
         note: pendingNote.trim() || undefined,
@@ -192,7 +193,7 @@ export default function RescueRequestDetailPage() {
     if (!requestId) return;
     try {
       setStartLoading(true);
-      const response = await rescueService.startCompanyActiveRequest(requestId);
+      const response = await companyRescueService.startCompanyActiveRequest(requestId);
       if (response.status === 'success') {
         toast.success('Đã bắt đầu chuyến đi');
         setRequest(response.data.request);
@@ -212,7 +213,7 @@ export default function RescueRequestDetailPage() {
     if (!requestId) return;
     try {
       setArriveLoading(true);
-      const response = await rescueService.arriveCompanyActiveRequest(requestId);
+      const response = await companyRescueService.arriveCompanyActiveRequest(requestId);
       if (response.status === 'success') {
         toast.success('Đã cập nhật trạng thái xe đến nơi');
         setRequest(response.data.request);
@@ -237,7 +238,7 @@ export default function RescueRequestDetailPage() {
 
     try {
       setCompleteLoading(true);
-      const response = await rescueService.completeCompanyActiveRequest(requestId, {
+      const response = await companyRescueService.completeCompanyActiveRequest(requestId, {
         amount,
         method: paymentMethod,
         note: completionNote.trim() || undefined,
@@ -466,6 +467,12 @@ export default function RescueRequestDetailPage() {
 
               {(status === 'completed' || status === 'canceled') && (
                 <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {status === 'completed' && (
+                    <PrimaryActionButton onClick={() => navigate('/company/reviews')} variant="orange">
+                      <StarOutline sx={{ fontSize: 20, mr: 1 }} />
+                      Xem đánh giá khách hàng
+                    </PrimaryActionButton>
+                  )}
                   <PrimaryActionButton onClick={() => navigate('/company/home')} variant="navy">
                     Quay về trang chủ
                   </PrimaryActionButton>

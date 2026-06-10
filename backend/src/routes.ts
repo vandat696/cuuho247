@@ -13,11 +13,18 @@ import vehicleRoutes from './modules/vehicle/vehicle.route';
 import rescueRoutes from './modules/rescue/rescue.route';
 import { serviceRouter, serviceCategoryRouter } from './modules/service-catalog/service-catalog.route';
 import messageRoutes from './modules/message/message.route';
+import adminRoutes from './modules/admin/admin.route';
+import reviewRoutes from './modules/review/review.route';
 
 const router = Router();
 
+import userRoutes from './modules/user/user.route';
+
 // Auth routes
 router.use('/auth', authRoutes);
+
+// User routes
+router.use('/users', userRoutes);
 
 // Company services routes (phải đặt trước /company để avoid route conflict)
 router.use('/company/services', serviceRouter);
@@ -36,5 +43,15 @@ router.use('/rescue', rescueRoutes);
 
 // Message Routes
 router.use('/messages', messageRoutes);
+
+// Admin Routes
+router.use('/admin', adminRoutes);
+
+// Ratings Routes
+router.use('/ratings', reviewRoutes);
+
+// Community Routes
+import communityRoutes from './modules/community/community.route';
+router.use('/community', communityRoutes);
 
 export default router;

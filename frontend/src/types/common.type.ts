@@ -13,7 +13,6 @@ export interface User {
   full_name?: string;
   phone?: string;
   status?: string;
-  is_verified?: boolean;
   last_login_at?: Date;
   [key: string]: any;
 }

@@ -35,14 +35,26 @@ http.interceptors.response.use(
     if (error.config.url.includes('login')) {
       return Promise.reject(error);
     }
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      const msg = error.response?.data?.message || '';
+      const isLocked =
+        msg.includes('khóa') ||
+        msg.includes('locked') ||
+        error.response?.data?.code === 'USER_LOCKED' ||
+        error.response?.data?.code === 'COMPANY_LOCKED';
+
       localStorage.removeItem('accessToken');
       localStorage.removeItem('role');
       localStorage.removeItem('accountId');
       localStorage.removeItem('accountPhone');
       localStorage.removeItem('accountName');
       localStorage.removeItem('companyId');
-      window.location.href = '/login';
+
+      if (isLocked) {
+        window.location.href = `/login?error=${encodeURIComponent(msg)}`;
+      } else {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

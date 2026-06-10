@@ -4,20 +4,22 @@ import { LocalShippingOutlined as TruckIcon } from '@mui/icons-material';
 
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
+import { NAVY, ORANGE, GREEN, RED, CARD_RADIUS, BUTTON_RADIUS } from '@/constants/colors';
 
-export const NAVY = '#1B3A5D';
-export const ORANGE = '#FF6B00';
-export const GREEN = '#16a34a';
-export const RED = '#dc2626';
-export const CARD_RADIUS = '12px';
-export const BUTTON_RADIUS = '8px';
+export { NAVY, ORANGE, GREEN, RED, CARD_RADIUS, BUTTON_RADIUS };
 
 export const formatAddress = (address?: Record<string, unknown>) => {
   if (!address) return 'Chưa có địa chỉ';
 
   const parts = ['detail', 'ward', 'district', 'province']
     .map((key) => address[key])
-    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' &&
+        value.trim().length > 0 &&
+        value.trim().toLowerCase() !== 'chưa cập nhật' &&
+        value.trim().toLowerCase() !== 'chua cap nhat'
+    );
 
   return parts.length > 0 ? parts.join(', ') : 'Chưa có địa chỉ';
 };
@@ -155,6 +157,7 @@ export const PrimaryActionButton = ({
       disabled={disabled}
       sx={{
         width: '100%',
+        height: '100%',
         px: 3,
         py: 1.5,
         borderRadius: BUTTON_RADIUS,

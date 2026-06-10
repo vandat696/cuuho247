@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Service, ServiceFormData, ServiceFormErrors, ServiceCategory } from '../types/service.types';
+import { Service, ServiceFormData, ServiceFormErrors, ServiceCategory } from '../types/service.type';
 import { serviceService } from '../services/service.service';
 import toast from 'react-hot-toast';
 
