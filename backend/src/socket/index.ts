@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Message } from '../shared/models/Message.model';
 import { RescueRequest } from '../shared/models/RescueRequest.model';
 import { hasRequestAccess } from '../shared/utils/rescueRequestAuth';
+import { notificationService } from '../modules/notification/notification.service';
 
 interface SocketUser {
   id: string;
@@ -14,7 +15,15 @@ interface AuthenticatedSocket extends Socket {
   user?: SocketUser;
 }
 
+let ioInstance: Server | null = null;
+
+export function getIo(): Server | null {
+  return ioInstance;
+}
+
 export function setupSocket(io: Server): void {
+  ioInstance = io;
+
   // JWT Authentication middleware for socket connections
   io.use((socket: AuthenticatedSocket, next) => {
     const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1];
@@ -34,6 +43,12 @@ export function setupSocket(io: Server): void {
 
   io.on('connection', (socket: AuthenticatedSocket) => {
     console.log(`[Socket] User connected: ${socket.user?.id} (${socket.user?.role})`);
+
+    if (socket.user) {
+      const userRoom = `user:${socket.user.id}`;
+      socket.join(userRoom);
+      console.log(`[Socket] User ${socket.user.id} joined personal room: ${userRoom}`);
+    }
 
     /**
      * join_chat: Client joins a room for a specific rescue request
@@ -137,6 +152,27 @@ export function setupSocket(io: Server): void {
           io.to(room).emit('receive_message', messageData);
 
           console.log(`[Socket] Message saved & sent to room ${room}`);
+
+          // Create real-time chat notification for counterparty
+          try {
+            const isCompanySender = senderType === 'company';
+            const recipientId = isCompanySender
+              ? rescueRequest.user_id.toString()
+              : rescueRequest.company.company_id.toString();
+            const recipientType = isCompanySender ? 'user' : 'company';
+            const senderName = isCompanySender ? rescueRequest.company.company_name : 'Khách hàng';
+
+            await notificationService.createAndSendNotification(
+              recipientId,
+              recipientType,
+              'chat_message',
+              'Tin nhắn mới',
+              `Bạn có tin nhắn mới từ ${senderName}`,
+              { rescue_request_id }
+            );
+          } catch (err) {
+            console.error('[Socket] Error creating chat message notification:', err);
+          }
         } catch (err) {
           console.error('[Socket] Error saving message:', err);
           socket.emit('error', { message: 'Failed to send message' });

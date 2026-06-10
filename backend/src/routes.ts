@@ -15,6 +15,7 @@ import { serviceRouter, serviceCategoryRouter } from './modules/service-catalog/
 import messageRoutes from './modules/message/message.route';
 import adminRoutes from './modules/admin/admin.route';
 import reviewRoutes from './modules/review/review.route';
+import notificationRoutes from './modules/notification/notification.route';
 
 const router = Router();
 
@@ -49,6 +50,9 @@ router.use('/admin', adminRoutes);
 
 // Ratings Routes
 router.use('/ratings', reviewRoutes);
+
+// Notification Routes
+router.use('/notifications', notificationRoutes);
 
 // Community Routes
 import communityRoutes from './modules/community/community.route';

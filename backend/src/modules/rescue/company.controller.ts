@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import companyRescueRequestService from './company.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from './rescue.validator';
+import { notificationService } from '../notification/notification.service';
+
+const getCustomerId = (request: any): string => {
+  if (!request || !request.user_id) return '';
+  return request.user_id._id ? request.user_id._id.toString() : request.user_id.toString();
+};
 
 class RescueCompanyController {
   async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -188,6 +194,23 @@ class RescueCompanyController {
         });
       }
 
+      // Notify the customer
+      try {
+        const customerId = getCustomerId(request);
+        if (customerId) {
+          await notificationService.createAndSendNotification(
+            customerId,
+            'user',
+            'request_accepted',
+            'Yêu cầu cứu hộ được tiếp nhận',
+            `Đơn vị cứu hộ đã chấp nhận yêu cầu của bạn. Dự kiến xe sẽ đến sau ${request.eta_minutes || 15} phút.`,
+            { rescue_request_id: requestId }
+          );
+        }
+      } catch (err) {
+        console.error('Error creating request_accepted notification:', err);
+      }
+
       res.status(200).json({
         status: 'success',
         message: 'Nhận yêu cầu cứu hộ thành công',
@@ -236,6 +259,37 @@ class RescueCompanyController {
         });
       }
 
+      // Notify the customer
+      try {
+        const customerId = getCustomerId(request);
+        if (customerId) {
+          // Standard completed notification
+          await notificationService.createAndSendNotification(
+            customerId,
+            'user',
+            'request_completed',
+            'Cứu hộ hoàn thành',
+            `Yêu cầu cứu hộ #${requestId.slice(-4)} đã hoàn thành thành công.`,
+            { rescue_request_id: requestId }
+          );
+
+          // Payment reminder notification (as shown in UI)
+          const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+            value.amount
+          );
+          await notificationService.createAndSendNotification(
+            customerId,
+            'user',
+            'payment_reminder',
+            'Nhắc nhở thanh toán',
+            `Vui lòng hoàn tất thanh toán số tiền ${formattedAmount} cho yêu cầu #${requestId.slice(-4)}.`,
+            { rescue_request_id: requestId }
+          );
+        }
+      } catch (err) {
+        console.error('Error creating request_completed/payment_reminder notifications:', err);
+      }
+
       res.status(200).json({
         status: 'success',
         message: 'Hoàn tất và chốt thanh toán thành công',
@@ -265,6 +319,23 @@ class RescueCompanyController {
           status: 'in_progress',
           timestamp: new Date(),
         });
+      }
+
+      // Notify the customer
+      try {
+        const customerId = getCustomerId(request);
+        if (customerId) {
+          await notificationService.createAndSendNotification(
+            customerId,
+            'user',
+            'request_in_progress',
+            'Đội cứu hộ đang di chuyển',
+            'Nhân viên cứu hộ đang trên đường đến vị trí của bạn.',
+            { rescue_request_id: requestId }
+          );
+        }
+      } catch (err) {
+        console.error('Error creating request_in_progress notification:', err);
       }
 
       res.status(200).json({
@@ -297,6 +368,23 @@ class RescueCompanyController {
           status: 'arrived',
           timestamp: new Date(),
         });
+      }
+
+      // Notify the customer
+      try {
+        const customerId = getCustomerId(request);
+        if (customerId) {
+          await notificationService.createAndSendNotification(
+            customerId,
+            'user',
+            'eta_updated',
+            'Xe cứu hộ đã đến nơi',
+            'Đội cứu hộ đã có mặt tại vị trí của bạn.',
+            { rescue_request_id: requestId }
+          );
+        }
+      } catch (err) {
+        console.error('Error creating arrived (eta_updated) notification:', err);
       }
 
       res.status(200).json({

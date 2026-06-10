@@ -24,32 +24,24 @@ const mapDetailPath = (notification: NotificationData): string => {
   const requestId = notification.payload?.rescue_request_id;
 
   switch (notification.type) {
-    case 'request_created':
-      return requestId ? `/company/rescue/pending/detail/${requestId}` : '';
     case 'request_accepted':
     case 'request_in_progress':
     case 'eta_updated':
     case 'chat_message':
-      return requestId ? `/company/rescue/active/detail/${requestId}` : '';
+    case 'payment_reminder':
+      return requestId ? `/customer/tracking/${requestId}` : '';
     case 'request_completed':
-      return requestId ? `/company/rescue/completed/detail/${requestId}` : '';
-    case 'request_cancelled':
-    case 'request_rejected':
-    case 'request_timeout':
-      return requestId ? `/company/rescue/canceled/detail/${requestId}` : '';
-    case 'company_document_requested':
-      return '/company/profile/edit';
-    case 'review_submitted':
-      return '/company/reviews';
-    case 'company_approved':
-    case 'company_rejected':
+      return requestId ? `/customer/tracking/${requestId}` : '';
     case 'content_removed':
+    case 'review_submitted':
+    case 'request_timeout':
+    case 'request_rejected':
     default:
       return '';
   }
 };
 
-export default function CompanyNotificationsPage() {
+export default function CustomerNotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +53,7 @@ export default function CompanyNotificationsPage() {
         setNotifications(response.data.notifications);
       }
     } catch (error) {
-      console.error('Error fetching company notifications:', error);
+      console.error('Error fetching customer notifications:', error);
       toast.error('Không thể tải thông báo');
     } finally {
       setLoading(false);
@@ -122,7 +114,7 @@ export default function CompanyNotificationsPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Thông báo" backFallback="/company/home" />
+      <AppHeader title="Thông báo" backFallback="/customer/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>

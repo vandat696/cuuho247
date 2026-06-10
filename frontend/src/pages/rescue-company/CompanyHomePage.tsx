@@ -18,9 +18,10 @@ import { ActionCard } from '@/components/rescue-company/ActionCard';
 import { CompanyHeroCard } from '@/components/rescue-company/CompanyHeroCard';
 import { CompanyPendingStatus } from '@/components/rescue-company/CompanyPendingStatus';
 import { Company } from '@/types/common.type';
-import { PendingRescueRequest } from '@/types/rescue.type';
 import { companyService } from '@/services/company.service';
 import { companyRescueService } from '@/services/company-rescue.service';
+import { getSocket } from '@/utils/socket';
+import { notificationService } from '@/services/notification.service';
 import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 
@@ -32,15 +33,32 @@ export default function CompanyHomePage() {
   const navigate = useNavigate();
   const [counts, setCounts] = useState({ waiting: 0, inProgress: 0, done: 0, cancelled: 0 });
   const [company, setCompany] = useState<Company | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<PendingRescueRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const knownPendingIdsRef = useRef<Set<string>>(new Set());
   const hasInitializedNotificationsRef = useRef(false);
   const companyStatusRef = useRef<string | null>(null);
 
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await notificationService.getMyNotifications();
+      if (response.status === 'success') {
+        const count = response.data.notifications.filter((n) => !n.is_read).length;
+        setUnreadNotificationsCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread notifications count:', error);
+    }
+  };
+
   useEffect(() => {
     let rescueIntervalId: number | undefined;
     let profileIntervalId: number | undefined;
+    const socket = getSocket();
+
+    const handleNewNotification = () => {
+      fetchUnreadCount();
+    };
 
     const initialize = async () => {
       setLoading(true);
@@ -52,7 +70,10 @@ export default function CompanyHomePage() {
           fetchCompletedRequestsCount(),
           fetchCanceledRequestsCount(),
           fetchPendingRequests({ notifyNew: false }),
+          fetchUnreadCount(),
         ]);
+
+        socket.on('new_notification', handleNewNotification);
 
         rescueIntervalId = window.setInterval(() => {
           fetchPendingRequests({ notifyNew: true });
@@ -69,7 +90,11 @@ export default function CompanyHomePage() {
               fetchCompletedRequestsCount(),
               fetchCanceledRequestsCount(),
               fetchPendingRequests({ notifyNew: false }),
+              fetchUnreadCount(),
             ]);
+
+            socket.on('new_notification', handleNewNotification);
+
             rescueIntervalId = window.setInterval(() => {
               fetchPendingRequests({ notifyNew: true });
             }, NOTIFICATION_POLL_MS);
@@ -84,6 +109,7 @@ export default function CompanyHomePage() {
     return () => {
       if (rescueIntervalId) window.clearInterval(rescueIntervalId);
       if (profileIntervalId) window.clearInterval(profileIntervalId);
+      socket.off('new_notification', handleNewNotification);
     };
   }, []);
 
@@ -109,7 +135,6 @@ export default function CompanyHomePage() {
       if (response.status !== 'success') return;
 
       const requests = response.data.requests;
-      setPendingRequests(requests);
       setCounts((prev) => ({ ...prev, waiting: response.data.total }));
 
       const nextIds = new Set(requests.map((request) => request._id));
@@ -199,7 +224,7 @@ export default function CompanyHomePage() {
               sx={{ p: 1, color: '#fff' }}
             >
               <Badge
-                badgeContent={pendingRequests.length}
+                badgeContent={unreadNotificationsCount}
                 color="error"
                 overlap="circular"
                 sx={{

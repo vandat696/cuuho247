@@ -15,7 +15,9 @@ export type NotificationType =
   | 'company_document_requested'
   | 'chat_message'
   | 'content_removed'
-  | 'eta_updated';
+  | 'eta_updated'
+  | 'review_submitted'
+  | 'payment_reminder';
 
 export interface INotification extends Document {
   recipient_type: RecipientType;
@@ -50,6 +52,8 @@ const NotificationSchema = new Schema<INotification>(
         'chat_message',
         'content_removed',
         'eta_updated',
+        'review_submitted',
+        'payment_reminder',
       ],
       required: true,
     },
