@@ -32,7 +32,6 @@ class AuthService implements IAuthService {
       full_name,
       phone,
       status: 'active',
-      is_verified: true,
     });
 
     const userResponse = newUser.toObject();
@@ -132,7 +131,11 @@ class AuthService implements IAuthService {
     // Company approval is temporarily disabled. Companies can log in as long
     // as the account is not locked.
     if (role === 'company' && account.status === 'locked') {
-      throw new ApiError(403, 'Tài khoản công ty đã bị khóa');
+      throw new ApiError(403, `Tài khoản công ty đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
+    }
+
+    if (role === 'customer' && account.status === 'locked') {
+      throw new ApiError(403, `Tài khoản của bạn đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
     }
 
     if (role === 'admin') {

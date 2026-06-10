@@ -272,6 +272,156 @@ class AdminService {
   async getPendingCompanies() {
     return await Company.find({ status: 'pending_verification' }).sort({ updated_at: -1 });
   }
+
+  async getUsers(search?: string, status?: string, limit: number = 20, page: number = 1) {
+    const query: any = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [{ full_name: regex }, { email: regex }, { phone: regex }];
+    }
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      User.find(query).sort({ created_at: -1 }).skip(skip).limit(limit).exec(),
+      User.countDocuments(query).exec(),
+    ]);
+    return { users, total };
+  }
+
+  async getUserById(userId: string) {
+    const user = await User.findById(userId).exec();
+    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
+    return user;
+  }
+
+  async lockUser(userId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do khóa tài khoản là bắt buộc');
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
+    if (user.status === 'locked') throw new ApiError(400, 'Tài khoản người dùng đã bị khóa trước đó');
+
+    user.status = 'locked';
+    user.lock_reason = reason;
+    await user.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'lock_user',
+      target_type: 'user',
+      target_id: user._id,
+      reason,
+      details: { reason },
+    });
+
+    return user;
+  }
+
+  async unlockUser(userId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do mở khóa tài khoản là bắt buộc');
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
+    if (user.status === 'active') throw new ApiError(400, 'Tài khoản người dùng đang hoạt động');
+
+    user.status = 'active';
+    user.lock_reason = undefined;
+    await user.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'unlock_user',
+      target_type: 'user',
+      target_id: user._id,
+      reason,
+      details: { reason },
+    });
+
+    return user;
+  }
+
+  async getUserLogs(userId: string) {
+    const logs = await AdminLog.find({ target_type: 'user', target_id: userId })
+      .sort({ created_at: -1 })
+      .populate('admin_id', 'full_name email')
+      .exec();
+    return logs;
+  }
+
+  async getCompanies(search?: string, status?: string, limit: number = 20, page: number = 1) {
+    const query: any = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [{ company_name: regex }, { email: regex }, { phone: regex }, { director_name: regex }];
+    }
+    const skip = (page - 1) * limit;
+    const [companies, total] = await Promise.all([
+      Company.find(query).sort({ created_at: -1 }).skip(skip).limit(limit).exec(),
+      Company.countDocuments(query).exec(),
+    ]);
+    return { companies, total };
+  }
+
+  async getCompanyById(companyId: string) {
+    const company = await Company.findById(companyId).exec();
+    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
+    return company;
+  }
+
+  async lockCompany(companyId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do khóa tài khoản là bắt buộc');
+    const company = await Company.findById(companyId);
+    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
+    if (company.status === 'locked') throw new ApiError(400, 'Tài khoản công ty đã bị khóa trước đó');
+
+    company.status = 'locked';
+    company.lock_reason = reason;
+    await company.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'lock_company',
+      target_type: 'company',
+      target_id: company._id,
+      reason,
+      details: { reason },
+    });
+
+    return company;
+  }
+
+  async unlockCompany(companyId: string, adminId: string, reason: string) {
+    if (!reason) throw new ApiError(400, 'Lý do mở khóa tài khoản là bắt buộc');
+    const company = await Company.findById(companyId);
+    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
+    if (company.status === 'active') throw new ApiError(400, 'Tài khoản công ty đang hoạt động');
+
+    company.status = 'active';
+    company.lock_reason = undefined;
+    await company.save();
+
+    await AdminLog.create({
+      admin_id: adminId,
+      action: 'unlock_company',
+      target_type: 'company',
+      target_id: company._id,
+      reason,
+      details: { reason },
+    });
+
+    return company;
+  }
+
+  async getCompanyLogs(companyId: string) {
+    const logs = await AdminLog.find({ target_type: 'company', target_id: companyId })
+      .sort({ created_at: -1 })
+      .populate('admin_id', 'full_name email')
+      .exec();
+    return logs;
+  }
 }
 
 export default new AdminService();

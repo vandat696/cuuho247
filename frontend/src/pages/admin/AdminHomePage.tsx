@@ -6,6 +6,7 @@ import {
   PeopleAltOutlined as PeopleIcon,
   HistoryToggleOffOutlined as HistoryIcon,
   LogoutRounded as LogoutIcon,
+  ManageAccountsOutlined as UserIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -149,6 +150,12 @@ export default function AdminHomePage() {
                 title="Duyệt hồ sơ công ty"
                 description="Phê duyệt hồ sơ các đơn vị cứu hộ đăng ký mới"
                 onClick={() => navigate('/admin/companies/pending')}
+              />
+              <ActionCard
+                icon={<UserIcon sx={{ fontSize: 24 }} />}
+                title="Quản lý người dùng"
+                description="Xem thông tin và khóa/mở khóa tài khoản khách hàng"
+                onClick={() => navigate('/admin/users')}
               />
               <ActionCard
                 icon={<AdminIcon sx={{ fontSize: 24 }} />}

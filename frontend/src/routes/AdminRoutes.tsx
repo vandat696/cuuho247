@@ -7,6 +7,9 @@ const PendingCompaniesPage = React.lazy(() => import('@/pages/admin/PendingCompa
 const CompanyVerificationDetailPage = React.lazy(() => import('@/pages/admin/CompanyVerificationDetailPage'));
 const AdminLogsPage = React.lazy(() => import('@/pages/admin/AdminLogsPage'));
 const AdminReviewsPage = React.lazy(() => import('@/pages/admin/AdminReviewsPage'));
+const UserListPage = React.lazy(() => import('@/pages/admin/UserListPage'));
+const UserDetailPage = React.lazy(() => import('@/pages/admin/UserDetailPage'));
+const CompanyDetailPage = React.lazy(() => import('@/pages/admin/CompanyDetailPage'));
 
 export function AdminRoutes() {
   return (
@@ -48,6 +51,30 @@ export function AdminRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminReviewsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="users"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <UserListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="users/:userId"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <UserDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="companies/:companyId/detail"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <CompanyDetailPage />
           </ProtectedRoute>
         }
       />

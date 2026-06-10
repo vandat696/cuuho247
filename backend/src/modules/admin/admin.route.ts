@@ -24,4 +24,18 @@ router.put('/reviews/:reviewId/reply/restore', adminController.restoreReviewRepl
 // Audit logs
 router.get('/logs', adminController.getAuditLogs);
 
+// User management
+router.get('/users', adminController.getUsers);
+router.get('/users/:userId', adminController.getUserById);
+router.patch('/users/:userId/lock', adminController.lockUser);
+router.patch('/users/:userId/unlock', adminController.unlockUser);
+router.get('/users/:userId/logs', adminController.getUserLogs);
+
+// Company lock/unlock management
+router.get('/companies', adminController.getCompanies);
+router.get('/companies/:companyId', adminController.getCompanyById);
+router.patch('/companies/:companyId/lock', adminController.lockCompany);
+router.patch('/companies/:companyId/unlock', adminController.unlockCompany);
+router.get('/companies/:companyId/logs', adminController.getCompanyLogs);
+
 export default router;

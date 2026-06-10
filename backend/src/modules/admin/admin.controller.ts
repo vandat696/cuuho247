@@ -115,6 +115,120 @@ class AdminController {
       next(err);
     }
   }
+
+  async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const search = req.query.search as string;
+      const status = req.query.status as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const page = parseInt(req.query.page as string) || 1;
+      const result = await adminService.getUsers(search, status, limit, page);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getUserById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const user = await adminService.getUserById(userId);
+      res.status(200).json({ status: 'success', data: user });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async lockUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const user = await adminService.lockUser(userId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Khóa tài khoản thành công', data: user });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async unlockUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const user = await adminService.unlockUser(userId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Mở khóa tài khoản thành công', data: user });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getUserLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const logs = await adminService.getUserLogs(userId);
+      res.status(200).json({ status: 'success', data: logs });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getCompanies(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const search = req.query.search as string;
+      const status = req.query.status as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const page = parseInt(req.query.page as string) || 1;
+      const result = await adminService.getCompanies(search, status, limit, page);
+      res.status(200).json({ status: 'success', data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getCompanyById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { companyId } = req.params;
+      const company = await adminService.getCompanyById(companyId);
+      res.status(200).json({ status: 'success', data: company });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async lockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { companyId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const company = await adminService.lockCompany(companyId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Khóa tài khoản công ty thành công', data: company });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async unlockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { companyId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const company = await adminService.unlockCompany(companyId, adminId, reason);
+      res.status(200).json({ status: 'success', message: 'Mở khóa tài khoản công ty thành công', data: company });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getCompanyLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { companyId } = req.params;
+      const logs = await adminService.getCompanyLogs(companyId);
+      res.status(200).json({ status: 'success', data: logs });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export default new AdminController();

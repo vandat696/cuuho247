@@ -30,6 +30,26 @@ const actionLabels: Record<string, { label: string; color: string; icon: React.R
     color: ORANGE,
     icon: <DocsIcon sx={{ color: ORANGE, fontSize: 20 }} />,
   },
+  lock_user: {
+    label: 'Khóa tài khoản',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  unlock_user: {
+    label: 'Mở khóa tài khoản',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
+  lock_company: {
+    label: 'Khóa tài khoản đối tác',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  unlock_company: {
+    label: 'Mở khóa tài khoản đối tác',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
 };
 
 export const AuditLogItem = ({ log }: AuditLogItemProps) => {

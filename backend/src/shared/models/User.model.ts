@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 
-export type UserStatus = 'active' | 'locked' | 'unverified';
+export type UserStatus = 'active' | 'locked';
 
 export interface IUser extends Document {
   email: string;
@@ -9,7 +9,7 @@ export interface IUser extends Document {
   phone?: string;
   avatar_url?: string;
   status?: UserStatus;
-  is_verified?: boolean;
+  lock_reason?: string;
   last_login_at?: Date;
   created_at?: Date;
   updated_at?: Date;
@@ -24,9 +24,10 @@ const UserSchema = new Schema<IUser>(
     avatar_url: { type: String },
     status: {
       type: String,
-      enum: ['active', 'locked', 'unverified'],
+      enum: ['active', 'locked'],
+      default: 'active',
     },
-    is_verified: { type: Boolean },
+    lock_reason: { type: String },
     last_login_at: { type: Date },
   },
   {

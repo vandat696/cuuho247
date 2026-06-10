@@ -1,6 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { ShieldOutlined as ShieldOutlinedIcon } from '@mui/icons-material';
+import { toast } from 'react-hot-toast';
 
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -8,6 +10,14 @@ import { LoginForm } from '@/components/auth/LoginForm';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const errorMessage = searchParams.get('error');
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+  }, [errorMessage]);
 
   return (
     <MobileLayout>

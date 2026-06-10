@@ -16,6 +16,7 @@ export interface ICompany extends Document {
   status?: CompanyStatus;
   rejection_reason?: string;
   document_request_reason?: string;
+  lock_reason?: string;
   rating_avg?: number;
   rating_count?: number;
   is_verified?: boolean;
@@ -41,6 +42,7 @@ const CompanySchema = new Schema<ICompany>(
     },
     rejection_reason: { type: String },
     document_request_reason: { type: String },
+    lock_reason: { type: String },
     rating_avg: { type: Number },
     rating_count: { type: Number },
     is_verified: { type: Boolean, default: false },

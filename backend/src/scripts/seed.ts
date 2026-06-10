@@ -111,7 +111,6 @@ async function main() {
       ...customerSeed,
       password_hash: hashedPassword,
       status: 'active',
-      is_verified: true,
     }
   );
 
