@@ -8,7 +8,9 @@
     "build": "tsc",
     "lint": "eslint src --ext ts",
     "type-check": "tsc --noEmit",
-    "seed": "tsx src/scripts/seed.ts"
+    "clean-db": "tsx src/scripts/clean-db.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "db:reset": "npm run seed"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
