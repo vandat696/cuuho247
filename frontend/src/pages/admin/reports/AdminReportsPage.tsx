@@ -4,7 +4,7 @@ import { DownloadOutlined as ExportIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
 import { adminService, RescueActivitiesReport } from '@/services/admin.service';
-import { http } from '@/services/http';
+import { serviceService } from '@/services/service.service';
 import { NAVY, BUTTON_RADIUS } from '@/constants/colors';
 import { getDefaultDateRange } from '@/utils/date';
 
@@ -44,9 +44,9 @@ export default function AdminReportsPage() {
   const fetchCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await http.get('/service-categories');
-      if (response.data?.status === 'success') {
-        setCategories(response.data.data);
+      const response = await serviceService.getCategories();
+      if (response.status === 'success') {
+        setCategories(response.data);
       }
     } catch (err) {
       console.error('Error fetching categories:', err);
