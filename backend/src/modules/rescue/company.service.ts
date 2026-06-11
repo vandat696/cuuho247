@@ -3,6 +3,7 @@ import companyRepository from '@/modules/company/company.repository';
 import { serviceRepository, serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { Vehicle } from '@/shared/models/Vehicle.model';
+import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
 import type {
   IRescueCompanyService,
   AcceptRescueRequestData,
@@ -19,6 +20,20 @@ import type {
   RouteEstimateResult,
   SearchParams,
 } from './interfaces/rescue.interface';
+
+const INCIDENT_LABEL_MAP: Record<string, string> = {
+  'su-co-lop-xe': 'Lốp xe gặp sự cố',
+  'het-binh-ac-quy': 'Hết bình ắc quy',
+  'het-nhien-lieu': 'Hết nhiên liệu',
+  'xe-khong-khoi-dong': 'Xe không khởi động được',
+  'xe-chet-may': 'Xe bị chết máy giữa đường',
+  'xe-gap-su-co-ky-thuat': 'Xe có dấu hiệu hỏng hóc',
+  'tai-nan-giao-thong': 'Tai nạn giao thông',
+  'xe-bi-sa-lay': 'Xe bị sa lầy hoặc mắc kẹt',
+  'xe-bi-ngap-nuoc': 'Xe bị ngập nước',
+  'su-co-khoa-xe': 'Không mở được xe',
+  khac: 'Sự cố khác',
+};
 
 /**
  * RescueCompanyService: Xử lý nghiệp vụ Cứu hộ từ phía Công ty.
@@ -46,7 +61,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
       return {
         _id: request._id.toString(),
-        title: serviceName || this.getTitleFromDescription(request.description),
+        title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
         description: request.description,
         distance_km: distanceKm,
         eta_minutes: request.eta_minutes ?? null,
@@ -86,7 +101,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       _id: request._id.toString(),
-      title: serviceName || this.getTitleFromDescription(request.description),
+      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
       description: request.description,
       distance_km: this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates),
       eta_minutes: request.eta_minutes ?? null,
@@ -524,7 +539,8 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     let categoryId: string | undefined = undefined;
     if (incident_type) {
-      const category = await serviceCategoryRepository.findBySlug(incident_type);
+      const categorySlug = mapIncidentTypeToCategory(incident_type);
+      const category = await serviceCategoryRepository.findBySlug(categorySlug);
       if (category) {
         categoryId = category._id.toString();
       }
@@ -553,20 +569,20 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       if (!servicesByCompany.has(companyId)) {
         servicesByCompany.set(companyId, []);
       }
+      servicesByCompany.get(companyId)!.push(service.name);
+    }
+
+    const priceSourceServices = categoryId ? matchingServices : displayServices;
+    for (const service of priceSourceServices) {
+      const companyId = service.company_id.toString();
       if (!pricesByCompany.has(companyId)) {
         pricesByCompany.set(companyId, []);
       }
-      servicesByCompany.get(companyId)!.push(service.name);
       pricesByCompany.get(companyId)!.push(service.price);
     }
 
     const resultCompanies = categoryId
-      ? [...companies].sort((a, b) => {
-          const aMatches = matchingCompanyIds.has((a._id as any).toString());
-          const bMatches = matchingCompanyIds.has((b._id as any).toString());
-          if (aMatches === bMatches) return 0;
-          return aMatches ? -1 : 1;
-        })
+      ? companies.filter((company) => matchingCompanyIds.has((company._id as any).toString()))
       : companies;
 
     return resultCompanies.map((company) => {
@@ -591,7 +607,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
         service_names: servicesByCompany.get(companyId) ?? [],
         min_price: prices.length > 0 ? Math.min(...prices) : null,
         max_price: prices.length > 0 ? Math.max(...prices) : null,
-        eta_minutes: this.estimateEtaMinutes(roundedDistanceKm),
       };
     });
   }
@@ -606,7 +621,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       _id: request._id.toString(),
-      title: serviceName || this.getTitleFromDescription(request.description),
+      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
       description: request.description,
       distance_km: null,
       eta_minutes: request.eta_minutes ?? null,
@@ -657,11 +672,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
   private toRad(deg: number): number {
     return (deg * Math.PI) / 180;
-  }
-
-  private getTitleFromDescription(description?: string): string {
-    if (!description) return 'Su co cuu ho';
-    return description.split(/[,.]/)[0].trim() || 'Su co cuu ho';
   }
 }
 

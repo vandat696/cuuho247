@@ -1,22 +1,33 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { RescueLocation } from '@/types/rescue.type';
+import { RescueLocation, CompanyResult } from '@/types/rescue.type';
 import { MiniMap } from '../location/MiniMap';
 
 interface SearchResultHeaderProps {
   incidentTypeLabel: string;
   location: RescueLocation | null;
   totalResults: number;
-  onFilter?: () => void;
+  companies?: CompanyResult[];
 }
 
-export function SearchResultHeader({ location, totalResults, onFilter }: SearchResultHeaderProps) {
+export function SearchResultHeader({ location, totalResults, companies = [] }: SearchResultHeaderProps) {
+  const companyMarkers = companies
+    .map((c, idx) => ({
+      id: c._id,
+      name: c.company_name,
+      index: idx + 1,
+      lat: c.location?.coordinates[1] ?? 0,
+      lng: c.location?.coordinates[0] ?? 0,
+      distance_km: c.distance_km,
+    }))
+    .filter((c) => c.lat !== 0 && c.lng !== 0);
+
   return (
     <Box>
       {/* Map Section */}
       <Box sx={{ p: 0, position: 'relative' }}>
         {location && location.lat !== 0 && location.lng !== 0 ? (
-          <MiniMap lat={location.lat} lng={location.lng} />
+          <MiniMap lat={location.lat} lng={location.lng} companies={companyMarkers} />
         ) : (
           <Box
             sx={{
@@ -91,22 +102,6 @@ export function SearchResultHeader({ location, totalResults, onFilter }: SearchR
         >
           Tìm thấy {totalResults} công ty cứu hộ
         </Typography>
-
-        <Box
-          component="button"
-          onClick={onFilter}
-          sx={{
-            border: 'none',
-            bgcolor: 'transparent',
-            color: '#1e3a5f',
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: 'pointer',
-            '&:hover': { opacity: 0.8 },
-          }}
-        >
-          Lọc
-        </Box>
       </Box>
     </Box>
   );

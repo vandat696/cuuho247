@@ -39,7 +39,6 @@ const mapDetailPath = (notification: NotificationData): string => {
     case 'request_timeout':
     case 'eta_updated':
     case 'chat_message':
-    case 'payment_reminder':
     case 'review_replied':
       return requestId ? `/customer/tracking/${requestId}` : '';
     case 'new_comment':

@@ -24,7 +24,6 @@ export interface CompanyRegisterInput {
   address: string;
   latitude: number;
   longitude: number;
-  service_area?: string;
   license_file_url?: string;
 }
 

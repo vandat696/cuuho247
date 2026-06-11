@@ -23,10 +23,7 @@ import { companyRescueService } from '@/services/company-rescue.service';
 import { notificationService } from '@/services/notification.service';
 import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
-
-const NOTIFICATION_POLL_MS = 15000;
-// Poll profile every 30s when pending — so company sees admin feedback (rejection reason, doc request) without a manual refresh
-const PENDING_PROFILE_POLL_MS = 30000;
+import { getSocket } from '@/utils/socket';
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
@@ -51,8 +48,23 @@ export default function CompanyHomePage() {
   };
 
   useEffect(() => {
-    let rescueIntervalId: number | undefined;
-    let profileIntervalId: number | undefined;
+    const socket = getSocket();
+
+    const handleNewRescueRequest = () => {
+      fetchPendingRequests({ notifyNew: true });
+    };
+
+    const handleCompanyStatusChanged = async () => {
+      const isActiveNow = await fetchCompanyProfile();
+      if (isActiveNow) {
+        await Promise.all([
+          fetchActiveRequestsCount(),
+          fetchCompletedRequestsCount(),
+          fetchCanceledRequestsCount(),
+          fetchPendingRequests({ notifyNew: false }),
+        ]);
+      }
+    };
 
     const handleNotificationReceived = (e: Event) => {
       const notification = (e as CustomEvent).detail;
@@ -68,6 +80,11 @@ export default function CompanyHomePage() {
       }
     };
 
+    // Register listeners synchronously to ensure they are captured by the cleanup function
+    socket.on('new_rescue_request', handleNewRescueRequest);
+    socket.on('company_status_changed', handleCompanyStatusChanged);
+    window.addEventListener('notification_received', handleNotificationReceived);
+
     const initialize = async () => {
       setLoading(true);
       const isActive = await fetchCompanyProfile();
@@ -80,43 +97,16 @@ export default function CompanyHomePage() {
           fetchPendingRequests({ notifyNew: false }),
           fetchUnreadCount(),
         ]);
-
-        window.addEventListener('notification_received', handleNotificationReceived);
-
-        rescueIntervalId = window.setInterval(() => {
-          fetchPendingRequests({ notifyNew: true });
-        }, NOTIFICATION_POLL_MS);
-      } else {
-        // Poll profile every 30s when pending/rejected so admin feedback appears automatically
-        profileIntervalId = window.setInterval(async () => {
-          const nowActive = await fetchCompanyProfile();
-          if (nowActive && companyStatusRef.current !== 'active') {
-            // Company just got approved — stop profile polling and start full dashboard
-            window.clearInterval(profileIntervalId);
-            await Promise.all([
-              fetchActiveRequestsCount(),
-              fetchCompletedRequestsCount(),
-              fetchCanceledRequestsCount(),
-              fetchPendingRequests({ notifyNew: false }),
-              fetchUnreadCount(),
-            ]);
-
-            window.addEventListener('notification_received', handleNotificationReceived);
-
-            rescueIntervalId = window.setInterval(() => {
-              fetchPendingRequests({ notifyNew: true });
-            }, NOTIFICATION_POLL_MS);
-          }
-        }, PENDING_PROFILE_POLL_MS);
       }
+
       setLoading(false);
     };
 
     initialize();
 
     return () => {
-      if (rescueIntervalId) window.clearInterval(rescueIntervalId);
-      if (profileIntervalId) window.clearInterval(profileIntervalId);
+      socket.off('new_rescue_request', handleNewRescueRequest);
+      socket.off('company_status_changed', handleCompanyStatusChanged);
       window.removeEventListener('notification_received', handleNotificationReceived);
     };
   }, []);

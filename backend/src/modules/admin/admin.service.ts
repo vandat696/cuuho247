@@ -74,7 +74,7 @@ class AdminService {
   }
 
   async requestDocuments(companyId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Yêu cầu bổ sung là bắt buộc');
+    if (!reason) throw new ApiError(400, 'Yêu cầu chỉnh sửa là bắt buộc');
 
     const company = await Company.findById(companyId);
     if (!company) throw new ApiError(404, 'Công ty không tồn tại');
@@ -95,8 +95,8 @@ class AdminService {
       recipient_type: 'company',
       recipient_id: company._id,
       type: 'company_document_requested',
-      title: 'Yêu cầu bổ sung giấy tờ',
-      body: `Quản trị viên yêu cầu bổ sung thông tin/giấy tờ: ${reason}`,
+      title: 'Yêu cầu chỉnh sửa giấy tờ',
+      body: `Quản trị viên yêu cầu chỉnh sửa thông tin/giấy tờ: ${reason}`,
     });
 
     return company;

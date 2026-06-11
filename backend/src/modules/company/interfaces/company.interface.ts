@@ -38,7 +38,6 @@ export interface UpdateCompanyProfileInput {
   location?: {
     coordinates: [number, number];
   };
-  service_area?: string;
   license_url?: string;
 }
 

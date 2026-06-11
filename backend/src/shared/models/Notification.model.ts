@@ -17,7 +17,6 @@ export type NotificationType =
   | 'content_removed'
   | 'eta_updated'
   | 'review_submitted'
-  | 'payment_reminder'
   | 'review_replied'
   | 'new_comment';
 
@@ -55,7 +54,6 @@ const NotificationSchema = new Schema<INotification>(
         'content_removed',
         'eta_updated',
         'review_submitted',
-        'payment_reminder',
         'review_replied',
         'new_comment',
       ],

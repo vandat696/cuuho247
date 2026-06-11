@@ -120,7 +120,6 @@ export interface CompanyResult {
   service_names: string[];
   min_price: number | null;
   max_price: number | null;
-  eta_minutes: number | null;
 }
 
 export interface CreateRequestData {

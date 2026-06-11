@@ -91,7 +91,7 @@ export default function ConfirmRequestPage() {
             name: company.company_name,
             rating: company.rating_avg,
             reviews: company.rating_count,
-            etaMinutes: company.eta_minutes,
+            distanceKm: company.distance_km,
             minPrice: company.min_price,
             maxPrice: company.max_price,
           }}

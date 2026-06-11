@@ -120,7 +120,7 @@ export const CompanyPendingStatus = ({ company, handleLogout, onEditProfile }: C
                 letterSpacing: 0.5,
               }}
             >
-              Yêu cầu bổ sung từ quản trị viên
+              Yêu cầu chỉnh sửa từ quản trị viên
             </Typography>
             <Typography sx={{ fontSize: 13, color: '#7c2d12', lineHeight: 1.5 }}>
               {company.document_request_reason}

@@ -74,7 +74,7 @@ export default function RescueTrackingPage() {
           // or ideally the company's location if available in the API response.
           // For now, we will wait for Socket updates or use customer location.
         } else {
-          toast.error('Không tìm thấy yêu cầu');
+          toast.error('Không tìm thấy yêu cầu', { id: 'request-not-found-error' });
           navigate('/customer/home');
         }
       } catch (error) {
@@ -139,7 +139,7 @@ export default function RescueTrackingPage() {
   if (loading) {
     return (
       <MobileLayout>
-        <AppHeader title="Theo dõi cứu hộ" backFallback="/customer/home" />
+        <AppHeader title="Theo dõi cứu hộ" onBack={() => navigate('/customer/home')} />
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', pt: 10 }}>
           <CircularProgress />
         </Box>
@@ -151,7 +151,7 @@ export default function RescueTrackingPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Theo dõi cứu hộ" backFallback="/customer/home" />
+      <AppHeader title="Theo dõi cứu hộ" onBack={() => navigate('/customer/home')} />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto', bgcolor: '#f4f5f7' }}>
         {remainingEta !== null && <TrackingETASection remainingEta={remainingEta} />}

@@ -43,6 +43,7 @@ export interface IRescueRequest extends Document {
   description: string;
   location: IGeoPoint;
   service_types?: Types.ObjectId[];
+  incident_type?: string;
   address?: Partial<IAddress>;
   incident_photos?: string[];
   status?: RequestStatus;
@@ -126,6 +127,7 @@ const RescueRequestSchema = new Schema<IRescueRequest>(
     description: { type: String, required: true },
     location: { type: GeoPointSchema, required: true },
     service_types: [{ type: Schema.Types.ObjectId, ref: 'ServiceCategory' }],
+    incident_type: { type: String },
     address: { type: PartialAddressSchema },
     incident_photos: [{ type: String }],
     status: {

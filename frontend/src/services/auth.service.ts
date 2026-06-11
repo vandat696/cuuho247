@@ -28,7 +28,6 @@ export const authService = {
     address: string;
     latitude: number;
     longitude: number;
-    service_area: string;
     license_file?: File | null;
     terms_accepted: boolean;
   }): Promise<ApiResponse<any>> => {
@@ -41,7 +40,6 @@ export const authService = {
     formData.append('address', data.address);
     formData.append('latitude', String(data.latitude));
     formData.append('longitude', String(data.longitude));
-    formData.append('service_area', data.service_area);
     formData.append('terms_accepted', String(data.terms_accepted));
     if (data.license_file) {
       formData.append('license_file', data.license_file);

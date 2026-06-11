@@ -30,10 +30,6 @@ const getAddressText = (company: Company) => {
   );
 };
 
-const getServiceArea = (company: Company) => {
-  return company.service_area || company.address?.city || company.address?.province || 'Hà Nội';
-};
-
 const CompanyProfilePage = () => {
   const navigate = useNavigate();
   const [company, setCompany] = useState<Company | null>(null);
@@ -140,11 +136,7 @@ const CompanyProfilePage = () => {
             label="Địa chỉ công ty"
             value={getAddressText(company)}
           />
-          <InfoField
-            icon={<LocationIcon sx={{ fontSize: 20 }} />}
-            label="Phạm vi hoạt động"
-            value={getServiceArea(company)}
-          />
+
           <InfoField
             icon={<DocumentIcon sx={{ fontSize: 20 }} />}
             label="Giấy phép kinh doanh"

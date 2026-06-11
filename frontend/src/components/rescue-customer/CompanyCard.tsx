@@ -3,9 +3,8 @@ import Typography from '@mui/material/Typography';
 import { CompanyResult } from '@/types/rescue.type';
 import StarIcon from '@mui/icons-material/Star';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
-import { formatPriceRange, formatEta } from '@/utils/format';
+import { formatPriceRange } from '@/utils/format';
 
 interface CompanyCardProps {
   company: CompanyResult;
@@ -14,7 +13,6 @@ interface CompanyCardProps {
 
 export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
   const priceText = formatPriceRange(company.min_price, company.max_price);
-  const etaText = formatEta(company.eta_minutes);
 
   return (
     <Box
@@ -27,7 +25,7 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
         boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
       }}
     >
-      {/* Header: Name and Distance */}
+      {/* Header: Name */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
         <Typography
           variant="h3"
@@ -41,10 +39,6 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
         >
           {company.company_name}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', color: '#1e3a5f' }}>
-          <LocationOnIcon sx={{ fontSize: 18, mr: 0.5 }} />
-          <Typography sx={{ fontWeight: 600, fontSize: 16 }}>{company.distance_km} km</Typography>
-        </Box>
       </Box>
 
       {/* Rating Row */}
@@ -62,15 +56,15 @@ export function CompanyCard({ company, onViewDetail }: CompanyCardProps) {
         )}
       </Box>
 
-      {/* Price and Time Info */}
+      {/* Price and Distance Info */}
       <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
           <PaidIcon sx={{ color: '#a0aec0', fontSize: 20, mr: 1, mt: 0.2 }} />
           <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500, lineHeight: 1.2 }}>{priceText}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <AccessTimeIcon sx={{ color: '#a0aec0', fontSize: 20, mr: 1 }} />
-          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500 }}>{etaText}</Typography>
+          <LocationOnIcon sx={{ color: '#a0aec0', fontSize: 20, mr: 1 }} />
+          <Typography sx={{ fontSize: 15, color: '#1e3a5f', fontWeight: 500 }}>{company.distance_km} km</Typography>
         </Box>
       </Box>
 

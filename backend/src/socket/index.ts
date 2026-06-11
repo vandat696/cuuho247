@@ -48,6 +48,11 @@ export function setupSocket(io: Server): void {
       const userRoom = `user:${socket.user.id}`;
       socket.join(userRoom);
       console.log(`[Socket] User ${socket.user.id} joined personal room: ${userRoom}`);
+
+      if (socket.user.role === 'company') {
+        socket.join(`company:${socket.user.id}`);
+        console.log(`[Socket] Company ${socket.user.id} joined room: company:${socket.user.id}`);
+      }
     }
 
     /**

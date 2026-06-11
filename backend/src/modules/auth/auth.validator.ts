@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import { SERVICE_AREAS } from '@/shared/constants/serviceAreas';
 
 // ─── Common schemas ────────────────────────────────────────────────────────────
 
@@ -89,14 +88,6 @@ export const registerCompanySchema = Joi.object({
     'number.max': 'Kinh độ công ty không hợp lệ',
     'any.required': 'Vị trí công ty là bắt buộc',
   }),
-  service_area: Joi.string()
-    .valid(...SERVICE_AREAS.map((area) => area.id))
-    .required()
-    .messages({
-      'any.only': 'Khu vực hoạt động không hợp lệ',
-      'any.required': 'Khu vực hoạt động là bắt buộc',
-      'string.empty': 'Khu vực hoạt động không được để trống',
-    }),
   license_file_url: Joi.string().uri().max(500).optional().messages({
     'string.uri': 'Link giấy phép không hợp lệ (phải là URL)',
     'string.max': 'Link giấy phép không được vượt quá {#limit} ký tự',

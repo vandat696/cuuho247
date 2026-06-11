@@ -11,9 +11,7 @@ import {
 import { authService } from '../../services/auth.service';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { Select } from '../common/Select';
 import { LocationPickerDialog } from '../location/LocationPickerDialog';
-import { SERVICE_AREAS } from '../../constants/service-areas';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '../../types/rescue.type';
 
@@ -26,7 +24,6 @@ interface CompanyRegisterFormData {
   phone: string;
   address: string;
   company_location: RescueLocation | null;
-  service_area: string;
   license_file: File | null;
   terms_accepted: boolean;
 }
@@ -54,7 +51,6 @@ const CompanyRegisterForm = () => {
     phone: '',
     address: '',
     company_location: null,
-    service_area: '',
     license_file: null,
     terms_accepted: false,
   });
@@ -192,10 +188,6 @@ const CompanyRegisterForm = () => {
       newErrors.company_location = 'Vui lòng chọn vị trí công ty trên bản đồ';
     }
 
-    if (!formData.service_area.trim()) {
-      newErrors.service_area = 'Khu vực hoạt động là bắt buộc';
-    }
-
     if (!formData.terms_accepted) {
       newErrors.terms_accepted = 'Bạn phải đồng ý với Điều khoản dịch vụ';
     }
@@ -231,7 +223,6 @@ const CompanyRegisterForm = () => {
         address: formData.address.trim(),
         latitude: formData.company_location!.lat,
         longitude: formData.company_location!.lng,
-        service_area: formData.service_area.trim(),
         license_file: formData.license_file,
         terms_accepted: formData.terms_accepted,
       });
@@ -361,25 +352,6 @@ const CompanyRegisterForm = () => {
               {formData.company_location ? 'Chỉnh vị trí trên bản đồ' : 'Mở bản đồ chọn vị trí'}
             </MuiButton>
           </Box>
-        </Box>
-
-        {/* Khu vực hoạt động */}
-        <Box>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'text.primary' }}>
-            Khu vực hoạt động
-          </Typography>
-
-          <Select
-            id="service_area"
-            label="Khu vực hoạt động"
-            name="service_area"
-            placeholder="Chọn khu vực hoạt động"
-            options={SERVICE_AREAS}
-            value={formData.service_area}
-            onChange={handleChange}
-            error={errors.service_area}
-            required
-          />
         </Box>
 
         {/* Mật khẩu */}

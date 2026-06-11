@@ -71,6 +71,8 @@ export class ReviewService implements IReviewService {
       console.error('Error creating review notifications:', err);
     }
 
+    await newReview.populate('user_id', 'full_name avatar_url');
+
     return newReview;
   }
 
@@ -122,6 +124,8 @@ export class ReviewService implements IReviewService {
     } catch (err) {
       console.error('Error creating review reply notification:', err);
     }
+
+    await updatedReview.populate('user_id', 'full_name avatar_url');
 
     return updatedReview;
   }

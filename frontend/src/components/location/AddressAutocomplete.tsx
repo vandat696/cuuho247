@@ -64,6 +64,7 @@ export function AddressAutocomplete({
       includeInputInList
       filterSelectedOptions
       value={value}
+      isOptionEqualToValue={(option, val) => option?.address === val?.address}
       noOptionsText={query.length === 0 ? 'Bắt đầu nhập địa chỉ...' : 'Không tìm thấy địa chỉ'}
       loading={loading || isFetchingDetail}
       onInputChange={(_, newInputValue) => {

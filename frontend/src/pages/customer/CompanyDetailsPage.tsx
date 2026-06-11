@@ -12,12 +12,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StarIcon from '@mui/icons-material/Star';
 import CloseIcon from '@mui/icons-material/Close';
-import { formatPriceRange, formatEta } from '@/utils/format';
+import { formatPriceRange } from '@/utils/format';
 import { reviewService } from '@/services/review.service';
 import { toast } from 'react-hot-toast';
 
@@ -46,7 +45,6 @@ export default function CompanyDetailsPage() {
   const { formData, company } = locationState;
 
   const priceText = formatPriceRange(company.min_price, company.max_price);
-  const etaText = formatEta(company.eta_minutes);
 
   const addressText = [company.address.detail, company.address.ward, company.address.district, company.address.province]
     .filter(Boolean)
@@ -120,7 +118,6 @@ export default function CompanyDetailsPage() {
             Thông tin dịch vụ
           </Typography>
           <InfoField icon={<PaidIcon sx={{ fontSize: 20 }} />} label="Giá dự kiến" value={priceText} />
-          <InfoField icon={<AccessTimeIcon sx={{ fontSize: 20 }} />} label="Thời gian đến" value={etaText} />
           <InfoField
             icon={<LocationOnIcon sx={{ fontSize: 20 }} />}
             label="Khoảng cách"
