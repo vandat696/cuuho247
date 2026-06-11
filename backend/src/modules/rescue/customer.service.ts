@@ -4,6 +4,7 @@ import rescueRepository from './rescue.repository';
 import type { IRescueRequest, RequestStatus } from '@/shared/models/RescueRequest.model';
 import { ApiError } from '@/shared/utils/apiError.util';
 import { ServiceCategory } from '@/shared/models/ServiceCategory.model';
+import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { IRescueCustomerService, CreateRequestData } from './interfaces/rescue.interface';
 
 const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
@@ -53,7 +54,8 @@ class RescueCustomerService implements IRescueCustomerService {
     }
 
     if (service_types && service_types.length > 0) {
-      const categories = await ServiceCategory.find({ slug: { $in: service_types } });
+      const mappedCategorySlugs = mapIncidentTypesToCategories(service_types);
+      const categories = await ServiceCategory.find({ slug: { $in: mappedCategorySlugs } });
       if (categories.length > 0) {
         payload.service_types = categories.map((cat) => cat._id as Types.ObjectId);
       }

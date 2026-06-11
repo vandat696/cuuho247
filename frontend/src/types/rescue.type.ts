@@ -3,30 +3,88 @@
 export interface IncidentType {
   label: string;
   slug: string;
+  category?: string;
+  icon?: string;
 }
 
-export const INCIDENT_TYPES: IncidentType[] = [
-  { label: 'Xe chết máy', slug: 'xe-chet-may' },
-  { label: 'Hết bình ắc quy', slug: 'het-binh-ac-quy' },
-  { label: 'Thủng lốp / nổ lốp', slug: 'thung-lop-no-lop' },
-  { label: 'Hết nhiên liệu', slug: 'het-nhien-lieu' },
-  { label: 'Xe không khởi động được', slug: 'xe-khong-khoi-dong' },
-  { label: 'Tai nạn giao thông', slug: 'tai-nan-giao-thong' },
-  { label: 'Xe bị sa lầy', slug: 'xe-bi-sa-lay' },
-  { label: 'Xe bị khóa vô lăng', slug: 'xe-bi-khoa-vo-lang' },
-  { label: 'Quên chìa khóa trong xe', slug: 'quen-chia-khoa-trong-xe' },
-  { label: 'Mất chìa khóa xe', slug: 'mat-chia-khoa-xe' },
-  { label: 'Động cơ quá nhiệt', slug: 'dong-co-qua-nhiet' },
-  { label: 'Hỏng phanh', slug: 'hong-phanh' },
-  { label: 'Hỏng côn', slug: 'hong-con' },
-  { label: 'Hỏng hộp số', slug: 'hong-hop-so' },
-  { label: 'Xe bị ngập nước', slug: 'xe-bi-ngap-nuoc' },
-  { label: 'Xe phát ra tiếng động lạ', slug: 'xe-phat-tieng-dong-la' },
-  { label: 'Đèn cảnh báo động cơ bật sáng', slug: 'den-canh-bao-dong-co' },
-  { label: 'Xe bị nghiêng/lật', slug: 'xe-bi-nghieng-lat' },
-  { label: 'Cần kéo xe về garage', slug: 'keo-xe-ve-garage' },
-  { label: 'Sự cố khác', slug: 'su-co-khac' },
-];
+export const INCIDENT_TYPES: readonly IncidentType[] = [
+  {
+    slug: 'su-co-lop-xe',
+    label: 'Lốp xe gặp sự cố',
+    category: 'va-vo-va-lop-xe',
+    icon: 'tire',
+  },
+
+  {
+    slug: 'het-binh-ac-quy',
+    label: 'Hết bình ắc quy',
+    category: 'kich-binh-sac-ac-quy',
+    icon: 'battery',
+  },
+
+  {
+    slug: 'het-nhien-lieu',
+    label: 'Hết nhiên liệu',
+    category: 'tiep-nhien-lieu',
+    icon: 'fuel',
+  },
+
+  {
+    slug: 'xe-khong-khoi-dong',
+    label: 'Xe không khởi động được',
+    category: 'sua-chua-dong-co-luu-dong',
+    icon: 'car-off',
+  },
+
+  {
+    slug: 'xe-chet-may',
+    label: 'Xe bị chết máy giữa đường',
+    category: 'sua-chua-dong-co-luu-dong',
+    icon: 'engine',
+  },
+
+  {
+    slug: 'xe-gap-su-co-ky-thuat',
+    label: 'Xe có dấu hiệu hỏng hóc',
+    category: 'sua-chua-dong-co-luu-dong',
+    icon: 'wrench',
+  },
+
+  {
+    slug: 'tai-nan-giao-thong',
+    label: 'Tai nạn giao thông',
+    category: 'cau-keo-xe-o-to',
+    icon: 'alert-triangle',
+  },
+
+  {
+    slug: 'xe-bi-sa-lay',
+    label: 'Xe bị sa lầy hoặc mắc kẹt',
+    category: 'cau-keo-xe-o-to',
+    icon: 'truck',
+  },
+
+  {
+    slug: 'xe-bi-ngap-nuoc',
+    label: 'Xe bị ngập nước',
+    category: 'cau-keo-xe-o-to',
+    icon: 'waves',
+  },
+
+  {
+    slug: 'su-co-khoa-xe',
+    label: 'Không mở được xe',
+    category: 'cuu-ho-khoa-xe',
+    icon: 'key',
+  },
+
+  {
+    slug: 'khac',
+    label: 'Sự cố khác',
+    category: 'sua-chua-dong-co-luu-dong',
+    icon: 'help-circle',
+  },
+] as const;
 
 // ─── Request Status ────────────────────────────────────────────────────────────
 

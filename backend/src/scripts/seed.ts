@@ -42,10 +42,12 @@ const adminSeed = {
 };
 
 const categorySeeds = [
-  { name: 'Xe chết máy', slug: 'xe-chet-may' },
-  { name: 'Hết xăng', slug: 'het-xang' },
-  { name: 'Thủng lốp', slug: 'thung-lop' },
-  { name: 'Tai nạn nhẹ', slug: 'tai-nan-nhe' },
+  { name: 'Vá vỏ / Vá lốp xe', slug: 'va-vo-va-lop-xe' },
+  { name: 'Kích bình / Sạc ắc quy', slug: 'kich-binh-sac-ac-quy' },
+  { name: 'Tiếp nhiên liệu', slug: 'tiep-nhien-lieu' },
+  { name: 'Sửa chữa động cơ lưu động', slug: 'sua-chua-dong-co-luu-dong' },
+  { name: 'Cẩu kéo xe ô tô', slug: 'cau-keo-xe-o-to' },
+  { name: 'Cứu hộ khóa xe', slug: 'cuu-ho-khoa-xe' },
 ];
 
 const vehicleSeeds = [
@@ -57,28 +59,40 @@ const vehicleSeeds = [
 
 const serviceSeeds = [
   {
-    name: 'Xe chết máy',
-    categorySlug: 'xe-chet-may',
+    name: 'Sửa chữa động cơ lưu động',
+    categorySlug: 'sua-chua-dong-co-luu-dong',
     price: 150000,
-    description: 'Hỗ trợ kích bình, kiểm tra nhanh và kéo xe đến điểm sửa chữa gần nhất.',
+    description: 'Hỗ trợ kiểm tra nhanh và khắc phục các sự cố động cơ tại chỗ.',
   },
   {
-    name: 'Hết xăng',
-    categorySlug: 'het-xang',
+    name: 'Tiếp nhiên liệu',
+    categorySlug: 'tiep-nhien-lieu',
     price: 100000,
     description: 'Tiếp nhiên liệu tận nơi trong khu vực hỗ trợ.',
   },
   {
-    name: 'Thủng lốp',
-    categorySlug: 'thung-lop',
+    name: 'Vá vỏ / Vá lốp xe',
+    categorySlug: 'va-vo-va-lop-xe',
     price: 80000,
     description: 'Vá lốp lưu động, thay lốp dự phòng và kiểm tra áp suất.',
   },
   {
-    name: 'Tai nạn nhẹ',
-    categorySlug: 'tai-nan-nhe',
+    name: 'Cẩu kéo xe ô tô',
+    categorySlug: 'cau-keo-xe-o-to',
     price: 200000,
     description: 'Cứu hộ hiện trường, kéo xe và hỗ trợ an toàn ban đầu.',
+  },
+  {
+    name: 'Kích bình / Sạc ắc quy',
+    categorySlug: 'kich-binh-sac-ac-quy',
+    price: 120000,
+    description: 'Kích bình ắc quy, kiểm tra dòng sạc và hệ thống điện của xe.',
+  },
+  {
+    name: 'Cứu hộ khóa xe',
+    categorySlug: 'cuu-ho-khoa-xe',
+    price: 150000,
+    description: 'Mở cửa xe khi quên chìa khóa hoặc gặp sự cố với khóa xe.',
   },
 ];
 
@@ -92,6 +106,11 @@ async function upsertOne<T>(model: any, filter: Record<string, unknown>, update:
 
 async function main() {
   await connectDB();
+
+  // Clear existing services and categories to prevent legacy seed data from persisting
+  console.log('Cleaning up existing service categories and services...');
+  await Service.deleteMany({});
+  await ServiceCategory.deleteMany({});
 
   const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, SALT_ROUNDS);
 

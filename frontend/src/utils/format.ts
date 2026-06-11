@@ -57,11 +57,15 @@ export const formatPrice = (price: number | null) =>
   price === null ? null : new Intl.NumberFormat('vi-VN').format(price);
 
 /**
- * Format khoảng giá min–max dạng "X - Yđ" hoặc fallback text.
+ * Format giá dịch vụ dạng "Xđ" hoặc fallback text.
  */
-export const formatPriceRange = (minPrice: number | null, maxPrice: number | null, fallback = 'Chưa cập nhật giá') => {
-  if (minPrice !== null && maxPrice !== null) {
-    return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}đ`;
+export const formatPriceRange = (
+  minPrice: number | null,
+  _maxPrice?: number | null,
+  fallback = 'Chưa cập nhật giá'
+) => {
+  if (minPrice !== null) {
+    return `${formatPrice(minPrice)}đ`;
   }
   return fallback;
 };

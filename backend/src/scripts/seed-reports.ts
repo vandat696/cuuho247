@@ -6,6 +6,8 @@ import { Review } from '../shared/models/Review.model';
 import { Company } from '../shared/models/Company.model';
 import { User } from '../shared/models/User.model';
 import { ServiceCategory } from '../shared/models/ServiceCategory.model';
+import { Service } from '../shared/models/Service.model';
+import { Vehicle } from '../shared/models/Vehicle.model';
 
 const REVIEW_CONTENTS = [
   'Dịch vụ rất tốt, nhân viên thân thiện và chuyên nghiệp!',
@@ -35,6 +37,8 @@ async function seedData() {
     { name: 'Cẩu kéo xe ô tô', slug: 'cau-keo-xe-o-to', is_active: true },
     { name: 'Kích bình / Sạc ắc quy', slug: 'kich-binh-sac-ac-quy', is_active: true },
     { name: 'Sửa chữa động cơ lưu động', slug: 'sua-chua-dong-co-luu-dong', is_active: true },
+    { name: 'Tiếp nhiên liệu', slug: 'tiep-nhien-lieu', is_active: true },
+    { name: 'Cứu hộ khóa xe', slug: 'cuu-ho-khoa-xe', is_active: true },
   ];
 
   const categories = [];
@@ -103,10 +107,134 @@ async function seedData() {
       // Keep it active for reports
       company.status = 'active';
       company.is_verified = true;
+      company.location = comp.location as any;
+      company.address = comp.address;
       await company.save();
     }
     companies.push(company);
   }
+
+  // 2b. Setup Services for Test Companies
+  console.log('Setting up services for test companies...');
+  const companyIds = companies.map((c) => c._id);
+  await Service.deleteMany({ company_id: { $in: companyIds } });
+
+  const servicesData = [
+    // Hà Nội 247
+    {
+      companyEmail: 'cuuhohanoi247@test.vn',
+      categorySlug: 'va-vo-va-lop-xe',
+      name: 'Vá vỏ / Vá lốp xe',
+      price: 70000,
+      description: 'Vá lốp lưu động nhanh chóng.',
+    },
+    {
+      companyEmail: 'cuuhohanoi247@test.vn',
+      categorySlug: 'kich-binh-sac-ac-quy',
+      name: 'Kích bình / Sạc ắc quy',
+      price: 110000,
+      description: 'Kích bình ắc quy lưu động.',
+    },
+    {
+      companyEmail: 'cuuhohanoi247@test.vn',
+      categorySlug: 'sua-chua-dong-co-luu-dong',
+      name: 'Sửa chữa động cơ lưu động',
+      price: 140000,
+      description: 'Sửa chữa hỏng hóc động cơ tại chỗ.',
+    },
+    {
+      companyEmail: 'cuuhohanoi247@test.vn',
+      categorySlug: 'tiep-nhien-lieu',
+      name: 'Tiếp nhiên liệu',
+      price: 90000,
+      description: 'Tiếp xăng dầu khẩn cấp.',
+    },
+    // Đông Đô
+    {
+      companyEmail: 'cuuohodongdo@test.vn',
+      categorySlug: 'va-vo-va-lop-xe',
+      name: 'Vá vỏ / Vá lốp xe',
+      price: 80000,
+      description: 'Vá vỏ xe ô tô và xe máy.',
+    },
+    {
+      companyEmail: 'cuuohodongdo@test.vn',
+      categorySlug: 'cau-keo-xe-o-to',
+      name: 'Cẩu kéo xe ô tô',
+      price: 220000,
+      description: 'Cứu hộ cẩu kéo xe ô tô.',
+    },
+    {
+      companyEmail: 'cuuohodongdo@test.vn',
+      categorySlug: 'sua-chua-dong-co-luu-dong',
+      name: 'Sửa chữa động cơ lưu động',
+      price: 160000,
+      description: 'Kiểm tra và sửa lỗi động cơ.',
+    },
+    // Sài Gòn
+    {
+      companyEmail: 'cuuhosaigon@test.vn',
+      categorySlug: 'va-vo-va-lop-xe',
+      name: 'Vá vỏ / Vá lốp xe',
+      price: 75000,
+      description: 'Vá vỏ xe hơi, xe máy tận nơi.',
+    },
+    {
+      companyEmail: 'cuuhosaigon@test.vn',
+      categorySlug: 'kich-binh-sac-ac-quy',
+      name: 'Kích bình / Sạc ắc quy',
+      price: 120000,
+      description: 'Sạc bình kích nổ ắc quy.',
+    },
+    {
+      companyEmail: 'cuuhosaigon@test.vn',
+      categorySlug: 'cau-keo-xe-o-to',
+      name: 'Cẩu kéo xe ô tô',
+      price: 250000,
+      description: 'Xe cứu hộ chuyên dụng kéo chở xe.',
+    },
+    {
+      companyEmail: 'cuuhosaigon@test.vn',
+      categorySlug: 'cuu-ho-khoa-xe',
+      name: 'Cứu hộ khóa xe',
+      price: 150000,
+      description: 'Hỗ trợ mở khóa cửa xe ô tô.',
+    },
+  ];
+
+  for (const s of servicesData) {
+    const comp = companies.find((c) => c.email === s.companyEmail);
+    const cat = categories.find((c) => c.slug === s.categorySlug);
+    if (comp && cat) {
+      await Service.create({
+        company_id: comp._id,
+        category_id: cat._id,
+        name: s.name,
+        price: s.price,
+        description: s.description,
+        is_active: true,
+      });
+    }
+  }
+  console.log('Seeded services for test companies.');
+
+  // 2c. Setup Vehicles for Test Companies
+  console.log('Setting up vehicles for test companies...');
+  await Vehicle.deleteMany({ company_id: { $in: companyIds } });
+  for (const comp of companies) {
+    await Vehicle.create({
+      company_id: comp._id,
+      plate_number:
+        comp.company_name === 'Cứu hộ Hà Nội 247'
+          ? '30A-99999'
+          : comp.company_name === 'Cứu hộ Đông Đô'
+            ? '30E-88888'
+            : '51K-77777',
+      vehicle_type: 'Xe cứu hộ đa năng',
+      status: 'available',
+    });
+  }
+  console.log('Seeded vehicles for test companies.');
 
   // 3. Setup Test User (Customer)
   console.log('Setting up test user...');

@@ -3,6 +3,7 @@ import companyRepository from '@/modules/company/company.repository';
 import { serviceRepository, serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { Vehicle } from '@/shared/models/Vehicle.model';
+import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
 import type {
   IRescueCompanyService,
   AcceptRescueRequestData,
@@ -524,7 +525,8 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     let categoryId: string | undefined = undefined;
     if (incident_type) {
-      const category = await serviceCategoryRepository.findBySlug(incident_type);
+      const categorySlug = mapIncidentTypeToCategory(incident_type);
+      const category = await serviceCategoryRepository.findBySlug(categorySlug);
       if (category) {
         categoryId = category._id.toString();
       }
@@ -553,20 +555,20 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       if (!servicesByCompany.has(companyId)) {
         servicesByCompany.set(companyId, []);
       }
+      servicesByCompany.get(companyId)!.push(service.name);
+    }
+
+    const priceSourceServices = categoryId ? matchingServices : displayServices;
+    for (const service of priceSourceServices) {
+      const companyId = service.company_id.toString();
       if (!pricesByCompany.has(companyId)) {
         pricesByCompany.set(companyId, []);
       }
-      servicesByCompany.get(companyId)!.push(service.name);
       pricesByCompany.get(companyId)!.push(service.price);
     }
 
     const resultCompanies = categoryId
-      ? [...companies].sort((a, b) => {
-          const aMatches = matchingCompanyIds.has((a._id as any).toString());
-          const bMatches = matchingCompanyIds.has((b._id as any).toString());
-          if (aMatches === bMatches) return 0;
-          return aMatches ? -1 : 1;
-        })
+      ? companies.filter((company) => matchingCompanyIds.has((company._id as any).toString()))
       : companies;
 
     return resultCompanies.map((company) => {
