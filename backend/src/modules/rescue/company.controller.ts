@@ -286,22 +286,9 @@ class RescueCompanyController {
             `Yêu cầu cứu hộ #${requestId.slice(-4)} đã hoàn thành thành công.`,
             { rescue_request_id: requestId }
           );
-
-          // Payment reminder notification (as shown in UI)
-          const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-            value.amount
-          );
-          await notificationService.createAndSendNotification(
-            customerId,
-            'user',
-            'payment_reminder',
-            'Nhắc nhở thanh toán',
-            `Vui lòng hoàn tất thanh toán số tiền ${formattedAmount} cho yêu cầu #${requestId.slice(-4)}.`,
-            { rescue_request_id: requestId }
-          );
         }
       } catch (err) {
-        console.error('Error creating request_completed/payment_reminder notifications for customer:', err);
+        console.error('Error creating request_completed notification for customer:', err);
       }
 
       // Notify the company (self-notification)
