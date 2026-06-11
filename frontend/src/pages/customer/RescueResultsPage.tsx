@@ -67,6 +67,7 @@ export default function RescueResultsPage() {
           incidentTypeLabel={formData.incident_type_label}
           location={formData.location}
           totalResults={results.total}
+          companies={results.companies}
           onFilter={() => toast('Tính năng lọc sẽ sớm ra mắt', { icon: '🔧' })}
         />
 
