@@ -7,7 +7,6 @@ import {
   PhoneOutlined as PhoneIcon,
   MailOutline as MailIcon,
   LocationOnOutlined as LocationIcon,
-  MapOutlined as AreaIcon,
   DescriptionOutlined as LicenseIcon,
   VerifiedUserOutlined as VerifyIcon,
 } from '@mui/icons-material';
@@ -25,7 +24,6 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { adminService } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
 import { NAVY, ORANGE } from '@/constants/colors';
-import { SERVICE_AREAS } from '@/constants/service-areas';
 
 export default function CompanyVerificationDetailPage() {
   const navigate = useNavigate();
@@ -104,11 +102,11 @@ export default function CompanyVerificationDetailPage() {
     setDialogConfig({
       open: true,
       type,
-      title: type === 'reject' ? 'Từ chối hồ sơ công ty cứu hộ' : 'Yêu cầu bổ sung giấy tờ',
+      title: type === 'reject' ? 'Từ chối hồ sơ công ty cứu hộ' : 'Yêu cầu chỉnh sửa giấy tờ',
       placeholder:
         type === 'reject'
           ? 'Nhập lý do từ chối cụ thể để gửi cho công ty cứu hộ...'
-          : 'Mô tả thông tin/giấy tờ cần bổ sung gửi cho công ty cứu hộ...',
+          : 'Mô tả thông tin/giấy tờ cần chỉnh sửa gửi cho công ty cứu hộ...',
     });
   };
 
@@ -126,7 +124,7 @@ export default function CompanyVerificationDetailPage() {
 
       if (response.status === 'success') {
         toast.success(
-          dialogConfig.type === 'reject' ? 'Đã từ chối hồ sơ thành công' : 'Đã gửi yêu cầu bổ sung giấy tờ thành công'
+          dialogConfig.type === 'reject' ? 'Đã từ chối hồ sơ thành công' : 'Đã gửi yêu cầu chỉnh sửa hồ sơ thành công'
         );
         setDialogConfig((prev) => ({ ...prev, open: false }));
         if (location.key !== 'default') {
@@ -177,18 +175,9 @@ export default function CompanyVerificationDetailPage() {
             <InfoRow icon={<MailIcon />} label="Địa chỉ Email" value={company.email} />
           </InfoCard>
 
-          {/* Location & Service Area */}
-          <InfoCard title="Địa chỉ & Khu vực hoạt động">
+          {/* Location */}
+          <InfoCard title="Địa chỉ đăng ký">
             <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
-            <InfoRow
-              icon={<AreaIcon />}
-              label="Khu vực hoạt động"
-              value={
-                SERVICE_AREAS.find((area) => area.id === company.service_area)?.label ||
-                company.service_area ||
-                'Chưa đăng ký'
-              }
-            />
           </InfoCard>
 
           {/* License File Card */}
@@ -287,7 +276,7 @@ export default function CompanyVerificationDetailPage() {
                 disabled={actionLoading}
                 variant="outline"
               >
-                Yêu cầu bổ sung hồ sơ
+                Yêu cầu chỉnh sửa hồ sơ
               </PrimaryActionButton>
 
               <PrimaryActionButton

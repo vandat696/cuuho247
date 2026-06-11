@@ -11,7 +11,6 @@ export interface ICompany extends Document {
   phone: string;
   address: IAddress;
   location: IGeoPoint;
-  service_area: string;
   license_file_url?: string;
   status?: CompanyStatus;
   rejection_reason?: string;
@@ -34,7 +33,6 @@ const CompanySchema = new Schema<ICompany>(
     phone: { type: String, required: true },
     address: { type: AddressSchema, required: true },
     location: { type: GeoPointSchema, required: true },
-    service_area: { type: String, required: true },
     license_file_url: { type: String },
     status: {
       type: String,

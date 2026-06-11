@@ -41,18 +41,8 @@ class AuthService implements IAuthService {
   }
 
   async registerCompany(companyData: CompanyRegisterInput): Promise<CompanyProfile> {
-    const {
-      email,
-      password,
-      company_name,
-      director_name,
-      phone,
-      address,
-      latitude,
-      longitude,
-      service_area,
-      license_file_url,
-    } = companyData;
+    const { email, password, company_name, director_name, phone, address, latitude, longitude, license_file_url } =
+      companyData;
 
     const existingUser = await userRepository.findByEmail(email);
     const existingCompany = await companyRepository.findByEmail(email);
@@ -78,7 +68,6 @@ class AuthService implements IAuthService {
         type: 'Point',
         coordinates: [longitude, latitude],
       },
-      service_area,
       license_file_url,
       status: 'pending_verification',
       is_verified: false,

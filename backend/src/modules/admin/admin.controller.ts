@@ -69,7 +69,7 @@ class AdminController {
         });
       }
 
-      res.status(200).json({ status: 'success', message: 'Đã gửi yêu cầu bổ sung giấy tờ', data: company });
+      res.status(200).json({ status: 'success', message: 'Đã gửi yêu cầu chỉnh sửa giấy tờ', data: company });
     } catch (err) {
       next(err);
     }

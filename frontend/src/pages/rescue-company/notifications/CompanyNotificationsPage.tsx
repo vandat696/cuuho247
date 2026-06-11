@@ -41,7 +41,7 @@ const mapDetailPath = (notification: NotificationData): string => {
     case 'company_document_requested':
       return '/company/profile/edit';
     case 'review_submitted':
-      return '/company/reviews';
+      return requestId ? `/company/rescue/completed/${requestId}` : '/company/reviews';
     case 'new_comment':
       return postId ? `/community/${postId}` : '';
     case 'company_approved':

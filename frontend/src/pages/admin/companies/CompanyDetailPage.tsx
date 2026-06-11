@@ -7,7 +7,6 @@ import {
   PhoneOutlined as PhoneIcon,
   MailOutline as MailIcon,
   LocationOnOutlined as LocationIcon,
-  MapOutlined as AreaIcon,
   DescriptionOutlined as LicenseIcon,
   HistoryToggleOffOutlined as HistoryIcon,
 } from '@mui/icons-material';
@@ -25,7 +24,6 @@ import { CompanyLogHistory } from '@/components/admin/CompanyLogHistory';
 import { adminService, AuditLog } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
 import { NAVY, GREEN, RED, ORANGE } from '@/constants/colors';
-import { SERVICE_AREAS } from '@/constants/service-areas';
 import { formatDateTime } from '@/utils/format';
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
@@ -161,18 +159,9 @@ export default function CompanyDetailPage() {
             <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={company.phone} />
           </InfoCard>
 
-          {/* Location & Service Area */}
-          <InfoCard title="Địa chỉ & Khu vực hoạt động">
+          {/* Location */}
+          <InfoCard title="Địa chỉ đăng ký">
             <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
-            <InfoRow
-              icon={<AreaIcon />}
-              label="Khu vực hoạt động"
-              value={
-                SERVICE_AREAS.find((area) => area.id === company.service_area)?.label ||
-                company.service_area ||
-                'Chưa đăng ký'
-              }
-            />
           </InfoCard>
 
           {/* License File Card */}

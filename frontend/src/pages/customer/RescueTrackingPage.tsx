@@ -74,7 +74,7 @@ export default function RescueTrackingPage() {
           // or ideally the company's location if available in the API response.
           // For now, we will wait for Socket updates or use customer location.
         } else {
-          toast.error('Không tìm thấy yêu cầu');
+          toast.error('Không tìm thấy yêu cầu', { id: 'request-not-found-error' });
           navigate('/customer/home');
         }
       } catch (error) {

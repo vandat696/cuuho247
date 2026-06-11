@@ -97,7 +97,7 @@ export default function RescueRequestDetailPage() {
         }
       } catch (error) {
         console.error('Error fetching rescue request detail:', error);
-        toast.error('Không thể tải chi tiết yêu cầu');
+        toast.error('Không thể tải chi tiết yêu cầu', { id: 'fetch-request-detail-error' });
       } finally {
         setLoading(false);
       }

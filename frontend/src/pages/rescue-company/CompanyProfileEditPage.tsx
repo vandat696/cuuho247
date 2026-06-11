@@ -13,10 +13,8 @@ import {
 import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Input } from '@/components/common/Input';
-import { Select } from '@/components/common/Select';
 import { Button } from '@/components/common/Button';
 import { LocationPickerDialog } from '@/components/location/LocationPickerDialog';
-import { SERVICE_AREAS } from '@/constants/service-areas';
 import { companyService } from '@/services/company.service';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '@/types/rescue.type';
@@ -28,7 +26,6 @@ interface CompanyProfileEditFormData {
   phone: string;
   address: string;
   company_location: RescueLocation | null;
-  service_area: string;
   license_file: File | null;
   existing_license_url?: string;
 }
@@ -52,7 +49,6 @@ export default function CompanyProfileEditPage() {
     phone: '',
     address: '',
     company_location: null,
-    service_area: '',
     license_file: null,
   });
 
@@ -96,7 +92,6 @@ export default function CompanyProfileEditPage() {
           phone: company.phone || '',
           address: addressStr,
           company_location: loc,
-          service_area: company.service_area || '',
           license_file: null,
           existing_license_url: company.license_file_url || company.license_url,
         });
@@ -221,10 +216,6 @@ export default function CompanyProfileEditPage() {
       newErrors.company_location = 'Vui lòng chọn vị trí công ty trên bản đồ';
     }
 
-    if (!formData.service_area.trim()) {
-      newErrors.service_area = 'Khu vực hoạt động là bắt buộc';
-    }
-
     if (formData.license_file) {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(formData.license_file.type)) {
@@ -252,7 +243,6 @@ export default function CompanyProfileEditPage() {
       formDataToSend.append('director_name', formData.director_name.trim());
       formDataToSend.append('phone', formData.phone.trim());
       formDataToSend.append('address', formData.address.trim());
-      formDataToSend.append('service_area', formData.service_area.trim());
 
       if (formData.company_location) {
         formDataToSend.append('latitude', String(formData.company_location.lat));
@@ -383,25 +373,6 @@ export default function CompanyProfileEditPage() {
                   {formData.company_location ? 'Thay đổi vị trí bản đồ' : 'Chọn vị trí trên bản đồ'}
                 </MuiButton>
               </Box>
-            </Box>
-
-            {/* Khu vực hoạt động */}
-            <Box>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: NAVY }}>
-                Khu vực phục vụ
-              </Typography>
-
-              <Select
-                id="service_area"
-                label="Khu vực hoạt động"
-                name="service_area"
-                placeholder="Chọn khu vực hoạt động"
-                options={SERVICE_AREAS}
-                value={formData.service_area}
-                onChange={handleChange}
-                error={errors.service_area}
-                required
-              />
             </Box>
 
             {/* Giấy phép kinh doanh */}

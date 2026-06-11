@@ -44,7 +44,7 @@ export default function RescueRequestListPage() {
       }
     } catch (error) {
       console.error('Error fetching requests:', error);
-      toast.error('Không thể tải dữ liệu yêu cầu');
+      toast.error('Không thể tải dữ liệu yêu cầu', { id: 'fetch-requests-error' });
     } finally {
       setLoading(false);
     }
