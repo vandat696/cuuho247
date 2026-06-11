@@ -3,6 +3,7 @@ import companyRescueRequestService from './company.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from './rescue.validator';
 import { notificationService } from '../notification/notification.service';
+import { validateSchema } from '../../shared/utils/validation.util';
 
 const getCustomerId = (request: any): string => {
   if (!request || !request.user_id) return '';
@@ -164,19 +165,12 @@ class RescueCompanyController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const { error, value } = acceptRequestSchema.validate(req.body, { abortEarly: false });
-
-      if (error) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: error.details.map((err) => ({
-            field: err.context?.key,
-            message: err.message,
-          })),
-        });
-        return;
-      }
+      const value = validateSchema<any>(acceptRequestSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+        formatErrors: 'object',
+      });
+      if (!value) return;
 
       const request = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, value);
 
@@ -243,19 +237,12 @@ class RescueCompanyController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const { error, value } = completeRequestSchema.validate(req.body, { abortEarly: false });
-
-      if (error) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: error.details.map((err) => ({
-            field: err.context?.key,
-            message: err.message,
-          })),
-        });
-        return;
-      }
+      const value = validateSchema<any>(completeRequestSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+        formatErrors: 'object',
+      });
+      if (!value) return;
 
       const request = await companyRescueRequestService.completeActiveRequestForCompany(companyId, requestId, value);
 

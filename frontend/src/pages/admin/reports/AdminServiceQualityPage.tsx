@@ -3,9 +3,9 @@ import { Box, Typography, CircularProgress, Button, Alert } from '@mui/material'
 import { DownloadOutlined as ExportIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { adminService, ServiceQualityReport } from '@/services/admin.service';
 import { NAVY, BUTTON_RADIUS } from '@/constants/colors';
+import { getDefaultDateRange } from '@/utils/date';
 
 import QualityFilters from '@/components/admin/QualityFilters';
 import QualitySummaryCards from '@/components/admin/QualitySummaryCards';
@@ -26,21 +26,8 @@ export default function AdminServiceQualityPage() {
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize dates to last 7 days
-  const today = new Date();
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(today.getDate() - 6);
-
-  const formatDateString = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   const [filters, setFilters] = useState<FilterState>({
-    startDate: formatDateString(sevenDaysAgo),
-    endDate: formatDateString(today),
+    ...getDefaultDateRange(6),
     companyId: 'all',
     groupBy: 'day',
   });
@@ -172,7 +159,7 @@ export default function AdminServiceQualityPage() {
   const hasData = reportData && (reportData.summary.totalRequests > 0 || reportData.summary.totalReviews > 0);
 
   return (
-    <AdminLayout title="Chất lượng dịch vụ" backFallback="/admin/home">
+    <>
       {/* Filter component */}
       <QualityFilters
         filters={filters}
@@ -251,6 +238,6 @@ export default function AdminServiceQualityPage() {
           )}
         </Box>
       )}
-    </AdminLayout>
+    </>
   );
 }

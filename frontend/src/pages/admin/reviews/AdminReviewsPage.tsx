@@ -27,7 +27,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { adminService } from '@/services/admin.service';
@@ -636,7 +635,7 @@ export default function AdminReviewsPage() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <AdminLayout title="Quản lý đánh giá" backFallback="/admin/home">
+    <>
       {/* Tabs */}
       <Tabs
         value={activeTab}
@@ -654,6 +653,6 @@ export default function AdminReviewsPage() {
       </Tabs>
 
       {activeTab === 0 ? <ReviewsTab /> : <CommunityTab />}
-    </AdminLayout>
+    </>
   );
 }

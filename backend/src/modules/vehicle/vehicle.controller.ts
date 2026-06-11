@@ -1,8 +1,8 @@
 import { Response } from 'express';
-import { ValidationErrorItem } from 'joi';
 import { vehicleService } from './vehicle.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { createVehicleSchema, updateVehicleSchema } from './vehicle.validator';
+import { validateSchema } from '../../shared/utils/validation.util';
 
 export class VehicleController {
   async getVehicles(req: AuthRequest, res: Response) {
@@ -31,16 +31,11 @@ export class VehicleController {
     try {
       const companyId = req.user.id;
 
-      const { error, value } = createVehicleSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(createVehicleSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       const vehicle = await vehicleService.createVehicle(companyId, value);
       res.status(201).json({ status: 'success', data: vehicle });
@@ -54,16 +49,11 @@ export class VehicleController {
     try {
       const companyId = req.user.id;
 
-      const { error, value } = updateVehicleSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(updateVehicleSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       const vehicle = await vehicleService.updateVehicle(companyId, req.params.id, value);
       res.json({ status: 'success', data: vehicle });

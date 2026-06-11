@@ -13,66 +13,36 @@ class AdminController {
   }
 
   async approveCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { companyId } = req.params;
-      const { reason } = req.body;
-      const adminId = req.user?.id as string;
-      const company = await adminService.approveCompany(companyId, adminId, reason);
-
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`company:${companyId}`).emit('company_status_changed', {
-          status: 'active',
-          company,
-        });
-      }
-
-      res.status(200).json({ status: 'success', message: 'Công ty đã được duyệt thành công', data: company });
-    } catch (err) {
-      next(err);
-    }
+    await this.handleCompanyStatusChange(
+      req,
+      res,
+      next,
+      'active',
+      'Công ty đã được duyệt thành công',
+      (companyId, adminId, reason) => adminService.approveCompany(companyId, adminId, reason)
+    );
   }
 
   async rejectCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { companyId } = req.params;
-      const { reason } = req.body;
-      const adminId = req.user?.id as string;
-      const company = await adminService.rejectCompany(companyId, adminId, reason);
-
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`company:${companyId}`).emit('company_status_changed', {
-          status: 'rejected',
-          company,
-        });
-      }
-
-      res.status(200).json({ status: 'success', message: 'Hồ sơ công ty đã bị từ chối', data: company });
-    } catch (err) {
-      next(err);
-    }
+    await this.handleCompanyStatusChange(
+      req,
+      res,
+      next,
+      'rejected',
+      'Hồ sơ công ty đã bị từ chối',
+      (companyId, adminId, reason) => adminService.rejectCompany(companyId, adminId, reason)
+    );
   }
 
   async requestDocuments(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { companyId } = req.params;
-      const { reason } = req.body;
-      const adminId = req.user?.id as string;
-      const company = await adminService.requestDocuments(companyId, adminId, reason);
-
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`company:${companyId}`).emit('company_status_changed', {
-          status: 'pending_verification',
-          company,
-        });
-      }
-
-      res.status(200).json({ status: 'success', message: 'Đã gửi yêu cầu chỉnh sửa giấy tờ', data: company });
-    } catch (err) {
-      next(err);
-    }
+    await this.handleCompanyStatusChange(
+      req,
+      res,
+      next,
+      'pending_verification',
+      'Đã gửi yêu cầu chỉnh sửa giấy tờ',
+      (companyId, adminId, reason) => adminService.requestDocuments(companyId, adminId, reason)
+    );
   }
 
   async getAuditLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -224,45 +194,25 @@ class AdminController {
   }
 
   async lockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { companyId } = req.params;
-      const { reason } = req.body;
-      const adminId = req.user?.id as string;
-      const company = await adminService.lockCompany(companyId, adminId, reason);
-
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`company:${companyId}`).emit('company_status_changed', {
-          status: 'locked',
-          company,
-        });
-      }
-
-      res.status(200).json({ status: 'success', message: 'Khóa tài khoản công ty thành công', data: company });
-    } catch (err) {
-      next(err);
-    }
+    await this.handleCompanyStatusChange(
+      req,
+      res,
+      next,
+      'locked',
+      'Khóa tài khoản công ty thành công',
+      (companyId, adminId, reason) => adminService.lockCompany(companyId, adminId, reason)
+    );
   }
 
   async unlockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { companyId } = req.params;
-      const { reason } = req.body;
-      const adminId = req.user?.id as string;
-      const company = await adminService.unlockCompany(companyId, adminId, reason);
-
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`company:${companyId}`).emit('company_status_changed', {
-          status: 'active',
-          company,
-        });
-      }
-
-      res.status(200).json({ status: 'success', message: 'Mở khóa tài khoản công ty thành công', data: company });
-    } catch (err) {
-      next(err);
-    }
+    await this.handleCompanyStatusChange(
+      req,
+      res,
+      next,
+      'active',
+      'Mở khóa tài khoản công ty thành công',
+      (companyId, adminId, reason) => adminService.unlockCompany(companyId, adminId, reason)
+    );
   }
 
   async getCompanyLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -350,11 +300,7 @@ class AdminController {
       const serviceCategoryId = req.query.serviceCategoryId as string | undefined;
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month' | undefined) || 'day';
 
-      if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
-        res.status(400).json({
-          status: 'error',
-          message: 'Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.',
-        });
+      if (!this.validateGroupBy(groupBy, res)) {
         return;
       }
 
@@ -382,11 +328,7 @@ class AdminController {
       const companyId = req.query.companyId as string | undefined;
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month' | undefined) || 'day';
 
-      if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
-        res.status(400).json({
-          status: 'error',
-          message: 'Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.',
-        });
+      if (!this.validateGroupBy(groupBy, res)) {
         return;
       }
 
@@ -396,6 +338,45 @@ class AdminController {
     } catch (err) {
       next(err);
     }
+  }
+
+  private async handleCompanyStatusChange(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+    status: string,
+    message: string,
+    serviceMethod: (companyId: string, adminId: string, reason: string) => Promise<any>
+  ): Promise<void> {
+    try {
+      const { companyId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id as string;
+      const company = await serviceMethod(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status,
+          company,
+        });
+      }
+
+      res.status(200).json({ status: 'success', message, data: company });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  private validateGroupBy(groupBy: any, res: Response): boolean {
+    if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
+      res.status(400).json({
+        status: 'error',
+        message: 'Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.',
+      });
+      return false;
+    }
+    return true;
   }
 }
 

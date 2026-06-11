@@ -38,6 +38,7 @@ export default function CustomerEditProfilePage() {
         localStorage.setItem('accountName', response.data.full_name || '');
         localStorage.setItem('accountPhone', response.data.phone || '');
         localStorage.setItem('accountEmail', response.data.email || '');
+        localStorage.setItem('accountAvatar', response.data.avatar_url || '');
       } catch (error) {
         console.error('Failed to fetch profile', error);
       } finally {
@@ -67,7 +68,7 @@ export default function CustomerEditProfilePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await userService.updateProfile({
+      const res = await userService.updateProfile({
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
@@ -76,6 +77,7 @@ export default function CustomerEditProfilePage() {
       localStorage.setItem('accountName', formData.name);
       localStorage.setItem('accountPhone', formData.phone);
       localStorage.setItem('accountEmail', formData.email);
+      localStorage.setItem('accountAvatar', res.data.avatar_url || '');
       toast.success('Cập nhật hồ sơ thành công');
       navigate(-1);
     } catch (error: any) {

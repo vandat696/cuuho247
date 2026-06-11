@@ -19,6 +19,7 @@ import { companyService } from '@/services/company.service';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '@/types/rescue.type';
 import { NAVY } from '@/constants/colors';
+import { formatFileSize, validateCompanyFormFields, useCompanyFormHandlers } from '@/utils/companyFormHelper';
 
 interface CompanyProfileEditFormData {
   company_name: string;
@@ -34,13 +35,6 @@ interface FormErrors {
   [key: string]: string;
 }
 
-const formatFileSize = (size: number) => {
-  if (size < 1024 * 1024) {
-    return `${Math.round(size / 1024)} KB`;
-  }
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-};
-
 export default function CompanyProfileEditPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CompanyProfileEditFormData>({
@@ -55,7 +49,14 @@ export default function CompanyProfileEditPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
+
+  const {
+    isLocationPickerOpen,
+    setIsLocationPickerOpen,
+    handleConfirmCompanyLocation,
+    handleLicenseFileChange,
+    handleRemoveLicenseFile,
+  } = useCompanyFormHandlers(setFormData, setErrors);
 
   useEffect(() => {
     fetchProfileData();
@@ -104,37 +105,6 @@ export default function CompanyProfileEditPage() {
     }
   };
 
-  const handleCompanyLocationChange = (location: RescueLocation | null) => {
-    setFormData((prev) => ({
-      ...prev,
-      company_location: location,
-    }));
-
-    if (errors.company_location) {
-      setErrors((prev) => ({
-        ...prev,
-        company_location: '',
-      }));
-    }
-  };
-
-  const handleConfirmCompanyLocation = (location: RescueLocation) => {
-    handleCompanyLocationChange(location);
-    if (location.address) {
-      setFormData((prev) => ({
-        ...prev,
-        address: location.address,
-      }));
-      if (errors.address) {
-        setErrors((prev) => ({
-          ...prev,
-          address: '',
-        }));
-      }
-    }
-    setIsLocationPickerOpen(false);
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
     const { name, value } = target as any;
@@ -152,79 +122,8 @@ export default function CompanyProfileEditPage() {
     }
   };
 
-  const handleLicenseFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-
-    setFormData((prev) => ({
-      ...prev,
-      license_file: file,
-    }));
-
-    if (errors.license_file) {
-      setErrors((prev) => ({
-        ...prev,
-        license_file: '',
-      }));
-    }
-  };
-
-  const handleRemoveLicenseFile = () => {
-    setFormData((prev) => ({
-      ...prev,
-      license_file: null,
-    }));
-    setErrors((prev) => ({
-      ...prev,
-      license_file: '',
-    }));
-  };
-
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.company_name.trim()) {
-      newErrors.company_name = 'Tên công ty là bắt buộc';
-    } else if (formData.company_name.trim().length < 2) {
-      newErrors.company_name = 'Tên công ty phải có ít nhất 2 ký tự';
-    }
-
-    if (!formData.director_name.trim()) {
-      newErrors.director_name = 'Họ và tên giám đốc là bắt buộc';
-    } else if (formData.director_name.trim().length < 2) {
-      newErrors.director_name = 'Họ và tên phải có ít nhất 2 ký tự';
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ (phải từ 10-11 số)';
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = 'Địa chỉ là bắt buộc';
-    } else if (formData.address.trim().length < 5) {
-      newErrors.address = 'Địa chỉ phải có ít nhất 5 ký tự';
-    }
-
-    if (
-      !formData.company_location ||
-      typeof formData.company_location.lat !== 'number' ||
-      typeof formData.company_location.lng !== 'number' ||
-      formData.company_location.lat === 0 ||
-      formData.company_location.lng === 0
-    ) {
-      newErrors.company_location = 'Vui lòng chọn vị trí công ty trên bản đồ';
-    }
-
-    if (formData.license_file) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(formData.license_file.type)) {
-        newErrors.license_file = 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP';
-      } else if (formData.license_file.size > 5 * 1024 * 1024) {
-        newErrors.license_file = 'Ảnh không được vượt quá 5MB';
-      }
-    }
-
+    const newErrors = validateCompanyFormFields(formData);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

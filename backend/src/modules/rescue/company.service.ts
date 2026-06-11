@@ -57,19 +57,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return requests.map((request: any) => {
       const distanceKm = this.getDistanceFromCoordinates(companyCoords, request.location?.coordinates);
-      const serviceName = request.service_types?.[0]?.name;
-
-      return {
-        _id: request._id.toString(),
-        title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
-        description: request.description,
-        distance_km: distanceKm,
-        eta_minutes: request.eta_minutes ?? null,
-        created_at: request.created_at,
-        address: request.address,
-        status: request.status,
-        user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
-      };
+      return this.mapBasicRequest(request, distanceKm);
     });
   }
 
@@ -77,42 +65,17 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<PendingRescueRequestDetailResult | null> {
-    const { isValidObjectId } = await import('mongoose');
-    if (!isValidObjectId(requestId)) {
-      return null;
-    }
-
-    const company = await companyRepository.findById(companyId);
-    const request = (await RescueRequest.findOne({
-      _id: requestId,
-      'company.company_id': companyId,
-      status: 'pending',
-    })
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
-
+    const request = await this.getRequestDetail(companyId, requestId, 'pending');
     if (!request) {
       return null;
     }
 
-    const serviceName = request.service_types?.[0]?.name;
+    const company = await companyRepository.findById(companyId);
+    const distanceKm = this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates);
 
     return {
-      _id: request._id.toString(),
-      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
-      description: request.description,
-      distance_km: this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates),
-      eta_minutes: request.eta_minutes ?? null,
-      created_at: request.created_at,
-      address: request.address,
-      status: request.status,
-      user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khach hang',
-        phone: request.user_id?.phone || '',
-      },
+      ...this.mapBasicRequest(request, distanceKm),
+      customer: this.mapCustomer(request.user_id),
       incident_photos: request.incident_photos || [],
       location: request.location,
     };
@@ -135,31 +98,14 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<ActiveRescueRequestDetailResult | null> {
-    const { isValidObjectId } = await import('mongoose');
-    if (!isValidObjectId(requestId)) {
-      return null;
-    }
-
-    const request = (await RescueRequest.findOne({
-      _id: requestId,
-      'company.company_id': companyId,
-      status: { $in: ['accepted', 'in_progress'] },
-    })
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
-
+    const request = await this.getRequestDetail(companyId, requestId, ['accepted', 'in_progress']);
     if (!request) {
       return null;
     }
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khach hang',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -230,10 +176,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       ...(await this.mapRequestWithVehicle(request, vehicle)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khach hang',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -280,10 +223,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -330,10 +270,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -354,31 +291,14 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<CompletedRescueRequestDetailResult | null> {
-    const { isValidObjectId } = await import('mongoose');
-    if (!isValidObjectId(requestId)) {
-      return null;
-    }
-
-    const request = (await RescueRequest.findOne({
-      _id: requestId,
-      'company.company_id': companyId,
-      status: 'completed',
-    })
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
-
+    const request = await this.getRequestDetail(companyId, requestId, 'completed');
     if (!request) {
       return null;
     }
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khach hang',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -441,10 +361,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -465,31 +382,14 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<CanceledRescueRequestDetailResult | null> {
-    const { isValidObjectId } = await import('mongoose');
-    if (!isValidObjectId(requestId)) {
-      return null;
-    }
-
-    const request = (await RescueRequest.findOne({
-      _id: requestId,
-      'company.company_id': companyId,
-      status: 'cancelled',
-    })
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
-
+    const request = await this.getRequestDetail(companyId, requestId, 'cancelled');
     if (!request) {
       return null;
     }
 
     return {
       ...(await this.mapRequestWithVehicle(request)),
-      customer: {
-        full_name: request.user_id?.full_name || 'Khách hàng',
-        phone: request.user_id?.phone || '',
-      },
+      customer: this.mapCustomer(request.user_id),
     };
   }
 
@@ -612,7 +512,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
   }
 
   private async mapRequestWithVehicle(request: any, providedVehicle?: any): Promise<ActiveRescueRequestResult> {
-    const serviceName = request.service_types?.[0]?.name;
     const vehicle =
       providedVehicle ||
       (request.vehicle?.vehicle_id
@@ -621,7 +520,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       _id: request._id.toString(),
-      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
+      title: this.getRequestTitle(request),
       description: request.description,
       distance_km: null,
       eta_minutes: request.eta_minutes ?? null,
@@ -639,6 +538,32 @@ class CompanyRescueRequestService implements IRescueCompanyService {
         plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
       },
     } as ActiveRescueRequestResult;
+  }
+
+  private getRequestTitle(request: any): string {
+    const serviceName = request.service_types?.[0]?.name;
+    return (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác';
+  }
+
+  private mapBasicRequest(request: any, distanceKm: number | null) {
+    return {
+      _id: request._id.toString(),
+      title: this.getRequestTitle(request),
+      description: request.description,
+      distance_km: distanceKm,
+      eta_minutes: request.eta_minutes ?? null,
+      created_at: request.created_at,
+      address: request.address,
+      status: request.status,
+      user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
+    };
+  }
+
+  private mapCustomer(userIdObj: any) {
+    return {
+      full_name: userIdObj?.full_name || 'Khách hàng',
+      phone: userIdObj?.phone || '',
+    };
   }
 
   private getDistanceFromCoordinates(originCoords?: number[], destinationCoords?: number[]): number | null {
@@ -672,6 +597,36 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
   private toRad(deg: number): number {
     return (deg * Math.PI) / 180;
+  }
+
+  private async getRequestDetail(
+    companyId: string,
+    requestId: string,
+    statusFilter: string | string[]
+  ): Promise<any | null> {
+    const { isValidObjectId } = await import('mongoose');
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const query: any = {
+      _id: requestId,
+      'company.company_id': companyId,
+    };
+
+    if (Array.isArray(statusFilter)) {
+      query.status = { $in: statusFilter };
+    } else {
+      query.status = statusFilter;
+    }
+
+    const request = await RescueRequest.findOne(query)
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec();
+
+    return request;
   }
 }
 

@@ -3,10 +3,10 @@ import { Box, Typography, CircularProgress, Button, Alert } from '@mui/material'
 import { DownloadOutlined as ExportIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { adminService, RescueActivitiesReport } from '@/services/admin.service';
 import { http } from '@/services/http';
 import { NAVY, BUTTON_RADIUS } from '@/constants/colors';
+import { getDefaultDateRange } from '@/utils/date';
 
 import ReportFilters from '@/components/admin/ReportFilters';
 import ReportSummaryCards from '@/components/admin/ReportSummaryCards';
@@ -27,21 +27,8 @@ export default function AdminReportsPage() {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize dates
-  const today = new Date();
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(today.getDate() - 6);
-
-  const formatDateString = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   const [filters, setFilters] = useState<FilterState>({
-    startDate: formatDateString(sevenDaysAgo),
-    endDate: formatDateString(today),
+    ...getDefaultDateRange(6),
     serviceCategoryId: 'all',
     groupBy: 'day',
   });
@@ -176,7 +163,7 @@ export default function AdminReportsPage() {
   const hasData = reportData && reportData.summary.totalRequests > 0;
 
   return (
-    <AdminLayout title="Báo cáo hoạt động" backFallback="/admin/home">
+    <>
       {/* Filters */}
       <ReportFilters
         filters={filters}
@@ -255,6 +242,6 @@ export default function AdminReportsPage() {
           )}
         </>
       )}
-    </AdminLayout>
+    </>
   );
 }

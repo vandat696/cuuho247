@@ -11,7 +11,6 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ActionCard } from '@/components/rescue-company/ActionCard';
 import { adminService } from '@/services/admin.service';
 import { NAVY, ORANGE, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
@@ -44,7 +43,7 @@ export default function AdminHomePage() {
   const adminEmail = localStorage.getItem('accountEmail') || 'admin@cuuho247.vn';
 
   return (
-    <AdminLayout title="Tổng quan" showBack={false}>
+    <>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
@@ -179,6 +178,6 @@ export default function AdminHomePage() {
           </Box>
         </>
       )}
-    </AdminLayout>
+    </>
   );
 }

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { AuditLogItem } from '@/components/admin/AuditLogItem';
 import { adminService, AuditLog } from '@/services/admin.service';
 import { Button } from '@/components/common/Button';
@@ -68,7 +67,7 @@ export default function AdminLogsPage() {
   const hasMore = (logs || []).length < total;
 
   return (
-    <AdminLayout title="Nhật ký hệ thống" backFallback="/admin/home">
+    <>
       <Typography sx={{ mb: 2, fontSize: 16, fontWeight: 800, color: NAVY }}>
         Tổng số: {total} hành động ghi nhận
       </Typography>
@@ -98,6 +97,6 @@ export default function AdminLogsPage() {
           )}
         </Box>
       )}
-    </AdminLayout>
+    </>
   );
 }

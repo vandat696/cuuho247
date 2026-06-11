@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { Box, Typography, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import {
   HomeOutlined as HomeIcon,
@@ -19,23 +19,69 @@ import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 import { DesktopLayout } from './DesktopLayout';
 
 interface AdminLayoutProps {
-  children: ReactNode;
-  title: string;
+  children?: ReactNode;
+  title?: string;
   showBack?: boolean;
   onBack?: () => void;
   backFallback?: string;
 }
 
+interface LayoutConfig {
+  title: string;
+  showBack: boolean;
+  backFallback: string;
+}
+
+function getLayoutConfig(pathname: string): LayoutConfig {
+  if (pathname === '/admin/home') {
+    return { title: 'Tổng quan', showBack: false, backFallback: '/admin/home' };
+  }
+  if (pathname === '/admin/companies/pending') {
+    return { title: 'Duyệt công ty cứu hộ', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname.startsWith('/admin/companies/') && pathname.endsWith('/verify')) {
+    return { title: 'Duyệt hồ sơ công ty cứu hộ', showBack: true, backFallback: '/admin/companies/pending' };
+  }
+  if (pathname.startsWith('/admin/companies/') && pathname.endsWith('/detail')) {
+    return { title: 'Chi tiết công ty cứu hộ', showBack: true, backFallback: '/admin/users' };
+  }
+  if (pathname === '/admin/logs') {
+    return { title: 'Nhật ký hệ thống', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname === '/admin/reviews') {
+    return { title: 'Quản lý đánh giá', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname === '/admin/reports') {
+    return { title: 'Báo cáo hoạt động', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname === '/admin/reports/service-quality') {
+    return { title: 'Chất lượng dịch vụ', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname === '/admin/users') {
+    return { title: 'Danh sách tài khoản', showBack: true, backFallback: '/admin/home' };
+  }
+  if (pathname.startsWith('/admin/users/')) {
+    return { title: 'Chi tiết tài khoản', showBack: true, backFallback: '/admin/users' };
+  }
+
+  return { title: 'Hệ thống quản trị', showBack: false, backFallback: '/admin/home' };
+}
+
 export function AdminLayout({
   children,
-  title,
-  showBack = false,
+  title: propTitle,
+  showBack: propShowBack,
   onBack,
-  backFallback = '/admin/home',
+  backFallback: propBackFallback,
 }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [pendingCount, setPendingCount] = useState<number>(0);
+
+  const autoConfig = getLayoutConfig(location.pathname);
+  const title = propTitle !== undefined ? propTitle : autoConfig.title;
+  const showBack = propShowBack !== undefined ? propShowBack : autoConfig.showBack;
+  const backFallback = propBackFallback !== undefined ? propBackFallback : autoConfig.backFallback;
 
   useEffect(() => {
     fetchPendingCount();
@@ -82,7 +128,7 @@ export function AdminLayout({
   const menuItems = [
     { text: 'Tổng quan', path: '/admin/home', icon: <HomeIcon /> },
     {
-      text: 'Công ty cứu hộ chờ duyệt',
+      text: 'Duyệt công ty cứu hộ',
       path: '/admin/companies/pending',
       icon: <CompanyIcon />,
       badge: pendingCount > 0 ? pendingCount : undefined,
@@ -326,7 +372,7 @@ export function AdminLayout({
 
         {/* Content view scroll area */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {children}
+          {children || <Outlet />}
         </Box>
       </Box>
     </DesktopLayout>

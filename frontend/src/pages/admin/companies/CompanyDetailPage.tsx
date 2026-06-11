@@ -1,35 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
-import {
-  ApartmentOutlined as CompanyIcon,
-  PersonOutline as PersonIcon,
-  PhoneOutlined as PhoneIcon,
-  MailOutline as MailIcon,
-  LocationOnOutlined as LocationIcon,
-  DescriptionOutlined as LicenseIcon,
-  HistoryToggleOffOutlined as HistoryIcon,
-} from '@mui/icons-material';
+import { HistoryToggleOffOutlined as HistoryIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
-import {
-  InfoCard,
-  InfoRow,
-  PrimaryActionButton,
-  formatAddress,
-} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { PrimaryActionButton } from '@/components/rescue-company/RescueCompanyRequestShared';
 import { ActionReasonDialog } from '@/components/admin/ActionReasonDialog';
 import { CompanyLogHistory } from '@/components/admin/CompanyLogHistory';
+import CompanyDetailsSection from '@/components/admin/CompanyDetailsSection';
+import { useAccountStatusActions } from '@/hooks/useAccountStatusActions';
 import { adminService, AuditLog } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
-import { NAVY, GREEN, RED, ORANGE } from '@/constants/colors';
+import { NAVY, GREEN, RED } from '@/constants/colors';
 import { formatDateTime } from '@/utils/format';
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   active: { label: 'HOẠT ĐỘNG', bg: 'rgba(22, 163, 74, 0.04)', text: GREEN },
   locked: { label: 'ĐÃ KHÓA', bg: 'rgba(220, 38, 38, 0.04)', text: RED },
-  pending_verification: { label: 'CHỜ DUYỆT', bg: 'rgba(255, 107, 0, 0.04)', text: ORANGE },
+  pending_verification: { label: 'CHỜ DUYỆT', bg: 'rgba(255, 107, 0, 0.04)', text: '#ff6b00' },
   rejected: { label: 'BỊ TỪ CHỐI', bg: 'rgba(107, 114, 128, 0.04)', text: '#6b7280' },
 };
 
@@ -40,20 +28,6 @@ export default function CompanyDetailPage() {
   const [company, setCompany] = useState<Company | null>(null);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-
-  // Dialog configurations
-  const [dialogConfig, setDialogConfig] = useState<{
-    open: boolean;
-    type: 'lock' | 'unlock';
-    title: string;
-    placeholder: string;
-  }>({
-    open: false,
-    type: 'lock',
-    title: '',
-    placeholder: '',
-  });
 
   useEffect(() => {
     if (companyId) {
@@ -86,50 +60,22 @@ export default function CompanyDetailPage() {
     }
   };
 
-  const handleOpenActionDialog = (type: 'lock' | 'unlock') => {
-    setDialogConfig({
-      open: true,
-      type,
-      title: type === 'lock' ? 'Khóa tài khoản công ty cứu hộ' : 'Mở khóa tài khoản công ty cứu hộ',
-      placeholder:
-        type === 'lock'
-          ? 'Nhập lý do cụ thể khóa tài khoản này (ví dụ: vi phạm chính sách, thái độ cứu hộ không tốt)...'
-          : 'Nhập lý do mở khóa tài khoản này...',
-    });
-  };
-
-  const handleDialogConfirm = async (reason: string) => {
-    if (!companyId) return;
-
-    try {
-      setActionLoading(true);
-      let response;
-      if (dialogConfig.type === 'lock') {
-        response = await adminService.lockCompany(companyId, reason);
-      } else {
-        response = await adminService.unlockCompany(companyId, reason);
-      }
-
-      if (response.status === 'success') {
-        toast.success(dialogConfig.type === 'lock' ? 'Khóa tài khoản thành công' : 'Mở khóa tài khoản thành công');
-        setDialogConfig((prev) => ({ ...prev, open: false }));
-        await fetchCompanyDetailAndLogs();
-      }
-    } catch (error: any) {
-      console.error('Error processing account action:', error);
-      toast.error(error.response?.data?.message || 'Thao tác thất bại');
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const { actionLoading, dialogConfig, setDialogConfig, handleOpenActionDialog, handleDialogConfirm } =
+    useAccountStatusActions(
+      companyId,
+      'company',
+      fetchCompanyDetailAndLogs,
+      adminService.lockCompany,
+      adminService.unlockCompany
+    );
 
   if (loading) {
     return (
-      <AdminLayout title="Chi tiết công ty cứu hộ" backFallback="/admin/users" showBack={true}>
+      <>
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
         </Box>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -137,10 +83,9 @@ export default function CompanyDetailPage() {
 
   const status = company.status || 'pending_verification';
   const cfg = statusConfig[status] || { label: status, bg: 'rgba(107, 114, 128, 0.04)', text: '#6b7280' };
-  const hasLicense = !!(company.license_file_url || company.license_url);
 
   return (
-    <AdminLayout title="Chi tiết công ty cứu hộ" backFallback="/admin/users" showBack={true}>
+    <>
       <Box
         sx={{
           display: 'grid',
@@ -151,69 +96,7 @@ export default function CompanyDetailPage() {
       >
         {/* Left Column: Basic Details & Business Profile */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Basic Information Card */}
-          <InfoCard title="Thông tin cơ bản">
-            <InfoRow icon={<CompanyIcon />} label="Tên công ty cứu hộ" value={company.company_name} />
-            <InfoRow icon={<PersonIcon />} label="Người đại diện" value={company.director_name} />
-            <InfoRow icon={<MailIcon />} label="Địa chỉ Email" value={company.email} />
-            <InfoRow icon={<PhoneIcon />} label="Số điện thoại" value={company.phone} />
-          </InfoCard>
-
-          {/* Location */}
-          <InfoCard title="Địa chỉ đăng ký">
-            <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
-          </InfoCard>
-
-          {/* License File Card */}
-          <InfoCard title="Giấy phép kinh doanh/Hồ sơ pháp lý">
-            {hasLicense ? (
-              <Box
-                component="a"
-                href={company.license_file_url || company.license_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  p: 2,
-                  borderRadius: '8px',
-                  bgcolor: 'rgba(255, 107, 0, 0.04)',
-                  border: '1px solid rgba(255, 107, 0, 0.15)',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s',
-                  '&:hover': { bgcolor: 'rgba(255, 107, 0, 0.08)' },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '8px',
-                    bgcolor: 'rgba(255, 107, 0, 0.1)',
-                    color: ORANGE,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <LicenseIcon sx={{ fontSize: 28 }} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }} noWrap>
-                    Giấy phép kinh doanh
-                  </Typography>
-                  <Typography sx={{ fontSize: 12, color: '#6b7280', mt: 0.5 }}>Nhấn để xem chi tiết</Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Typography sx={{ fontSize: 14, color: '#ef4444', fontWeight: 500 }}>
-                Công ty cứu hộ chưa tải lên tệp hồ sơ pháp lý.
-              </Typography>
-            )}
-          </InfoCard>
+          <CompanyDetailsSection company={company} />
 
           {/* Status indicator Card */}
           <Box>
@@ -315,6 +198,6 @@ export default function CompanyDetailPage() {
         onClose={() => setDialogConfig((prev) => ({ ...prev, open: false }))}
         onConfirm={handleDialogConfirm}
       />
-    </AdminLayout>
+    </>
   );
 }
