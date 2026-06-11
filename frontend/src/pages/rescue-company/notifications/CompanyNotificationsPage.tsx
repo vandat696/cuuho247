@@ -14,7 +14,7 @@ const mapKind = (type: string): NotificationKind => {
   if (type === 'request_completed' || type === 'review_submitted' || type === 'company_approved') {
     return 'success';
   }
-  if (type === 'chat_message') {
+  if (type === 'chat_message' || type === 'new_comment') {
     return 'message';
   }
   return 'warning';
@@ -22,6 +22,7 @@ const mapKind = (type: string): NotificationKind => {
 
 const mapDetailPath = (notification: NotificationData): string => {
   const requestId = notification.payload?.rescue_request_id;
+  const postId = notification.payload?.post_id;
 
   switch (notification.type) {
     case 'request_created':
@@ -41,6 +42,8 @@ const mapDetailPath = (notification: NotificationData): string => {
       return '/company/profile/edit';
     case 'review_submitted':
       return '/company/reviews';
+    case 'new_comment':
+      return postId ? `/community/${postId}` : '';
     case 'company_approved':
     case 'company_rejected':
     case 'content_removed':

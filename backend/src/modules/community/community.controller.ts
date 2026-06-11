@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { CommunityPost, CommunityPostComment, CommunityPostLike, User, Company } from '@/shared/models';
 import { ApiError } from '@/shared/utils/apiError.util';
+import { notificationService } from '../notification/notification.service';
 
 /**
  * Kiểm tra nếu user là company thì phải có status 'active' mới được tương tác.
@@ -231,6 +232,30 @@ export const addComment = async (req: AuthRequest, res: Response) => {
     'user_id',
     'full_name company_name avatar_url role'
   );
+
+  // Notify the post author
+  try {
+    if (post.user_id && post.user_id.toString() !== user_id) {
+      const commenterName = populatedComment?.user_id
+        ? (populatedComment.user_id as any).company_name ||
+          (populatedComment.user_id as any).full_name ||
+          'Thành viên cộng đồng'
+        : 'Thành viên cộng đồng';
+
+      const recipientType = post.user_type === 'Company' ? 'company' : 'user';
+
+      await notificationService.createAndSendNotification(
+        post.user_id.toString(),
+        recipientType,
+        'new_comment',
+        'Bình luận mới',
+        `${commenterName} đã bình luận về bài viết của bạn: "${content.slice(0, 30)}${content.length > 30 ? '...' : ''}"`,
+        { post_id: id }
+      );
+    }
+  } catch (err) {
+    console.error('Error creating new_comment notification:', err);
+  }
 
   res.status(201).json({
     message: 'Comment added',

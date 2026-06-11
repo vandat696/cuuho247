@@ -18,7 +18,8 @@ export type NotificationType =
   | 'eta_updated'
   | 'review_submitted'
   | 'payment_reminder'
-  | 'review_replied';
+  | 'review_replied'
+  | 'new_comment';
 
 export interface INotification extends Document {
   recipient_type: RecipientType;
@@ -56,6 +57,7 @@ const NotificationSchema = new Schema<INotification>(
         'review_submitted',
         'payment_reminder',
         'review_replied',
+        'new_comment',
       ],
       required: true,
     },

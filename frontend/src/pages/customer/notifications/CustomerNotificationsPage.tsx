@@ -19,7 +19,7 @@ const mapKind = (type: string): NotificationKind => {
   ) {
     return 'success';
   }
-  if (type === 'chat_message') {
+  if (type === 'chat_message' || type === 'new_comment') {
     return 'message';
   }
   return 'warning';
@@ -27,6 +27,7 @@ const mapKind = (type: string): NotificationKind => {
 
 const mapDetailPath = (notification: NotificationData): string => {
   const requestId = notification.payload?.rescue_request_id;
+  const postId = notification.payload?.post_id;
 
   switch (notification.type) {
     case 'request_created':
@@ -41,6 +42,8 @@ const mapDetailPath = (notification: NotificationData): string => {
     case 'payment_reminder':
     case 'review_replied':
       return requestId ? `/customer/tracking/${requestId}` : '';
+    case 'new_comment':
+      return postId ? `/community/${postId}` : '';
     case 'content_removed':
     case 'review_submitted':
     default:
