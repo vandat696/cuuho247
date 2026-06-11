@@ -100,16 +100,17 @@ export default function CustomerHomePage() {
       fetchMyRequests();
     };
 
-    const handleNewNotification = () => {
+    const handleNotificationReceived = () => {
       fetchUnreadCount();
+      fetchMyRequests();
     };
 
     socket.on('status_changed', handleStatusChanged);
-    socket.on('new_notification', handleNewNotification);
+    window.addEventListener('notification_received', handleNotificationReceived);
 
     return () => {
       socket.off('status_changed', handleStatusChanged);
-      socket.off('new_notification', handleNewNotification);
+      window.removeEventListener('notification_received', handleNotificationReceived);
     };
   }, []);
 

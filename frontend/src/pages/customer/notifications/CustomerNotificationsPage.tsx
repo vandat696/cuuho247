@@ -11,7 +11,12 @@ import { formatTimeAgo } from '@/components/rescue-company/RescueCompanyRequestS
 import { NAVY, ORANGE } from '@/constants/colors';
 
 const mapKind = (type: string): NotificationKind => {
-  if (type === 'request_completed' || type === 'review_submitted' || type === 'company_approved') {
+  if (
+    type === 'request_completed' ||
+    type === 'review_submitted' ||
+    type === 'company_approved' ||
+    type === 'review_replied'
+  ) {
     return 'success';
   }
   if (type === 'chat_message') {
@@ -24,18 +29,20 @@ const mapDetailPath = (notification: NotificationData): string => {
   const requestId = notification.payload?.rescue_request_id;
 
   switch (notification.type) {
+    case 'request_created':
     case 'request_accepted':
+    case 'request_rejected':
     case 'request_in_progress':
+    case 'request_completed':
+    case 'request_cancelled':
+    case 'request_timeout':
     case 'eta_updated':
     case 'chat_message':
     case 'payment_reminder':
-      return requestId ? `/customer/tracking/${requestId}` : '';
-    case 'request_completed':
+    case 'review_replied':
       return requestId ? `/customer/tracking/${requestId}` : '';
     case 'content_removed':
     case 'review_submitted':
-    case 'request_timeout':
-    case 'request_rejected':
     default:
       return '';
   }

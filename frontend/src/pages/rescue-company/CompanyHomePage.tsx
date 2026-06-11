@@ -20,7 +20,6 @@ import { CompanyPendingStatus } from '@/components/rescue-company/CompanyPending
 import { Company } from '@/types/common.type';
 import { companyService } from '@/services/company.service';
 import { companyRescueService } from '@/services/company-rescue.service';
-import { getSocket } from '@/utils/socket';
 import { notificationService } from '@/services/notification.service';
 import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
@@ -54,10 +53,19 @@ export default function CompanyHomePage() {
   useEffect(() => {
     let rescueIntervalId: number | undefined;
     let profileIntervalId: number | undefined;
-    const socket = getSocket();
 
-    const handleNewNotification = () => {
+    const handleNotificationReceived = (e: Event) => {
+      const notification = (e as CustomEvent).detail;
       fetchUnreadCount();
+      if (notification) {
+        if (notification.type === 'request_created') {
+          fetchPendingRequests({ notifyNew: false });
+        } else if (notification.type === 'request_cancelled') {
+          fetchActiveRequestsCount();
+          fetchCanceledRequestsCount();
+          fetchPendingRequests({ notifyNew: false });
+        }
+      }
     };
 
     const initialize = async () => {
@@ -73,7 +81,7 @@ export default function CompanyHomePage() {
           fetchUnreadCount(),
         ]);
 
-        socket.on('new_notification', handleNewNotification);
+        window.addEventListener('notification_received', handleNotificationReceived);
 
         rescueIntervalId = window.setInterval(() => {
           fetchPendingRequests({ notifyNew: true });
@@ -93,7 +101,7 @@ export default function CompanyHomePage() {
               fetchUnreadCount(),
             ]);
 
-            socket.on('new_notification', handleNewNotification);
+            window.addEventListener('notification_received', handleNotificationReceived);
 
             rescueIntervalId = window.setInterval(() => {
               fetchPendingRequests({ notifyNew: true });
@@ -109,7 +117,7 @@ export default function CompanyHomePage() {
     return () => {
       if (rescueIntervalId) window.clearInterval(rescueIntervalId);
       if (profileIntervalId) window.clearInterval(profileIntervalId);
-      socket.off('new_notification', handleNewNotification);
+      window.removeEventListener('notification_received', handleNotificationReceived);
     };
   }, []);
 

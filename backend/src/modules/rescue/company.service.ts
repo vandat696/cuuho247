@@ -53,6 +53,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
         created_at: request.created_at,
         address: request.address,
         status: request.status,
+        user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
       };
     });
   }
@@ -92,6 +93,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       created_at: request.created_at,
       address: request.address,
       status: request.status,
+      user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
       customer: {
         full_name: request.user_id?.full_name || 'Khach hang',
         phone: request.user_id?.phone || '',
@@ -616,6 +618,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       address: request.address,
       status: request.status,
       payment: request.payment,
+      user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
       vehicle: {
         vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
         plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',

@@ -208,7 +208,21 @@ class RescueCompanyController {
           );
         }
       } catch (err) {
-        console.error('Error creating request_accepted notification:', err);
+        console.error('Error creating request_accepted notification for customer:', err);
+      }
+
+      // Notify the company (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          companyId,
+          'company',
+          'request_accepted',
+          'Nhận yêu cầu thành công',
+          `Bạn đã chấp nhận yêu cầu cứu hộ. Dự kiến đến sau ${request.eta_minutes || 15} phút.`,
+          { rescue_request_id: requestId }
+        );
+      } catch (err) {
+        console.error('Error creating request_accepted notification for company:', err);
       }
 
       res.status(200).json({
@@ -287,7 +301,21 @@ class RescueCompanyController {
           );
         }
       } catch (err) {
-        console.error('Error creating request_completed/payment_reminder notifications:', err);
+        console.error('Error creating request_completed/payment_reminder notifications for customer:', err);
+      }
+
+      // Notify the company (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          companyId,
+          'company',
+          'request_completed',
+          'Hoàn thành cứu hộ',
+          `Nhiệm vụ cứu hộ #${requestId.slice(-4)} đã được hoàn tất thành công.`,
+          { rescue_request_id: requestId }
+        );
+      } catch (err) {
+        console.error('Error creating request_completed notification for company:', err);
       }
 
       res.status(200).json({
@@ -335,7 +363,21 @@ class RescueCompanyController {
           );
         }
       } catch (err) {
-        console.error('Error creating request_in_progress notification:', err);
+        console.error('Error creating request_in_progress notification for customer:', err);
+      }
+
+      // Notify the company (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          companyId,
+          'company',
+          'request_in_progress',
+          'Bắt đầu di chuyển',
+          'Đã xác nhận di chuyển đến vị trí cứu hộ.',
+          { rescue_request_id: requestId }
+        );
+      } catch (err) {
+        console.error('Error creating request_in_progress notification for company:', err);
       }
 
       res.status(200).json({
@@ -384,7 +426,21 @@ class RescueCompanyController {
           );
         }
       } catch (err) {
-        console.error('Error creating arrived (eta_updated) notification:', err);
+        console.error('Error creating arrived (eta_updated) notification for customer:', err);
+      }
+
+      // Notify the company (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          companyId,
+          'company',
+          'eta_updated',
+          'Đã đến nơi',
+          'Đã xác nhận đến vị trí của khách hàng.',
+          { rescue_request_id: requestId }
+        );
+      } catch (err) {
+        console.error('Error creating arrived (eta_updated) notification for company:', err);
       }
 
       res.status(200).json({

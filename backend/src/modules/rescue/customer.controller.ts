@@ -53,7 +53,21 @@ class RescueCustomerController {
           { rescue_request_id: newRequest._id.toString() }
         );
       } catch (err) {
-        console.error('Error creating request_created notification:', err);
+        console.error('Error creating request_created notification for company:', err);
+      }
+
+      // Notify the customer (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          req.user.id,
+          'user',
+          'request_created',
+          'Gửi yêu cầu cứu hộ thành công',
+          'Yêu cầu cứu hộ của bạn đang chờ công ty xác nhận.',
+          { rescue_request_id: newRequest._id.toString() }
+        );
+      } catch (err) {
+        console.error('Error creating request_created notification for user:', err);
       }
 
       res.status(201).json({
@@ -97,7 +111,21 @@ class RescueCustomerController {
           { rescue_request_id: id }
         );
       } catch (err) {
-        console.error('Error creating request_cancelled notification:', err);
+        console.error('Error creating request_cancelled notification for company:', err);
+      }
+
+      // Notify the customer (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          req.user.id,
+          'user',
+          'request_cancelled',
+          'Hủy yêu cầu thành công',
+          'Yêu cầu cứu hộ đã được hủy.',
+          { rescue_request_id: id }
+        );
+      } catch (err) {
+        console.error('Error creating request_cancelled notification for user:', err);
       }
 
       res.status(200).json({

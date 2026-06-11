@@ -38,6 +38,7 @@ export interface PendingRescueRequestResult {
   created_at?: Date;
   address?: Partial<IAddress>;
   status?: string;
+  user_id?: string;
 }
 
 export interface PendingRescueRequestDetailResult extends PendingRescueRequestResult {

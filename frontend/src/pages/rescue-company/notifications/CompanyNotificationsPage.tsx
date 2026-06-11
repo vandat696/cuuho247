@@ -25,18 +25,18 @@ const mapDetailPath = (notification: NotificationData): string => {
 
   switch (notification.type) {
     case 'request_created':
-      return requestId ? `/company/rescue/pending/detail/${requestId}` : '';
+      return requestId ? `/company/rescue/pending/${requestId}` : '';
     case 'request_accepted':
     case 'request_in_progress':
     case 'eta_updated':
     case 'chat_message':
-      return requestId ? `/company/rescue/active/detail/${requestId}` : '';
+      return requestId ? `/company/rescue/active/${requestId}` : '';
     case 'request_completed':
-      return requestId ? `/company/rescue/completed/detail/${requestId}` : '';
+      return requestId ? `/company/rescue/completed/${requestId}` : '';
     case 'request_cancelled':
     case 'request_rejected':
     case 'request_timeout':
-      return requestId ? `/company/rescue/canceled/detail/${requestId}` : '';
+      return requestId ? `/company/rescue/canceled/${requestId}` : '';
     case 'company_document_requested':
       return '/company/profile/edit';
     case 'review_submitted':

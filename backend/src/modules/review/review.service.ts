@@ -107,6 +107,22 @@ export class ReviewService implements IReviewService {
       throw new Error('Lỗi khi cập nhật phản hồi');
     }
 
+    // Send notification to customer
+    try {
+      if (review.user_id) {
+        await notificationService.createAndSendNotification(
+          review.user_id.toString(),
+          'user',
+          'review_replied',
+          'Phản hồi đánh giá',
+          `Đơn vị cứu hộ đã phản hồi đánh giá của bạn cho yêu cầu #${review.rescue_request_id.toString().slice(-4)}.`,
+          { rescue_request_id: review.rescue_request_id.toString() }
+        );
+      }
+    } catch (err) {
+      console.error('Error creating review reply notification:', err);
+    }
+
     return updatedReview;
   }
 

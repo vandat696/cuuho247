@@ -16,7 +16,8 @@ export type NotificationType =
   | 'content_removed'
   | 'eta_updated'
   | 'review_submitted'
-  | 'payment_reminder';
+  | 'payment_reminder'
+  | 'review_replied';
 
 export interface NotificationData {
   _id: string;
