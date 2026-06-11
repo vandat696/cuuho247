@@ -18,6 +18,15 @@ class AdminController {
       const { reason } = req.body;
       const adminId = req.user?.id as string;
       const company = await adminService.approveCompany(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status: 'active',
+          company,
+        });
+      }
+
       res.status(200).json({ status: 'success', message: 'Công ty đã được duyệt thành công', data: company });
     } catch (err) {
       next(err);
@@ -30,6 +39,15 @@ class AdminController {
       const { reason } = req.body;
       const adminId = req.user?.id as string;
       const company = await adminService.rejectCompany(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status: 'rejected',
+          company,
+        });
+      }
+
       res.status(200).json({ status: 'success', message: 'Hồ sơ công ty đã bị từ chối', data: company });
     } catch (err) {
       next(err);
@@ -42,6 +60,15 @@ class AdminController {
       const { reason } = req.body;
       const adminId = req.user?.id as string;
       const company = await adminService.requestDocuments(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status: 'pending_verification',
+          company,
+        });
+      }
+
       res.status(200).json({ status: 'success', message: 'Đã gửi yêu cầu bổ sung giấy tờ', data: company });
     } catch (err) {
       next(err);
@@ -202,6 +229,15 @@ class AdminController {
       const { reason } = req.body;
       const adminId = req.user?.id as string;
       const company = await adminService.lockCompany(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status: 'locked',
+          company,
+        });
+      }
+
       res.status(200).json({ status: 'success', message: 'Khóa tài khoản công ty thành công', data: company });
     } catch (err) {
       next(err);
@@ -214,6 +250,15 @@ class AdminController {
       const { reason } = req.body;
       const adminId = req.user?.id as string;
       const company = await adminService.unlockCompany(companyId, adminId, reason);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`company:${companyId}`).emit('company_status_changed', {
+          status: 'active',
+          company,
+        });
+      }
+
       res.status(200).json({ status: 'success', message: 'Mở khóa tài khoản công ty thành công', data: company });
     } catch (err) {
       next(err);

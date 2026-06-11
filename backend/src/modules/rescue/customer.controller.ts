@@ -70,6 +70,14 @@ class RescueCustomerController {
         console.error('Error creating request_created notification for user:', err);
       }
 
+      const io = req.app.get('io');
+      if (io) {
+        const companyId = newRequest.company.company_id.toString();
+        io.to(`company:${companyId}`).emit('new_rescue_request', {
+          rescue_request: newRequest,
+        });
+      }
+
       res.status(201).json({
         status: 'success',
         message: 'Tạo yêu cầu cứu hộ thành công',
