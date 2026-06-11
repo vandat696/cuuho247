@@ -591,7 +591,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
         service_names: servicesByCompany.get(companyId) ?? [],
         min_price: prices.length > 0 ? Math.min(...prices) : null,
         max_price: prices.length > 0 ? Math.max(...prices) : null,
-        eta_minutes: this.estimateEtaMinutes(roundedDistanceKm),
       };
     });
   }

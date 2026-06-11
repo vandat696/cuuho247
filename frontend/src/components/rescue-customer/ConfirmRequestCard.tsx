@@ -2,14 +2,14 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/common/Button';
 import { MiniMap } from '@/components/location/MiniMap';
-import { formatPriceRange, formatEta } from '@/utils/format';
+import { formatPriceRange } from '@/utils/format';
 
 interface CompanyData {
   id: string;
   name: string;
   rating: number;
   reviews: number;
-  etaMinutes: number | null;
+  distanceKm: number;
   minPrice: number | null;
   maxPrice: number | null;
 }
@@ -41,7 +41,6 @@ export function ConfirmRequestCard({
   loading = false,
 }: ConfirmRequestCardProps) {
   const priceText = formatPriceRange(company.minPrice, company.maxPrice);
-  const etaText = formatEta(company.etaMinutes);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -163,8 +162,8 @@ export function ConfirmRequestCard({
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #cbd5e1', pt: 2, mb: 1.5 }}>
-          <Typography sx={{ color: '#64748b', fontSize: 14 }}>Thời gian đến</Typography>
-          <Typography sx={{ color: '#ea580c', fontWeight: 600 }}>{etaText}</Typography>
+          <Typography sx={{ color: '#64748b', fontSize: 14 }}>Khoảng cách</Typography>
+          <Typography sx={{ color: '#ea580c', fontWeight: 600 }}>{company.distanceKm} km</Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography sx={{ color: '#64748b', fontSize: 14 }}>Giá dự kiến</Typography>
