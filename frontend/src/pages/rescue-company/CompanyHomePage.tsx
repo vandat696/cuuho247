@@ -66,11 +66,6 @@ export default function CompanyHomePage() {
       }
     };
 
-    // Register listeners synchronously to ensure they are captured by the cleanup function
-    socket.on('new_rescue_request', handleNewRescueRequest);
-    socket.on('company_status_changed', handleCompanyStatusChanged);
-    window.addEventListener('notification_received', handleNotificationReceived);
-
     const handleNotificationReceived = (e: Event) => {
       const notification = (e as CustomEvent).detail;
       fetchUnreadCount();
@@ -84,6 +79,11 @@ export default function CompanyHomePage() {
         }
       }
     };
+
+    // Register listeners synchronously to ensure they are captured by the cleanup function
+    socket.on('new_rescue_request', handleNewRescueRequest);
+    socket.on('company_status_changed', handleCompanyStatusChanged);
+    window.addEventListener('notification_received', handleNotificationReceived);
 
     const initialize = async () => {
       setLoading(true);
