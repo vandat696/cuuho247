@@ -139,7 +139,7 @@ export default function RescueTrackingPage() {
   if (loading) {
     return (
       <MobileLayout>
-        <AppHeader title="Theo dõi cứu hộ" backFallback="/customer/home" />
+        <AppHeader title="Theo dõi cứu hộ" onBack={() => navigate('/customer/home')} />
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', pt: 10 }}>
           <CircularProgress />
         </Box>
@@ -151,7 +151,7 @@ export default function RescueTrackingPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Theo dõi cứu hộ" backFallback="/customer/home" />
+      <AppHeader title="Theo dõi cứu hộ" onBack={() => navigate('/customer/home')} />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto', bgcolor: '#f4f5f7' }}>
         {remainingEta !== null && <TrackingETASection remainingEta={remainingEta} />}
