@@ -3,6 +3,7 @@ import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { Message } from '@/shared/models/Message.model';
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { hasRequestAccess } from '@/shared/utils/rescueRequestAuth';
+import { notificationService } from '../notification/notification.service';
 
 class MessageController {
   /**
@@ -125,6 +126,27 @@ class MessageController {
         console.log(`[Socket] Image message saved & sent to room ${room}`);
       } else {
         console.warn('[Socket] Socket.IO instance not found on app, fallback to DB only');
+      }
+
+      // Create real-time chat notification for counterparty
+      try {
+        const isCompanySender = senderType === 'company';
+        const recipientId = isCompanySender
+          ? rescueRequest.user_id.toString()
+          : rescueRequest.company.company_id.toString();
+        const recipientType = isCompanySender ? 'user' : 'company';
+        const senderName = isCompanySender ? rescueRequest.company.company_name : 'Khách hàng';
+
+        await notificationService.createAndSendNotification(
+          recipientId,
+          recipientType,
+          'chat_message',
+          'Tin nhắn mới',
+          `Bạn có tin nhắn ảnh mới từ ${senderName}`,
+          { rescue_request_id: rescueRequestId }
+        );
+      } catch (err) {
+        console.error('[Socket] Error creating chat message notification for image:', err);
       }
 
       res.status(201).json({

@@ -7,6 +7,7 @@ const RescueTrackingPage = React.lazy(() => import('@/pages/customer/RescueTrack
 const CustomerReviewPage = React.lazy(() => import('@/pages/customer/CustomerReviewPage'));
 const CustomerProfilePage = React.lazy(() => import('@/pages/customer/CustomerProfilePage'));
 const CustomerEditProfilePage = React.lazy(() => import('@/pages/customer/CustomerEditProfilePage'));
+const CustomerNotificationsPage = React.lazy(() => import('@/pages/customer/notifications/CustomerNotificationsPage'));
 
 export function CustomerRoutes() {
   return (
@@ -18,6 +19,7 @@ export function CustomerRoutes() {
       <Route path="review/:requestId" element={<CustomerReviewPage />} />
       <Route path="profile" element={<CustomerProfilePage />} />
       <Route path="profile/edit" element={<CustomerEditProfilePage />} />
+      <Route path="notifications" element={<CustomerNotificationsPage />} />
     </Routes>
   );
 }

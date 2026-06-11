@@ -3,6 +3,7 @@ import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { Company } from '@/shared/models/Company.model';
 import { reviewRepository } from './review.repository';
 import type { IReviewService, CreateReviewInput, ReplyReviewInput } from './interfaces/review.interface';
+import { notificationService } from '../notification/notification.service';
 
 export class ReviewService implements IReviewService {
   async createReview(userId: string, data: CreateReviewInput): Promise<IReview> {
@@ -45,6 +46,31 @@ export class ReviewService implements IReviewService {
       rating_count: stats.rating_count,
     });
 
+    // 5. Notify both company and customer
+    try {
+      // Notify Company
+      await notificationService.createAndSendNotification(
+        companyId,
+        'company',
+        'review_submitted',
+        'Đánh giá mới',
+        `Bạn đã nhận được đánh giá ${data.rating} sao mới từ khách hàng cho yêu cầu #${data.rescue_request_id.slice(-4)}.`,
+        { rescue_request_id: data.rescue_request_id }
+      );
+
+      // Notify Customer
+      await notificationService.createAndSendNotification(
+        userId,
+        'user',
+        'review_submitted',
+        'Đánh giá đã được gửi',
+        'Cảm ơn bạn đã đánh giá dịch vụ của chúng tôi.',
+        { rescue_request_id: data.rescue_request_id }
+      );
+    } catch (err) {
+      console.error('Error creating review notifications:', err);
+    }
+
     return newReview;
   }
 
@@ -79,6 +105,22 @@ export class ReviewService implements IReviewService {
     const updatedReview = await reviewRepository.updateReply(reviewId, data.content);
     if (!updatedReview) {
       throw new Error('Lỗi khi cập nhật phản hồi');
+    }
+
+    // Send notification to customer
+    try {
+      if (review.user_id) {
+        await notificationService.createAndSendNotification(
+          review.user_id.toString(),
+          'user',
+          'review_replied',
+          'Phản hồi đánh giá',
+          `Đơn vị cứu hộ đã phản hồi đánh giá của bạn cho yêu cầu #${review.rescue_request_id.toString().slice(-4)}.`,
+          { rescue_request_id: review.rescue_request_id.toString() }
+        );
+      }
+    } catch (err) {
+      console.error('Error creating review reply notification:', err);
     }
 
     return updatedReview;

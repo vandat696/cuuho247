@@ -14,6 +14,8 @@ const SuspenseFallback = () => (
   <div style={{ padding: 20, textAlign: 'center', fontFamily: 'var(--font)' }}>Đang tải...</div>
 );
 
+import { GlobalNotificationListener } from './components/common/GlobalNotificationListener';
+
 // Core / Public Pages
 const HomePage = React.lazy(() => import('@/pages/HomePage'));
 const ShowcasePage = React.lazy(() => import('@/pages/ShowcasePage'));
@@ -41,6 +43,7 @@ function App() {
           },
         }}
       />
+      <GlobalNotificationListener />
 
       <Suspense fallback={<SuspenseFallback />}>
         <Routes>

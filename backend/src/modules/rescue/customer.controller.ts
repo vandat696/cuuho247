@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import rescueRequestService from './customer.service';
 import { cancelRequestSchema, createRequestSchema } from './rescue.validator';
+import { notificationService } from '../notification/notification.service';
 
 class RescueCustomerController {
   async getMyRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -41,6 +42,34 @@ class RescueCustomerController {
         user_id: req.user.id,
       });
 
+      // Notify the company of the new rescue request
+      try {
+        await notificationService.createAndSendNotification(
+          value.company_id,
+          'company',
+          'request_created',
+          'Yêu cầu cứu hộ mới',
+          'Bạn có một yêu cầu cứu hộ mới đang chờ xác nhận.',
+          { rescue_request_id: newRequest._id.toString() }
+        );
+      } catch (err) {
+        console.error('Error creating request_created notification for company:', err);
+      }
+
+      // Notify the customer (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          req.user.id,
+          'user',
+          'request_created',
+          'Gửi yêu cầu cứu hộ thành công',
+          'Yêu cầu cứu hộ của bạn đang chờ công ty xác nhận.',
+          { rescue_request_id: newRequest._id.toString() }
+        );
+      } catch (err) {
+        console.error('Error creating request_created notification for user:', err);
+      }
+
       res.status(201).json({
         status: 'success',
         message: 'Tạo yêu cầu cứu hộ thành công',
@@ -69,6 +98,34 @@ class RescueCustomerController {
           status: 'cancelled',
           timestamp: new Date(),
         });
+      }
+
+      // Notify the company that the customer canceled the request
+      try {
+        await notificationService.createAndSendNotification(
+          updated.company.company_id.toString(),
+          'company',
+          'request_cancelled',
+          'Yêu cầu đã hủy',
+          `Khách hàng đã hủy yêu cầu cứu hộ. Lý do: ${value.reason || 'Không có lý do'}`,
+          { rescue_request_id: id }
+        );
+      } catch (err) {
+        console.error('Error creating request_cancelled notification for company:', err);
+      }
+
+      // Notify the customer (self-notification)
+      try {
+        await notificationService.createAndSendNotification(
+          req.user.id,
+          'user',
+          'request_cancelled',
+          'Hủy yêu cầu thành công',
+          'Yêu cầu cứu hộ đã được hủy.',
+          { rescue_request_id: id }
+        );
+      } catch (err) {
+        console.error('Error creating request_cancelled notification for user:', err);
       }
 
       res.status(200).json({

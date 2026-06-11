@@ -11,7 +11,12 @@ import { formatTimeAgo } from '@/components/rescue-company/RescueCompanyRequestS
 import { NAVY, ORANGE } from '@/constants/colors';
 
 const mapKind = (type: string): NotificationKind => {
-  if (type === 'request_completed' || type === 'review_submitted' || type === 'company_approved') {
+  if (
+    type === 'request_completed' ||
+    type === 'review_submitted' ||
+    type === 'company_approved' ||
+    type === 'review_replied'
+  ) {
     return 'success';
   }
   if (type === 'chat_message' || type === 'new_comment') {
@@ -26,33 +31,27 @@ const mapDetailPath = (notification: NotificationData): string => {
 
   switch (notification.type) {
     case 'request_created':
-      return requestId ? `/company/rescue/pending/${requestId}` : '';
     case 'request_accepted':
+    case 'request_rejected':
     case 'request_in_progress':
+    case 'request_completed':
+    case 'request_cancelled':
+    case 'request_timeout':
     case 'eta_updated':
     case 'chat_message':
-      return requestId ? `/company/rescue/active/${requestId}` : '';
-    case 'request_completed':
-      return requestId ? `/company/rescue/completed/${requestId}` : '';
-    case 'request_cancelled':
-    case 'request_rejected':
-    case 'request_timeout':
-      return requestId ? `/company/rescue/canceled/${requestId}` : '';
-    case 'company_document_requested':
-      return '/company/profile/edit';
-    case 'review_submitted':
-      return '/company/reviews';
+    case 'payment_reminder':
+    case 'review_replied':
+      return requestId ? `/customer/tracking/${requestId}` : '';
     case 'new_comment':
       return postId ? `/community/${postId}` : '';
-    case 'company_approved':
-    case 'company_rejected':
     case 'content_removed':
+    case 'review_submitted':
     default:
       return '';
   }
 };
 
-export default function CompanyNotificationsPage() {
+export default function CustomerNotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +63,7 @@ export default function CompanyNotificationsPage() {
         setNotifications(response.data.notifications);
       }
     } catch (error) {
-      console.error('Error fetching company notifications:', error);
+      console.error('Error fetching customer notifications:', error);
       toast.error('Không thể tải thông báo');
     } finally {
       setLoading(false);
@@ -125,7 +124,7 @@ export default function CompanyNotificationsPage() {
 
   return (
     <MobileLayout>
-      <AppHeader title="Thông báo" backFallback="/company/home" />
+      <AppHeader title="Thông báo" backFallback="/customer/home" />
 
       <Box sx={{ flex: 1, bgcolor: '#fff', px: 3, py: 3 }}>
         <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>

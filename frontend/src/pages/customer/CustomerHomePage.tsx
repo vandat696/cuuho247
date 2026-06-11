@@ -10,7 +10,7 @@ import {
   PhoneOutlined,
   SecurityOutlined,
 } from '@mui/icons-material';
-import { Box, CircularProgress, IconButton, Typography } from '@mui/material';
+import { Box, CircularProgress, IconButton, Typography, Badge } from '@mui/material';
 
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -22,6 +22,7 @@ import {
   customerRescueService,
 } from '@/services/customer-rescue.service';
 import { getSocket } from '@/utils/socket';
+import { notificationService } from '@/services/notification.service';
 import { NAVY, ORANGE, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
 const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress', 'arrived'];
 
@@ -75,19 +76,41 @@ export default function CustomerHomePage() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<CustomerRescueRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await notificationService.getMyNotifications();
+      if (response.status === 'success') {
+        const count = response.data.notifications.filter((n) => !n.is_read).length;
+        setUnreadNotificationsCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread notifications count:', error);
+    }
+  };
 
   useEffect(() => {
     fetchMyRequests();
+    fetchUnreadCount();
 
     const socket = getSocket();
     const handleStatusChanged = () => {
       // Refetch để cập nhật trạng thái mới nhất
       fetchMyRequests();
     };
+
+    const handleNotificationReceived = () => {
+      fetchUnreadCount();
+      fetchMyRequests();
+    };
+
     socket.on('status_changed', handleStatusChanged);
+    window.addEventListener('notification_received', handleNotificationReceived);
 
     return () => {
       socket.off('status_changed', handleStatusChanged);
+      window.removeEventListener('notification_received', handleNotificationReceived);
     };
   }, []);
 
@@ -123,8 +146,15 @@ export default function CustomerHomePage() {
         showBack={false}
         logoIcon={<SecurityOutlined sx={{ fontSize: 24 }} />}
         rightSlot={
-          <IconButton aria-label="Thông báo" size="small" sx={{ p: 1, color: '#fff' }}>
-            <NotificationsNoneRounded sx={{ fontSize: 24 }} />
+          <IconButton
+            aria-label="Thông báo"
+            size="small"
+            sx={{ p: 1, color: '#fff' }}
+            onClick={() => navigate('/customer/notifications')}
+          >
+            <Badge badgeContent={unreadNotificationsCount} color="error">
+              <NotificationsNoneRounded sx={{ fontSize: 24 }} />
+            </Badge>
           </IconButton>
         }
       />
