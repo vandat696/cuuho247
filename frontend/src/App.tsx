@@ -8,6 +8,8 @@ import { RescueRoutes } from './routes/RescueRoutes';
 import { CustomerRoutes } from './routes/CustomerRoutes';
 import { CompanyRoutes } from './routes/CompanyRoutes';
 import { AdminRoutes } from './routes/AdminRoutes';
+import { CommunityRoutes } from './routes/CommunityRoutes';
+import { ChatRoutes } from './routes/ChatRoutes';
 
 // Suspense Fallback
 const SuspenseFallback = () => (
@@ -20,14 +22,6 @@ import { GlobalNotificationListener } from './components/common/GlobalNotificati
 const HomePage = React.lazy(() => import('@/pages/HomePage'));
 const ShowcasePage = React.lazy(() => import('@/pages/ShowcasePage'));
 const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'));
-
-// Chat Pages
-const ChatPage = React.lazy(() => import('@/pages/chat/ChatPage'));
-
-// Community Pages
-const CommunityListPage = React.lazy(() => import('@/pages/community/CommunityListPage'));
-const CommunityCreatePage = React.lazy(() => import('@/pages/community/CommunityCreatePage'));
-const CommunityDetailPage = React.lazy(() => import('@/pages/community/CommunityDetailPage'));
 
 function App() {
   return (
@@ -58,14 +52,8 @@ function App() {
           <Route path="/customer/*" element={<CustomerRoutes />} />
           <Route path="/company/*" element={<CompanyRoutes />} />
           <Route path="/admin/*" element={<AdminRoutes />} />
-
-          {/* Community Routes */}
-          <Route path="/community" element={<CommunityListPage />} />
-          <Route path="/community/create" element={<CommunityCreatePage />} />
-          <Route path="/community/:id" element={<CommunityDetailPage />} />
-
-          {/* Chat Routes */}
-          <Route path="/chat/:rescueRequestId" element={<ChatPage />} />
+          <Route path="/community/*" element={<CommunityRoutes />} />
+          <Route path="/chat/*" element={<ChatRoutes />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />

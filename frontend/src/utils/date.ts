@@ -30,3 +30,20 @@ export const formatRelativeTime = (dateString: string) => {
   const diffInYears = Math.floor(diffInDays / 365);
   return `${diffInYears} năm trước`;
 };
+
+export const formatDateString = (d: Date): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const getDefaultDateRange = (daysAgoCount: number = 6) => {
+  const today = new Date();
+  const daysAgo = new Date();
+  daysAgo.setDate(today.getDate() - daysAgoCount);
+  return {
+    startDate: formatDateString(daysAgo),
+    endDate: formatDateString(today),
+  };
+};

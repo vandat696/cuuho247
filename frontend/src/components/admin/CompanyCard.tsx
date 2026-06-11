@@ -6,9 +6,9 @@ import {
   AccessTimeOutlined as ClockIcon,
 } from '@mui/icons-material';
 import { Company } from '@/types/common.type';
-import { NAVY, GREEN, RED, ORANGE, CARD_RADIUS } from '@/constants/colors';
+import { NAVY, GREEN, RED, ORANGE } from '@/constants/colors';
 import { formatTimeAgo } from '@/components/rescue-company/RescueCompanyRequestShared';
-import { Button } from '@/components/common/Button';
+import AdminCard from './AdminCard';
 
 interface CompanyCardProps {
   company: Company;
@@ -27,68 +27,37 @@ export const CompanyCard = ({ company, onClick }: CompanyCardProps) => {
   const cfg = statusConfig[status] || { label: status, bg: 'rgba(107, 114, 128, 0.1)', text: '#6b7280' };
 
   return (
-    <Box
-      sx={{
-        p: 2.5,
-        border: '2px solid #e5e7eb',
-        borderRadius: CARD_RADIUS,
-        bgcolor: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}
+    <AdminCard
+      title={company.company_name}
+      badgeLabel={cfg.label}
+      badgeBg={cfg.bg}
+      badgeColor={cfg.text}
+      buttonText="Xem chi tiết công ty"
+      onClick={onClick}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>
-          {company.company_name}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
+        <PersonIcon sx={{ fontSize: 18, color: NAVY }} />
+        <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>Đại diện: {company.director_name}</Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
+        <MailIcon sx={{ fontSize: 18, color: NAVY }} />
+        <Typography sx={{ fontSize: 14, lineHeight: 1.3 }} noWrap>
+          {company.email}
         </Typography>
-        <Box
-          component="span"
-          sx={{
-            px: 1.25,
-            py: 0.5,
-            borderRadius: '9999px',
-            bgcolor: cfg.bg,
-            color: cfg.text,
-            fontSize: 12,
-            fontWeight: 600,
-            lineHeight: 1.25,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {cfg.label}
-        </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
-          <PersonIcon sx={{ fontSize: 18, color: NAVY }} />
-          <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>Đại diện: {company.director_name}</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
-          <MailIcon sx={{ fontSize: 18, color: NAVY }} />
-          <Typography sx={{ fontSize: 14, lineHeight: 1.3 }} noWrap>
-            {company.email}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
-          <PhoneIcon sx={{ fontSize: 18, color: NAVY }} />
-          <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>Số điện thoại: {company.phone}</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#6b7280' }}>
-          <ClockIcon sx={{ fontSize: 16 }} />
-          <Typography sx={{ fontSize: 12, lineHeight: 1.3 }}>
-            Cập nhật {formatTimeAgo(company.updated_at || company.created_at)}
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4b5563' }}>
+        <PhoneIcon sx={{ fontSize: 18, color: NAVY }} />
+        <Typography sx={{ fontSize: 14, lineHeight: 1.3 }}>Số điện thoại: {company.phone}</Typography>
       </Box>
 
-      <Button variant="secondary" fullWidth onClick={onClick}>
-        Xem chi tiết công ty
-      </Button>
-    </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#6b7280' }}>
+        <ClockIcon sx={{ fontSize: 16 }} />
+        <Typography sx={{ fontSize: 12, lineHeight: 1.3 }}>
+          Cập nhật {formatTimeAgo(company.updated_at || company.created_at)}
+        </Typography>
+      </Box>
+    </AdminCard>
   );
 };

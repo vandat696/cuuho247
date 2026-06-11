@@ -49,6 +49,7 @@ export const useLogin = () => {
           localStorage.setItem('role', response.data.role);
           localStorage.setItem('accountId', response.data.user._id);
           localStorage.setItem('accountPhone', response.data.user.phone || '');
+          localStorage.setItem('accountAvatar', response.data.user.avatar_url || '');
           localStorage.setItem(
             'accountName',
             response.data.role === 'company'

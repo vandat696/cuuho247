@@ -4,7 +4,6 @@ import { Box, Typography, CircularProgress, Tabs, Tab } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { UserCard } from '@/components/admin/UserCard';
 import { CompanyCard } from '@/components/admin/CompanyCard';
 import { Input } from '@/components/common/Input';
@@ -129,7 +128,7 @@ export default function UserListPage() {
   const hasMore = currentCount < total;
 
   return (
-    <AdminLayout title="Quản lý tài khoản" backFallback="/admin/home">
+    <>
       {/* Toggle Tabs */}
       <Tabs
         value={activeTab}
@@ -222,6 +221,6 @@ export default function UserListPage() {
           )}
         </Box>
       )}
-    </AdminLayout>
+    </>
   );
 }

@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { ValidationErrorItem } from 'joi';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import serviceCatalogService from './service-catalog.service';
 import { serviceRepository } from './service-catalog.repository';
 import { createServiceSchema, updateServiceSchema } from './service-catalog.validator';
+import { validateSchema } from '../../shared/utils/validation.util';
 
 class ServiceCatalogController {
   // GET /api/service-categories
@@ -51,16 +51,11 @@ class ServiceCatalogController {
       const companyId = req.user.id;
       const serviceData = { ...req.body, company_id: companyId };
 
-      const { error, value } = createServiceSchema.validate(serviceData, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(createServiceSchema, serviceData, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       const service = await serviceCatalogService.createService(value);
       res.status(201).json({ status: 'success', data: service });
@@ -76,16 +71,11 @@ class ServiceCatalogController {
       const companyId = req.user.id;
       const { serviceId } = req.params;
 
-      const { error, value } = updateServiceSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(updateServiceSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       const service = await serviceCatalogService.updateService(serviceId, companyId, value);
       res.json({ status: 'success', data: service });

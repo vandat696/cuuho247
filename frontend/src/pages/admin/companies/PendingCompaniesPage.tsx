@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { CompanyVerificationCard } from '@/components/admin/CompanyVerificationCard';
 import { adminService } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
@@ -34,7 +33,7 @@ export default function PendingCompaniesPage() {
   };
 
   return (
-    <AdminLayout title="Công ty cứu hộ chờ duyệt" backFallback="/admin/home">
+    <>
       <Typography sx={{ mb: 2.5, fontSize: 16, fontWeight: 800, color: NAVY }}>
         Tổng số: {companies.length} công ty cứu hộ chờ duyệt
       </Typography>
@@ -65,6 +64,6 @@ export default function PendingCompaniesPage() {
           ))}
         </Box>
       )}
-    </AdminLayout>
+    </>
   );
 }

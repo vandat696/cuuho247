@@ -1,29 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
-import {
-  ApartmentOutlined as CompanyIcon,
-  PersonOutline as PersonIcon,
-  PhoneOutlined as PhoneIcon,
-  MailOutline as MailIcon,
-  LocationOnOutlined as LocationIcon,
-  DescriptionOutlined as LicenseIcon,
-  VerifiedUserOutlined as VerifyIcon,
-} from '@mui/icons-material';
+import { VerifiedUserOutlined as VerifyIcon } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-import { AdminLayout } from '@/components/layout/AdminLayout';
-import {
-  InfoCard,
-  InfoRow,
-  PrimaryActionButton,
-  formatAddress,
-} from '@/components/rescue-company/RescueCompanyRequestShared';
+import { PrimaryActionButton } from '@/components/rescue-company/RescueCompanyRequestShared';
 import { ActionReasonDialog } from '@/components/admin/ActionReasonDialog';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import CompanyDetailsSection from '@/components/admin/CompanyDetailsSection';
 import { adminService } from '@/services/admin.service';
 import { Company } from '@/types/common.type';
-import { NAVY, ORANGE } from '@/constants/colors';
+import { NAVY } from '@/constants/colors';
 
 export default function CompanyVerificationDetailPage() {
   const navigate = useNavigate();
@@ -143,20 +130,18 @@ export default function CompanyVerificationDetailPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Duyệt hồ sơ công ty cứu hộ" backFallback="/admin/companies/pending" showBack={true}>
+      <>
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
         </Box>
-      </AdminLayout>
+      </>
     );
   }
 
   if (!company) return null;
 
-  const hasLicense = !!(company.license_file_url || company.license_url);
-
   return (
-    <AdminLayout title="Duyệt hồ sơ công ty cứu hộ" backFallback="/admin/companies/pending" showBack={true}>
+    <>
       <Box
         sx={{
           display: 'grid',
@@ -167,71 +152,7 @@ export default function CompanyVerificationDetailPage() {
       >
         {/* Left Column: Business Profile Details */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Basic Information Card */}
-          <InfoCard title="Thông tin cơ bản">
-            <InfoRow icon={<CompanyIcon />} label="Tên công ty cứu hộ" value={company.company_name} />
-            <InfoRow icon={<PersonIcon />} label="Người đại diện pháp luật" value={company.director_name} />
-            <InfoRow icon={<PhoneIcon />} label="Số điện thoại liên hệ" value={company.phone} />
-            <InfoRow icon={<MailIcon />} label="Địa chỉ Email" value={company.email} />
-          </InfoCard>
-
-          {/* Location */}
-          <InfoCard title="Địa chỉ đăng ký">
-            <InfoRow icon={<LocationIcon />} label="Địa chỉ đăng ký" value={formatAddress(company.address)} />
-          </InfoCard>
-
-          {/* License File Card */}
-          <InfoCard title="Giấy phép kinh doanh/Hồ sơ pháp lý">
-            {hasLicense ? (
-              <Box
-                component="a"
-                href={company.license_file_url || company.license_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  p: 2,
-                  borderRadius: '8px',
-                  bgcolor: 'rgba(255, 107, 0, 0.04)',
-                  border: `1px solid rgba(255, 107, 0, 0.15)`,
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 107, 0, 0.08)',
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '8px',
-                    bgcolor: 'rgba(255, 107, 0, 0.1)',
-                    color: ORANGE,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <LicenseIcon sx={{ fontSize: 28 }} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }} noWrap>
-                    Giấy phép kinh doanh
-                  </Typography>
-                  <Typography sx={{ fontSize: 12, color: '#6b7280', mt: 0.5 }}>Nhấn để xem chi tiết</Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Typography sx={{ fontSize: 14, color: '#ef4444', fontWeight: 500 }}>
-                Công ty cứu hộ chưa tải lên tệp hồ sơ pháp lý.
-              </Typography>
-            )}
-          </InfoCard>
+          <CompanyDetailsSection company={company} />
         </Box>
 
         {/* Right Column: Verification Action Panel */}
@@ -313,6 +234,6 @@ export default function CompanyVerificationDetailPage() {
         confirmColor="secondary"
         loading={actionLoading}
       />
-    </AdminLayout>
+    </>
   );
 }

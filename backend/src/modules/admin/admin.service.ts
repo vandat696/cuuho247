@@ -550,44 +550,7 @@ class AdminService {
     serviceCategoryId?: string,
     groupBy: 'day' | 'week' | 'month' = 'day'
   ) {
-    // 1. Establish default dates (last 7 days if not provided)
-    let end = new Date();
-    let start = new Date();
-    start.setDate(end.getDate() - 6); // default to 7 days including today
-
-    if (startDateStr) {
-      const parsedStart = new Date(startDateStr);
-      if (isNaN(parsedStart.getTime())) {
-        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
-      }
-      start = parsedStart;
-    }
-
-    if (endDateStr) {
-      const parsedEnd = new Date(endDateStr);
-      if (isNaN(parsedEnd.getTime())) {
-        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
-      }
-      end = parsedEnd;
-    }
-
-    // Adjust boundaries to local full days in UTC (Vietnam time zone offset)
-    const startBoundary = new Date(start);
-    startBoundary.setHours(0, 0, 0, 0);
-
-    const endBoundary = new Date(end);
-    endBoundary.setHours(23, 59, 59, 999);
-
-    // Validate date logic
-    if (startBoundary > endBoundary) {
-      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
-    }
-
-    // Validate max range (366 days)
-    const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
-    if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
-      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
-    }
+    const { startBoundary, endBoundary } = this.parseDateBoundaries(startDateStr, endDateStr);
 
     // 2. Fetch all service categories first (to map category names)
     const categories = await ServiceCategory.find().lean().exec();
@@ -716,42 +679,7 @@ class AdminService {
     companyId?: string,
     groupBy: 'day' | 'week' | 'month' = 'day'
   ) {
-    // 1. Establish default dates (last 7 days if not provided)
-    let end = new Date();
-    let start = new Date();
-    start.setDate(end.getDate() - 6);
-
-    if (startDateStr) {
-      const parsedStart = new Date(startDateStr);
-      if (isNaN(parsedStart.getTime())) {
-        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
-      }
-      start = parsedStart;
-    }
-
-    if (endDateStr) {
-      const parsedEnd = new Date(endDateStr);
-      if (isNaN(parsedEnd.getTime())) {
-        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
-      }
-      end = parsedEnd;
-    }
-
-    // Set local boundaries
-    const startBoundary = new Date(start);
-    startBoundary.setHours(0, 0, 0, 0);
-
-    const endBoundary = new Date(end);
-    endBoundary.setHours(23, 59, 59, 999);
-
-    if (startBoundary > endBoundary) {
-      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
-    }
-
-    const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
-    if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
-      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
-    }
+    const { startBoundary, endBoundary } = this.parseDateBoundaries(startDateStr, endDateStr);
 
     // 2. Fetch active companies to build lookup or compare
     const activeCompanies = await Company.find({ status: 'active' }, '_id company_name').lean().exec();
@@ -790,26 +718,8 @@ class AdminService {
     // 6. Calculate statistics
     if (companyId) {
       // Specific Company View
-      const totalRequests = requests.length;
-      // Responded requests: status is not pending and not timeout
-      const respondedRequests = requests.filter((r) => r.status !== 'pending' && r.status !== 'timeout').length;
-      const responseRate = totalRequests > 0 ? Math.round((respondedRequests / totalRequests) * 10000) / 100 : 0;
-
-      // Avg response time (for accepted requests where accepted_at is set)
-      const acceptedRequests = requests.filter((r) => r.accepted_at);
-      let avgResponseTime = 0;
-      if (acceptedRequests.length > 0) {
-        const totalDuration = acceptedRequests.reduce((sum, r) => {
-          const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
-          return sum + Math.max(diffMs / 60000, 0); // convert to minutes
-        }, 0);
-        avgResponseTime = Math.round((totalDuration / acceptedRequests.length) * 10) / 10;
-      }
-
-      // Ratings calculations
-      const totalReviews = reviews.length;
-      const avgRating =
-        totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 100) / 100 : 0;
+      const baseStats = this.calculateBaseStats(requests, reviews);
+      const { totalReviews } = baseStats;
 
       // Detailed ratings calculation
       const detailedRatingsAvg = {
@@ -857,80 +767,18 @@ class AdminService {
       }
 
       // Construct specific company time series
-      const timeSeriesMap: Record<
-        string,
-        { totalRequests: number; respondedRequests: number; ratingSum: number; reviewCount: number }
-      > = {};
-      timeKeys.forEach((key) => {
-        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-      });
-
-      requests.forEach((r) => {
-        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
-        if (!timeSeriesMap[key]) {
-          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-        }
-        timeSeriesMap[key].totalRequests += 1;
-        if (r.status !== 'pending' && r.status !== 'timeout') {
-          timeSeriesMap[key].respondedRequests += 1;
-        }
-      });
-
-      reviews.forEach((r) => {
-        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
-        if (!timeSeriesMap[key]) {
-          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-        }
-        timeSeriesMap[key].reviewCount += 1;
-        timeSeriesMap[key].ratingSum += r.rating;
-      });
-
-      const timeSeries = Object.entries(timeSeriesMap)
-        .map(([date, val]) => {
-          const rate =
-            val.totalRequests > 0 ? Math.round((val.respondedRequests / val.totalRequests) * 10000) / 100 : 0;
-          const avg = val.reviewCount > 0 ? Math.round((val.ratingSum / val.reviewCount) * 100) / 100 : 0;
-          return {
-            date,
-            totalRequests: val.totalRequests,
-            responseRate: rate,
-            avgRating: avg,
-            reviewCount: val.reviewCount,
-          };
-        })
-        .sort((a, b) => a.date.localeCompare(b.date));
+      const timeSeries = this.calculateTimeSeries(requests, reviews, timeKeys, groupBy);
 
       return {
         summary: {
-          totalRequests,
-          respondedRequests,
-          responseRate,
-          avgResponseTime,
-          totalReviews,
-          avgRating,
+          ...baseStats,
           detailedRatingsAvg,
         },
         timeSeries,
       };
     } else {
       // General All Companies View
-      const totalRequests = requests.length;
-      const respondedRequests = requests.filter((r) => r.status !== 'pending' && r.status !== 'timeout').length;
-      const responseRate = totalRequests > 0 ? Math.round((respondedRequests / totalRequests) * 10000) / 100 : 0;
-
-      const acceptedRequests = requests.filter((r) => r.accepted_at);
-      let avgResponseTime = 0;
-      if (acceptedRequests.length > 0) {
-        const totalDuration = acceptedRequests.reduce((sum, r) => {
-          const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
-          return sum + Math.max(diffMs / 60000, 0);
-        }, 0);
-        avgResponseTime = Math.round((totalDuration / acceptedRequests.length) * 10) / 10;
-      }
-
-      const totalReviews = reviews.length;
-      const avgRating =
-        totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 100) / 100 : 0;
+      const baseStats = this.calculateBaseStats(requests, reviews);
 
       // Group by company
       const companyStatsMap: Record<
@@ -1025,58 +873,10 @@ class AdminService {
         .sort((a, b) => b.avgRating - a.avgRating || b.totalRequests - a.totalRequests);
 
       // System-wide time series
-      const timeSeriesMap: Record<
-        string,
-        { totalRequests: number; respondedRequests: number; ratingSum: number; reviewCount: number }
-      > = {};
-      timeKeys.forEach((key) => {
-        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-      });
-
-      requests.forEach((r) => {
-        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
-        if (!timeSeriesMap[key]) {
-          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-        }
-        timeSeriesMap[key].totalRequests += 1;
-        if (r.status !== 'pending' && r.status !== 'timeout') {
-          timeSeriesMap[key].respondedRequests += 1;
-        }
-      });
-
-      reviews.forEach((r) => {
-        const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
-        if (!timeSeriesMap[key]) {
-          timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
-        }
-        timeSeriesMap[key].reviewCount += 1;
-        timeSeriesMap[key].ratingSum += r.rating;
-      });
-
-      const timeSeries = Object.entries(timeSeriesMap)
-        .map(([date, val]) => {
-          const rate =
-            val.totalRequests > 0 ? Math.round((val.respondedRequests / val.totalRequests) * 10000) / 100 : 0;
-          const avg = val.reviewCount > 0 ? Math.round((val.ratingSum / val.reviewCount) * 100) / 100 : 0;
-          return {
-            date,
-            totalRequests: val.totalRequests,
-            responseRate: rate,
-            avgRating: avg,
-            reviewCount: val.reviewCount,
-          };
-        })
-        .sort((a, b) => a.date.localeCompare(b.date));
+      const timeSeries = this.calculateTimeSeries(requests, reviews, timeKeys, groupBy);
 
       return {
-        summary: {
-          totalRequests,
-          respondedRequests,
-          responseRate,
-          avgResponseTime,
-          totalReviews,
-          avgRating,
-        },
+        summary: baseStats,
         companyBreakdown,
         timeSeries,
       };
@@ -1131,6 +931,118 @@ class AdminService {
     }
 
     return Array.from(new Set(keys));
+  }
+
+  private parseDateBoundaries(startDateStr?: string, endDateStr?: string): { startBoundary: Date; endBoundary: Date } {
+    let end = new Date();
+    let start = new Date();
+    start.setDate(end.getDate() - 6);
+
+    if (startDateStr) {
+      const parsedStart = new Date(startDateStr);
+      if (isNaN(parsedStart.getTime())) {
+        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
+      }
+      start = parsedStart;
+    }
+
+    if (endDateStr) {
+      const parsedEnd = new Date(endDateStr);
+      if (isNaN(parsedEnd.getTime())) {
+        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
+      }
+      end = parsedEnd;
+    }
+
+    const startBoundary = new Date(start);
+    startBoundary.setHours(0, 0, 0, 0);
+
+    const endBoundary = new Date(end);
+    endBoundary.setHours(23, 59, 59, 999);
+
+    if (startBoundary > endBoundary) {
+      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
+    }
+
+    const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
+    if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
+      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
+    }
+
+    return { startBoundary, endBoundary };
+  }
+
+  private calculateTimeSeries(requests: any[], reviews: any[], timeKeys: string[], groupBy: 'day' | 'week' | 'month') {
+    const timeSeriesMap: Record<
+      string,
+      { totalRequests: number; respondedRequests: number; ratingSum: number; reviewCount: number }
+    > = {};
+    timeKeys.forEach((key) => {
+      timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+    });
+
+    requests.forEach((r) => {
+      const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+      if (!timeSeriesMap[key]) {
+        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+      }
+      timeSeriesMap[key].totalRequests += 1;
+      if (r.status !== 'pending' && r.status !== 'timeout') {
+        timeSeriesMap[key].respondedRequests += 1;
+      }
+    });
+
+    reviews.forEach((r) => {
+      const key = this.formatDateTimeKey(r.created_at as Date, groupBy);
+      if (!timeSeriesMap[key]) {
+        timeSeriesMap[key] = { totalRequests: 0, respondedRequests: 0, ratingSum: 0, reviewCount: 0 };
+      }
+      timeSeriesMap[key].reviewCount += 1;
+      timeSeriesMap[key].ratingSum += r.rating;
+    });
+
+    return Object.entries(timeSeriesMap)
+      .map(([date, val]) => {
+        const rate = val.totalRequests > 0 ? Math.round((val.respondedRequests / val.totalRequests) * 10000) / 100 : 0;
+        const avg = val.reviewCount > 0 ? Math.round((val.ratingSum / val.reviewCount) * 100) / 100 : 0;
+        return {
+          date,
+          totalRequests: val.totalRequests,
+          responseRate: rate,
+          avgRating: avg,
+          reviewCount: val.reviewCount,
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  private calculateBaseStats(requests: any[], reviews: any[]) {
+    const totalRequests = requests.length;
+    const respondedRequests = requests.filter((r) => r.status !== 'pending' && r.status !== 'timeout').length;
+    const responseRate = totalRequests > 0 ? Math.round((respondedRequests / totalRequests) * 10000) / 100 : 0;
+
+    const acceptedRequests = requests.filter((r) => r.accepted_at);
+    let avgResponseTime = 0;
+    if (acceptedRequests.length > 0) {
+      const totalDuration = acceptedRequests.reduce((sum, r) => {
+        const diffMs = (r.accepted_at as Date).getTime() - (r.created_at as Date).getTime();
+        return sum + Math.max(diffMs / 60000, 0);
+      }, 0);
+      avgResponseTime = Math.round((totalDuration / acceptedRequests.length) * 10) / 10;
+    }
+
+    const totalReviews = reviews.length;
+    const avgRating =
+      totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 100) / 100 : 0;
+
+    return {
+      totalRequests,
+      respondedRequests,
+      responseRate,
+      avgResponseTime,
+      totalReviews,
+      avgRating,
+    };
   }
 }
 

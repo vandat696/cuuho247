@@ -1,24 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import { ValidationErrorItem } from 'joi';
 import { customerRegisterSchema, loginSchema, registerCompanySchema } from './auth.validator';
 import authService from './auth.service';
+import { validateSchema } from '../../shared/utils/validation.util';
 
 class AuthController {
   async customerRegister(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Validation input data
-      const { error, value } = customerRegisterSchema.validate(req.body, { abortEarly: false });
-
-      if (error) {
-        // Combine all error messages into an array to send to Frontend
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(customerRegisterSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       // Call Service to process data
       const newUser = await authService.customerRegister(value);
@@ -45,20 +38,12 @@ class AuthController {
       };
 
       // Validation input data - using registerCompanySchema
-      const { error, value } = registerCompanySchema.validate(requestBody, {
+      const value = validateSchema<any>(registerCompanySchema, requestBody, res, {
         abortEarly: false,
         allowUnknown: true,
+        customMessage: 'Dữ liệu không hợp lệ',
       });
-
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      if (!value) return;
 
       // Call Service to process data
       const newCompany = await authService.registerCompany(value);
@@ -77,17 +62,11 @@ class AuthController {
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Validation input data
-      const { error, value } = loginSchema.validate(req.body, { abortEarly: false });
-
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: 'Dữ liệu không hợp lệ',
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(loginSchema, req.body, res, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+      });
+      if (!value) return;
 
       // Call Service to process data
       const loginResult = await authService.login(value);

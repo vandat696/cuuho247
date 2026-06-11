@@ -1,24 +1,16 @@
 import { Response } from 'express';
-import { ValidationErrorItem } from 'joi';
 import { reviewService } from './review.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { createReviewSchema, replyReviewSchema } from './review.validator';
+import { validateSchema } from '../../shared/utils/validation.util';
 
 export class ReviewController {
   async createReview(req: AuthRequest, res: Response) {
     try {
       const userId = req.user.id;
 
-      const { error, value } = createReviewSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: errorMessages[0],
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(createReviewSchema, req.body, res, { abortEarly: false });
+      if (!value) return;
 
       const review = await reviewService.createReview(userId, value);
       res.status(201).json({ status: 'success', data: review });
@@ -64,16 +56,8 @@ export class ReviewController {
       const companyId = req.user.id;
       const { id } = req.params;
 
-      const { error, value } = replyReviewSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessages = error.details.map((detail: ValidationErrorItem) => detail.message);
-        res.status(400).json({
-          status: 'error',
-          message: errorMessages[0],
-          errors: errorMessages,
-        });
-        return;
-      }
+      const value = validateSchema<any>(replyReviewSchema, req.body, res, { abortEarly: false });
+      if (!value) return;
 
       const review = await reviewService.replyToReview(companyId, id, value);
       res.json({ status: 'success', data: review });

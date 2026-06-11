@@ -23,6 +23,7 @@ import {
 } from '@/services/customer-rescue.service';
 import { getSocket } from '@/utils/socket';
 import { notificationService } from '@/services/notification.service';
+import { userService } from '@/services/user.service';
 import { NAVY, ORANGE, CARD_RADIUS, CIRCLE_RADIUS } from '@/constants/colors';
 const ACTIVE_STATUSES: CustomerRescueRequestStatus[] = ['pending', 'accepted', 'in_progress', 'arrived'];
 
@@ -77,6 +78,7 @@ export default function CustomerHomePage() {
   const [requests, setRequests] = useState<CustomerRescueRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(localStorage.getItem('accountAvatar') || null);
 
   const fetchUnreadCount = async () => {
     try {
@@ -90,9 +92,26 @@ export default function CustomerHomePage() {
     }
   };
 
+  const fetchUserProfile = async () => {
+    try {
+      const response = await userService.getProfile();
+      if (response.status === 'success') {
+        const url = response.data.avatar_url || null;
+        setAvatarUrl(url);
+        localStorage.setItem('accountAvatar', url || '');
+        if (response.data.full_name) {
+          localStorage.setItem('accountName', response.data.full_name);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   useEffect(() => {
     fetchMyRequests();
     fetchUnreadCount();
+    fetchUserProfile();
 
     const socket = getSocket();
     const handleStatusChanged = () => {
@@ -181,9 +200,19 @@ export default function CustomerHomePage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                overflow: 'hidden',
               }}
             >
-              <PersonOutlineOutlined sx={{ fontSize: 34 }} />
+              {avatarUrl ? (
+                <Box
+                  component="img"
+                  src={avatarUrl}
+                  alt={userName}
+                  sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <PersonOutlineOutlined sx={{ fontSize: 34 }} />
+              )}
             </Box>
             <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#fff', lineHeight: 1.25 }} noWrap>
               {userName}
