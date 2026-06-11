@@ -21,6 +21,20 @@ import type {
   SearchParams,
 } from './interfaces/rescue.interface';
 
+const INCIDENT_LABEL_MAP: Record<string, string> = {
+  'su-co-lop-xe': 'Lốp xe gặp sự cố',
+  'het-binh-ac-quy': 'Hết bình ắc quy',
+  'het-nhien-lieu': 'Hết nhiên liệu',
+  'xe-khong-khoi-dong': 'Xe không khởi động được',
+  'xe-chet-may': 'Xe bị chết máy giữa đường',
+  'xe-gap-su-co-ky-thuat': 'Xe có dấu hiệu hỏng hóc',
+  'tai-nan-giao-thong': 'Tai nạn giao thông',
+  'xe-bi-sa-lay': 'Xe bị sa lầy hoặc mắc kẹt',
+  'xe-bi-ngap-nuoc': 'Xe bị ngập nước',
+  'su-co-khoa-xe': 'Không mở được xe',
+  khac: 'Sự cố khác',
+};
+
 /**
  * RescueCompanyService: Xử lý nghiệp vụ Cứu hộ từ phía Công ty.
  *
@@ -47,7 +61,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
       return {
         _id: request._id.toString(),
-        title: serviceName || this.getTitleFromDescription(request.description),
+        title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
         description: request.description,
         distance_km: distanceKm,
         eta_minutes: request.eta_minutes ?? null,
@@ -87,7 +101,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       _id: request._id.toString(),
-      title: serviceName || this.getTitleFromDescription(request.description),
+      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
       description: request.description,
       distance_km: this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates),
       eta_minutes: request.eta_minutes ?? null,
@@ -607,7 +621,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     return {
       _id: request._id.toString(),
-      title: serviceName || this.getTitleFromDescription(request.description),
+      title: (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác',
       description: request.description,
       distance_km: null,
       eta_minutes: request.eta_minutes ?? null,
@@ -658,11 +672,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
   private toRad(deg: number): number {
     return (deg * Math.PI) / 180;
-  }
-
-  private getTitleFromDescription(description?: string): string {
-    if (!description) return 'Su co cuu ho';
-    return description.split(/[,.]/)[0].trim() || 'Su co cuu ho';
   }
 }
 

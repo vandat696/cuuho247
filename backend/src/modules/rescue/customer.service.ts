@@ -39,6 +39,7 @@ class RescueCustomerService implements IRescueCustomerService {
         type: 'Point',
         coordinates: [location.lng, location.lat],
       },
+      incident_type: service_types?.[0],
       status: 'pending',
       status_history: [
         {

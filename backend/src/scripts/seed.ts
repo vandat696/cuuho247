@@ -488,6 +488,20 @@ async function main() {
       });
     }
 
+    const categoryId = selectedServices[0].category_id;
+    const categoryDoc = categories.find((c) => c._id.toString() === categoryId.toString());
+    const catSlug = categoryDoc ? categoryDoc.slug : '';
+
+    const catToIncidentMap: Record<string, string> = {
+      'va-vo-va-lop-xe': 'su-co-lop-xe',
+      'kich-binh-sac-ac-quy': 'het-binh-ac-quy',
+      'tiep-nhien-lieu': 'het-nhien-lieu',
+      'sua-chua-dong-co-luu-dong': 'xe-chet-may',
+      'cau-keo-xe-o-to': 'tai-nan-giao-thong',
+      'cuu-ho-khoa-xe': 'su-co-khoa-xe',
+    };
+    const incidentType = catToIncidentMap[catSlug] || 'khac';
+
     const description = `Yêu cầu cứu hộ xe gặp sự cố liên quan đến ${selectedServices.map((s) => s.name.toLowerCase()).join(' và ')}.`;
 
     const request = await Models.RescueRequest.create({
@@ -500,6 +514,7 @@ async function main() {
       description,
       location: requestLocation,
       service_types: serviceTypeIds,
+      incident_type: incidentType,
       address: {
         province: comp.address.province,
         district: comp.address.district,
