@@ -5,7 +5,6 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { SearchResultHeader } from '@/components/rescue-customer/SearchResultHeader';
 import { CompanyList } from '@/components/rescue-customer/CompanyList';
 import { RescueSearchState, CompanyResult } from '@/types/rescue.type';
-import toast from 'react-hot-toast';
 
 export default function RescueResultsPage() {
   const navigate = useNavigate();
@@ -68,7 +67,6 @@ export default function RescueResultsPage() {
           location={formData.location}
           totalResults={results.total}
           companies={results.companies}
-          onFilter={() => toast('Tính năng lọc sẽ sớm ra mắt', { icon: '🔧' })}
         />
 
         <Box sx={{ px: 2, py: 1, bgcolor: '#fff' }}>

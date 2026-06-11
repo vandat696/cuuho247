@@ -8,10 +8,9 @@ interface SearchResultHeaderProps {
   location: RescueLocation | null;
   totalResults: number;
   companies?: CompanyResult[];
-  onFilter?: () => void;
 }
 
-export function SearchResultHeader({ location, totalResults, companies = [], onFilter }: SearchResultHeaderProps) {
+export function SearchResultHeader({ location, totalResults, companies = [] }: SearchResultHeaderProps) {
   const companyMarkers = companies
     .map((c, idx) => ({
       id: c._id,
@@ -103,22 +102,6 @@ export function SearchResultHeader({ location, totalResults, companies = [], onF
         >
           Tìm thấy {totalResults} công ty cứu hộ
         </Typography>
-
-        <Box
-          component="button"
-          onClick={onFilter}
-          sx={{
-            border: 'none',
-            bgcolor: 'transparent',
-            color: '#1e3a5f',
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: 'pointer',
-            '&:hover': { opacity: 0.8 },
-          }}
-        >
-          Lọc
-        </Box>
       </Box>
     </Box>
   );

@@ -34,7 +34,7 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { companyRescueService } from '@/services/company-rescue.service';
 import { vehicleService } from '@/services/vehicle.service';
-import { getSocket } from '@/utils/socket';
+
 import { IVehicle } from '@/types/vehicle.type';
 
 type RequestStatus = 'pending' | 'active' | 'completed' | 'canceled';
@@ -58,13 +58,11 @@ export default function RescueRequestDetailPage() {
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [vehicleId, setVehicleId] = useState('');
   const [etaMinutes, setEtaMinutes] = useState('');
-  const [pendingNote, setPendingNote] = useState('');
   const [accepting, setAccepting] = useState(false);
 
   // States for active
   const [finalAmount, setFinalAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'e_wallet'>('cash');
-  const [completionNote, setCompletionNote] = useState('');
   const [completeLoading, setCompleteLoading] = useState(false);
 
   useEffect(() => {
@@ -122,40 +120,6 @@ export default function RescueRequestDetailPage() {
     }
   }, [status]);
 
-  // Location Sync over Socket for 'active' request
-  useEffect(() => {
-    if (status !== 'active' || !requestId) return;
-    const socket = getSocket();
-    let watchId: number;
-
-    const startLocationSync = () => {
-      if ('geolocation' in navigator) {
-        watchId = navigator.geolocation.watchPosition(
-          (position) => {
-            const { latitude, longitude, heading } = position.coords;
-            socket.emit('update_location', {
-              rescue_request_id: requestId,
-              lat: latitude,
-              lng: longitude,
-              heading,
-            });
-          },
-          (error) => {
-            console.error('Error watching position:', error);
-          },
-          { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
-        );
-      }
-    };
-    startLocationSync();
-
-    return () => {
-      if (watchId !== undefined) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
-  }, [status, requestId]);
-
   const handleAcceptRequest = async () => {
     if (!requestId) return;
 
@@ -175,7 +139,6 @@ export default function RescueRequestDetailPage() {
       await companyRescueService.acceptCompanyPendingRequest(requestId, {
         vehicle_id: vehicleId,
         eta_minutes: eta,
-        note: pendingNote.trim() || undefined,
       });
       toast.success('Đã nhận yêu cầu cứu hộ');
       navigate('/company/rescue/active');
@@ -241,7 +204,6 @@ export default function RescueRequestDetailPage() {
       const response = await companyRescueService.completeCompanyActiveRequest(requestId, {
         amount,
         method: paymentMethod,
-        note: completionNote.trim() || undefined,
       });
 
       if (response.status === 'success') {
@@ -376,16 +338,6 @@ export default function RescueRequestDetailPage() {
                       sx={{ mt: 2 }}
                       inputProps={{ min: 1 }}
                     />
-                    <TextField
-                      label="Ghi chú"
-                      value={pendingNote}
-                      onChange={(event) => setPendingNote(event.target.value)}
-                      fullWidth
-                      size="small"
-                      sx={{ mt: 2 }}
-                      multiline
-                      minRows={2}
-                    />
                   </InfoCard>
 
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -426,16 +378,6 @@ export default function RescueRequestDetailPage() {
                         <MenuItem value="bank_transfer">Chuyển khoản</MenuItem>
                         <MenuItem value="e_wallet">Ví điện tử</MenuItem>
                       </TextField>
-                      <TextField
-                        fullWidth
-                        multiline
-                        minRows={3}
-                        label="Ghi chú"
-                        value={completionNote}
-                        onChange={(event) => setCompletionNote(event.target.value)}
-                        sx={{ mt: 2 }}
-                        placeholder="Ví dụ: phát sinh thêm phí kéo xe, giảm giá, khách đã thanh toán..."
-                      />
                     </InfoCard>
                   )}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
