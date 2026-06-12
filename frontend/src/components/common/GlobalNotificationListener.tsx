@@ -34,7 +34,11 @@ export function GlobalNotificationListener() {
         notification.type === 'chat_message' &&
         notification.payload?.rescue_request_id === pathname.split('/').pop();
 
-      if (!selfInitiated && !isChatPageForRequest) {
+      // 3. Skip toast if it's a subsequent unread chat message (only toast for the first unread)
+      const isChatMessage = notification.type === 'chat_message';
+      const isSubsequentChatMessage = isChatMessage && notification.payload?.unread_count > 1;
+
+      if (!selfInitiated && !isChatPageForRequest && !isSubsequentChatMessage) {
         toast.success(`${notification.title}: ${notification.body}`, { duration: 5000 });
       }
 

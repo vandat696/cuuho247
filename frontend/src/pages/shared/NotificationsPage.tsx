@@ -39,9 +39,10 @@ const mapDetailPath = (notification: NotificationData, role: 'customer' | 'compa
       case 'request_cancelled':
       case 'request_timeout':
       case 'eta_updated':
-      case 'chat_message':
       case 'review_replied':
         return requestId ? `/customer/tracking/${requestId}` : '';
+      case 'chat_message':
+        return requestId ? `/chat/${requestId}` : '';
       case 'new_comment':
         return postId ? `/community/${postId}` : '';
       case 'content_removed':
@@ -56,8 +57,9 @@ const mapDetailPath = (notification: NotificationData, role: 'customer' | 'compa
       case 'request_accepted':
       case 'request_in_progress':
       case 'eta_updated':
-      case 'chat_message':
         return requestId ? `/company/rescue/active/${requestId}` : '';
+      case 'chat_message':
+        return requestId ? `/chat/${requestId}` : '';
       case 'request_completed':
         return requestId ? `/company/rescue/completed/${requestId}` : '';
       case 'request_cancelled':

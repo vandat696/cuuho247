@@ -35,20 +35,6 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_ACCEPTED, async ({ request, companyI
   } catch (err) {
     console.error('Error creating request_accepted notification for customer:', err);
   }
-
-  // Notify company
-  try {
-    await notificationService.createAndSendNotification(
-      companyId,
-      'company',
-      'request_accepted',
-      'Nhận yêu cầu thành công',
-      `Bạn đã chấp nhận yêu cầu cứu hộ. Dự kiến đến sau ${request.eta_minutes || 15} phút.`,
-      { rescue_request_id: requestId }
-    );
-  } catch (err) {
-    console.error('Error creating request_accepted notification for company:', err);
-  }
 });
 
 // ─── 2. Event: REQUEST_IN_PROGRESS ────────────────────────────────────────────
@@ -79,20 +65,6 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_IN_PROGRESS, async ({ request, compa
     }
   } catch (err) {
     console.error('Error creating request_in_progress notification for customer:', err);
-  }
-
-  // Notify company
-  try {
-    await notificationService.createAndSendNotification(
-      companyId,
-      'company',
-      'request_in_progress',
-      'Bắt đầu di chuyển',
-      'Đã xác nhận di chuyển đến vị trí cứu hộ.',
-      { rescue_request_id: requestId }
-    );
-  } catch (err) {
-    console.error('Error creating request_in_progress notification for company:', err);
   }
 });
 
@@ -125,20 +97,6 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_ARRIVED, async ({ request, companyId
   } catch (err) {
     console.error('Error creating arrived (eta_updated) notification for customer:', err);
   }
-
-  // Notify company
-  try {
-    await notificationService.createAndSendNotification(
-      companyId,
-      'company',
-      'eta_updated',
-      'Đã đến nơi',
-      'Đã xác nhận đến vị trí của khách hàng.',
-      { rescue_request_id: requestId }
-    );
-  } catch (err) {
-    console.error('Error creating arrived (eta_updated) notification for company:', err);
-  }
 });
 
 // ─── 4. Event: REQUEST_COMPLETED ──────────────────────────────────────────────
@@ -170,20 +128,6 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_COMPLETED, async ({ request, company
   } catch (err) {
     console.error('Error creating request_completed notification for customer:', err);
   }
-
-  // Notify company
-  try {
-    await notificationService.createAndSendNotification(
-      companyId,
-      'company',
-      'request_completed',
-      'Hoàn thành cứu hộ',
-      `Nhiệm vụ cứu hộ #${requestId.slice(-4)} đã được hoàn tất thành công.`,
-      { rescue_request_id: requestId }
-    );
-  } catch (err) {
-    console.error('Error creating request_completed notification for company:', err);
-  }
 });
 
 // ─── 5. Event: REQUEST_CREATED ────────────────────────────────────────────────
@@ -211,22 +155,6 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_CREATED, async ({ request, io }) => 
     );
   } catch (err) {
     console.error('Error creating request_created notification for company:', err);
-  }
-
-  // Notify customer
-  try {
-    if (customerId) {
-      await notificationService.createAndSendNotification(
-        customerId,
-        'user',
-        'request_created',
-        'Gửi yêu cầu cứu hộ thành công',
-        'Yêu cầu cứu hộ của bạn đang chờ công ty xác nhận.',
-        { rescue_request_id: requestId }
-      );
-    }
-  } catch (err) {
-    console.error('Error creating request_created notification for user:', err);
   }
 });
 
@@ -256,19 +184,5 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_CANCELLED, async ({ request, userId,
     );
   } catch (err) {
     console.error('Error creating request_cancelled notification for company:', err);
-  }
-
-  // Notify customer
-  try {
-    await notificationService.createAndSendNotification(
-      userId,
-      'user',
-      'request_cancelled',
-      'Hủy yêu cầu thành công',
-      'Yêu cầu cứu hộ đã được hủy.',
-      { rescue_request_id: requestId }
-    );
-  } catch (err) {
-    console.error('Error creating request_cancelled notification for user:', err);
   }
 });
