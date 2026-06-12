@@ -9,6 +9,9 @@ import { NotFoundError } from './shared/utils/apiError.util';
 
 const app: Application = express();
 
+// Trust proxy (Fly.io, Render, Vercel) to resolve req.protocol as 'https'
+app.set('trust proxy', true);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
