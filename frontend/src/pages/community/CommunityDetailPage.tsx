@@ -8,6 +8,7 @@ import { AppHeader } from '../../components/layout/AppHeader';
 import { MobileLayout } from '../../components/layout/MobileLayout';
 import { toast } from 'react-hot-toast';
 import { ORANGE, CARD_RADIUS, BUTTON_RADIUS } from '../../constants/colors';
+import { getUploadImageUrl } from '../../utils/url';
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -143,7 +144,7 @@ const CommunityDetailPage: React.FC = () => {
                   >
                     <Box
                       component="img"
-                      src={`${import.meta.env.VITE_API_URL}/uploads/${img}`}
+                      src={getUploadImageUrl(img)}
                       alt="Post image"
                       sx={{ width: '100%', height: 'auto', display: 'block' }}
                     />

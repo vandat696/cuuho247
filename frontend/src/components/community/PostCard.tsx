@@ -5,6 +5,7 @@ import { ThumbUpOutlined, ChatBubbleOutline } from '@mui/icons-material';
 import { CommunityPost, communityService } from '../../services/community.service';
 import { formatRelativeTime } from '../../utils/date';
 import { CARD_RADIUS, ORANGE } from '../../constants/colors';
+import { getUploadImageUrl } from '../../utils/url';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -60,7 +61,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
         <Box sx={{ mb: 2, width: '100%', height: 180, borderRadius: '8px', overflow: 'hidden', bgcolor: '#f8fafc' }}>
           <Box
             component="img"
-            src={`http://localhost:3000/uploads/${post.images[0]}`}
+            src={getUploadImageUrl(post.images[0])}
             alt="Post image"
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
