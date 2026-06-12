@@ -7,11 +7,10 @@ class AuthController {
   async customerRegister(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Validation input data
-      const value = validateSchema<any>(customerRegisterSchema, req.body, res, {
+      const value = validateSchema<any>(customerRegisterSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',
       });
-      if (!value) return;
 
       // Call Service to process data
       const newUser = await authService.customerRegister(value);
@@ -38,12 +37,11 @@ class AuthController {
       };
 
       // Validation input data - using registerCompanySchema
-      const value = validateSchema<any>(registerCompanySchema, requestBody, res, {
+      const value = validateSchema<any>(registerCompanySchema, requestBody, {
         abortEarly: false,
         allowUnknown: true,
         customMessage: 'Dữ liệu không hợp lệ',
       });
-      if (!value) return;
 
       // Call Service to process data
       const newCompany = await authService.registerCompany(value);
@@ -62,11 +60,10 @@ class AuthController {
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Validation input data
-      const value = validateSchema<any>(loginSchema, req.body, res, {
+      const value = validateSchema<any>(loginSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',
       });
-      if (!value) return;
 
       // Call Service to process data
       const loginResult = await authService.login(value);

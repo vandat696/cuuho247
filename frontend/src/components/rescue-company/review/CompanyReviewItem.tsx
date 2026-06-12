@@ -28,7 +28,7 @@ export const CompanyReviewItem = ({ review, onReplySuccess }: CompanyReviewItemP
       setIsReplying(false);
       onReplySuccess(res.data);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi gửi phản hồi');
+      console.error('Error replying to review:', error);
     } finally {
       setIsSubmitting(false);
     }

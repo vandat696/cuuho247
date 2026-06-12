@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Service } from '../types/service.type';
 import { serviceService } from '../services/service.service';
-import toast from 'react-hot-toast';
 
 export const useServiceDetail = (serviceId: string | undefined) => {
   const [service, setService] = useState<Service | null>(null);
@@ -24,7 +23,6 @@ export const useServiceDetail = (serviceId: string | undefined) => {
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Lỗi không xác định';
         setError(errorMsg);
-        toast.error(errorMsg);
       } finally {
         setLoading(false);
       }

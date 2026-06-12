@@ -69,7 +69,7 @@ export default function ConfirmRequestPage() {
       toast.success('Gửi yêu cầu thành công!');
       navigate(`/customer/tracking/${res.data._id}`, { replace: true });
     } catch (error: any) {
-      toast.error(error.message || 'Có lỗi xảy ra khi gửi yêu cầu');
+      console.error('Error confirming rescue request:', error);
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
 import { User } from '@/shared/models/User.model';
 import { Company } from '@/shared/models/Company.model';
+import { AppError, UnauthorizedError, ForbiddenError } from '../utils/apiError.util';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -17,11 +18,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     const authHeader = req.header('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        status: 'error',
-        message: 'Không tìm thấy xác thực (Token bị thiếu hoặc sai định dạng)',
-      });
-      return;
+      throw new UnauthorizedError('Không tìm thấy xác thực (Token bị thiếu hoặc sai định dạng)');
     }
 
     // Remove "Bearer " to get token
@@ -31,8 +28,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     const decoded = verifyToken(token);
 
     if (typeof decoded === 'string' || !decoded) {
-      res.status(401).json({ status: 'error', message: 'Token không hợp lệ' });
-      return;
+      throw new UnauthorizedError('Token không hợp lệ');
     }
 
     const userId = decoded.id as string;
@@ -42,30 +38,24 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     if (role === 'customer') {
       const userObj = await User.findById(userId).select('status lock_reason').exec();
       if (!userObj) {
-        res.status(401).json({ status: 'error', message: 'Tài khoản không tồn tại' });
-        return;
+        throw new UnauthorizedError('Tài khoản không tồn tại');
       }
       if (userObj.status === 'locked') {
-        res.status(403).json({
-          status: 'error',
-          message: `Tài khoản của bạn đã bị khóa. Lý do: ${userObj.lock_reason || 'Không rõ lý do'}`,
-          code: 'USER_LOCKED',
-        });
-        return;
+        throw new ForbiddenError(
+          `Tài khoản của bạn đã bị khóa. Lý do: ${userObj.lock_reason || 'Không rõ lý do'}`,
+          'USER_LOCKED'
+        );
       }
     } else if (role === 'company') {
       const companyObj = await Company.findById(userId).select('status lock_reason').exec();
       if (!companyObj) {
-        res.status(401).json({ status: 'error', message: 'Tài khoản công ty không tồn tại' });
-        return;
+        throw new UnauthorizedError('Tài khoản công ty không tồn tại');
       }
       if (companyObj.status === 'locked') {
-        res.status(403).json({
-          status: 'error',
-          message: `Tài khoản công ty của bạn đã bị khóa. Lý do: ${companyObj.lock_reason || 'Không rõ lý do'}`,
-          code: 'COMPANY_LOCKED',
-        });
-        return;
+        throw new ForbiddenError(
+          `Tài khoản công ty của bạn đã bị khóa. Lý do: ${companyObj.lock_reason || 'Không rõ lý do'}`,
+          'COMPANY_LOCKED'
+        );
       }
     }
 
@@ -79,13 +69,17 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     // Continue to controller
     next();
   } catch (error: any) {
+    if (error instanceof AppError) {
+      next(error);
+      return;
+    }
     // If token is expired
     if (error.name === 'TokenExpiredError') {
-      res.status(401).json({ status: 'error', message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại' });
+      next(new UnauthorizedError('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại'));
       return;
     }
 
     // If token is invalid
-    res.status(401).json({ status: 'error', message: 'Token không hợp lệ' });
+    next(new UnauthorizedError('Token không hợp lệ'));
   }
 };

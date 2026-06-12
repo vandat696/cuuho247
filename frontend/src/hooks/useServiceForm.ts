@@ -40,8 +40,7 @@ export const useServiceForm = (initialService?: Service) => {
           setCategories(response.data || []);
         }
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Lỗi khi lấy danh mục dịch vụ';
-        toast.error(errorMsg);
+        console.error('Error fetching service categories:', err);
       } finally {
         setCategoriesLoading(false);
       }
@@ -117,8 +116,7 @@ export const useServiceForm = (initialService?: Service) => {
         }
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Lỗi không xác định';
-      toast.error(errorMsg);
+      console.error('Error submitting service form:', err);
       if (initialService) navigate(`/company/services/${initialService._id}`);
       else navigate('/company/services');
     } finally {

@@ -4,6 +4,7 @@ import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from './rescue.validator';
 import { notificationService } from '../notification/notification.service';
 import { validateSchema } from '../../shared/utils/validation.util';
+import { NotFoundError, BadRequestError } from '../../shared/utils/apiError.util';
 
 const getCustomerId = (request: any): string => {
   if (!request || !request.user_id) return '';
@@ -36,11 +37,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.getActiveRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({
-          status: 'error',
-          message: 'Không tìm thấy nhiệm vụ đang thực hiện',
-        });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ đang thực hiện');
       }
 
       res.status(200).json({
@@ -75,8 +72,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.getCompletedRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy nhiệm vụ đã hoàn thành' });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ đã hoàn thành');
       }
 
       res.status(200).json({
@@ -111,8 +107,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.getCanceledRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy nhiệm vụ đã hủy' });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ đã hủy');
       }
 
       res.status(200).json({
@@ -147,8 +142,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.getPendingRequestDetailForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy yêu cầu đang chờ' });
-        return;
+        throw new NotFoundError('Không tìm thấy yêu cầu đang chờ');
       }
 
       res.status(200).json({
@@ -165,18 +159,16 @@ class RescueCompanyController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const value = validateSchema<any>(acceptRequestSchema, req.body, res, {
+      const value = validateSchema<any>(acceptRequestSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',
         formatErrors: 'object',
       });
-      if (!value) return;
 
       const request = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, value);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy yêu cầu đang chờ để nhận' });
-        return;
+        throw new NotFoundError('Không tìm thấy yêu cầu đang chờ để nhận');
       }
 
       const io = req.app.get('io');
@@ -226,7 +218,7 @@ class RescueCompanyController {
       });
     } catch (error: any) {
       if (error.message.includes('Xe cứu hộ') || error.message.includes('Xe cuu ho')) {
-        res.status(400).json({ status: 'error', message: error.message });
+        next(new BadRequestError(error.message));
         return;
       }
       next(error);
@@ -237,18 +229,16 @@ class RescueCompanyController {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
-      const value = validateSchema<any>(completeRequestSchema, req.body, res, {
+      const value = validateSchema<any>(completeRequestSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',
         formatErrors: 'object',
       });
-      if (!value) return;
 
       const request = await companyRescueRequestService.completeActiveRequestForCompany(companyId, requestId, value);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy nhiệm vụ để hoàn tất' });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ để hoàn tất');
       }
 
       const io = req.app.get('io');
@@ -302,7 +292,7 @@ class RescueCompanyController {
     }
   }
 
-  async startCompanyActiveRequest(req: AuthRequest, res: Response): Promise<void> {
+  async startCompanyActiveRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
@@ -310,8 +300,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.startActiveRequestForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy nhiệm vụ để bắt đầu' });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ để bắt đầu');
       }
 
       const io = req.app.get('io');
@@ -360,12 +349,11 @@ class RescueCompanyController {
         data: { request },
       });
     } catch (error: any) {
-      console.error('startCompanyActiveRequest ERROR:', error);
-      res.status(500).json({ status: 'error', message: error.message || 'Lỗi server', details: error });
+      next(error);
     }
   }
 
-  async arriveCompanyActiveRequest(req: AuthRequest, res: Response): Promise<void> {
+  async arriveCompanyActiveRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
       const { requestId } = req.params;
@@ -373,8 +361,7 @@ class RescueCompanyController {
       const request = await companyRescueRequestService.arriveActiveRequestForCompany(companyId, requestId);
 
       if (!request) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy nhiệm vụ để xác nhận đến nơi' });
-        return;
+        throw new NotFoundError('Không tìm thấy nhiệm vụ để xác nhận đến nơi');
       }
 
       const io = req.app.get('io');
@@ -423,8 +410,7 @@ class RescueCompanyController {
         data: { request },
       });
     } catch (error: any) {
-      console.error('arriveCompanyActiveRequest ERROR:', error);
-      res.status(500).json({ status: 'error', message: error.message || 'Lỗi server', details: error });
+      next(error);
     }
   }
 
@@ -435,8 +421,7 @@ class RescueCompanyController {
       const { lat, lng } = req.query;
 
       if ((lat && !lng) || (!lat && lng)) {
-        res.status(400).json({ status: 'error', message: 'Vui long gui du ca lat va lng' });
-        return;
+        throw new BadRequestError('Vui lòng gửi đủ cả lat và lng');
       }
 
       const origin =
@@ -448,15 +433,13 @@ class RescueCompanyController {
           : undefined;
 
       if (origin && (Number.isNaN(origin.lat) || Number.isNaN(origin.lng))) {
-        res.status(400).json({ status: 'error', message: 'Tọa độ không hợp lệ' });
-        return;
+        throw new BadRequestError('Tọa độ không hợp lệ');
       }
 
       const estimate = await companyRescueRequestService.estimateRequestRouteForCompany(companyId, requestId, origin);
 
       if (!estimate) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy yêu cầu để tính thời gian di chuyển' });
-        return;
+        throw new NotFoundError('Không tìm thấy yêu cầu để tính thời gian di chuyển');
       }
 
       res.status(200).json({ status: 'success', data: { estimate } });
@@ -474,8 +457,7 @@ class RescueCompanyController {
       const { lat, lng, incident_type, max_distance_km } = req.query;
 
       if (!lat || !lng) {
-        res.status(400).json({ status: 'error', message: 'Vị trí (lat, lng) là bắt buộc' });
-        return;
+        throw new BadRequestError('Vị trí (lat, lng) là bắt buộc');
       }
 
       const results = await companyRescueRequestService.searchNearbyCompanies({

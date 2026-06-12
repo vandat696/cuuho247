@@ -83,7 +83,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
             } catch (error) {
               setIsLiked(isLiked);
               setLikeCount(isLiked ? likeCount : likeCount - 1);
-              import('react-hot-toast').then(({ toast }) => toast.error('Có lỗi xảy ra'));
+              console.error('Error toggling like:', error);
             }
           }}
           sx={{

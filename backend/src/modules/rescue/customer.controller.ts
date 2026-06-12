@@ -4,6 +4,7 @@ import rescueRequestService from './customer.service';
 import { cancelRequestSchema, createRequestSchema } from './rescue.validator';
 import { notificationService } from '../notification/notification.service';
 import { validateSchema } from '../../shared/utils/validation.util';
+import { BadRequestError } from '../../shared/utils/apiError.util';
 
 class RescueCustomerController {
   async getMyRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -25,12 +26,11 @@ class RescueCustomerController {
 
   async createRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const value = validateSchema<any>(createRequestSchema, req.body, res, {
+      const value = validateSchema<any>(createRequestSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',
         formatErrors: 'object',
       });
-      if (!value) return;
 
       const newRequest = await rescueRequestService.createRescueRequest({
         ...value,
@@ -88,8 +88,7 @@ class RescueCustomerController {
       const { id } = req.params;
       const { error, value } = cancelRequestSchema.validate(req.body);
       if (error) {
-        res.status(400).json({ status: 'error', message: error.details[0].message });
-        return;
+        throw new BadRequestError(error.details[0].message);
       }
 
       const updated = await rescueRequestService.cancelRequest(id, req.user.id, value.reason);

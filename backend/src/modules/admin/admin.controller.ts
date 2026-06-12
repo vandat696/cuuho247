@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import adminService from './admin.service';
+import { BadRequestError } from '../../shared/utils/apiError.util';
 
 class AdminController {
   async getPendingCompanies(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -300,9 +301,7 @@ class AdminController {
       const serviceCategoryId = req.query.serviceCategoryId as string | undefined;
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month' | undefined) || 'day';
 
-      if (!this.validateGroupBy(groupBy, res)) {
-        return;
-      }
+      this.validateGroupBy(groupBy);
 
       const report = await adminService.getRescueActivitiesReport(startDate, endDate, serviceCategoryId, groupBy);
 
@@ -328,9 +327,7 @@ class AdminController {
       const companyId = req.query.companyId as string | undefined;
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month' | undefined) || 'day';
 
-      if (!this.validateGroupBy(groupBy, res)) {
-        return;
-      }
+      this.validateGroupBy(groupBy);
 
       const report = await adminService.getServiceQualityReport(startDate, endDate, companyId, groupBy);
 
@@ -368,15 +365,10 @@ class AdminController {
     }
   }
 
-  private validateGroupBy(groupBy: any, res: Response): boolean {
+  private validateGroupBy(groupBy: any): void {
     if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
-      res.status(400).json({
-        status: 'error',
-        message: 'Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.',
-      });
-      return false;
+      throw new BadRequestError('Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.');
     }
-    return true;
   }
 }
 

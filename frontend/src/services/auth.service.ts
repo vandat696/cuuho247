@@ -4,10 +4,11 @@ import { LoginData, CustomerRegisterData } from '../types/auth.type';
 
 export const authService = {
   login: async (email: string, password: string): Promise<ApiResponse<LoginData>> => {
-    const response = await http.post<ApiResponse<LoginData>>(`/auth/login`, {
-      email,
-      password,
-    });
+    const response = await http.post<ApiResponse<LoginData>>(
+      `/auth/login`,
+      { email, password },
+      { skipGlobalErrorToast: true }
+    );
     return response.data;
   },
   registerCustomer: async (data: {
@@ -16,7 +17,9 @@ export const authService = {
     full_name: string;
     phone: string;
   }): Promise<ApiResponse<CustomerRegisterData>> => {
-    const response = await http.post<ApiResponse<CustomerRegisterData>>(`/auth/customer-register`, data);
+    const response = await http.post<ApiResponse<CustomerRegisterData>>(`/auth/customer-register`, data, {
+      skipGlobalErrorToast: true,
+    });
     return response.data;
   },
   registerCompany: async (data: {
@@ -45,7 +48,9 @@ export const authService = {
       formData.append('license_file', data.license_file);
     }
 
-    const response = await http.post<ApiResponse<any>>(`/auth/company-register`, formData);
+    const response = await http.post<ApiResponse<any>>(`/auth/company-register`, formData, {
+      skipGlobalErrorToast: true,
+    });
     return response.data;
   },
 };

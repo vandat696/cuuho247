@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import companyService from './company.service';
+import { UnauthorizedError } from '@/shared/utils/apiError.util';
 
 class CompanyController {
   async getCompanyById(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -24,8 +25,7 @@ class CompanyController {
       // req.user contains the decoded token payload
       const companyId = req.user?.id;
       if (!companyId) {
-        res.status(401).json({ status: 'error', message: 'Unauthorized' });
-        return;
+        throw new UnauthorizedError('Unauthorized');
       }
 
       const companyData = await companyService.getCompanyById(companyId);
@@ -42,8 +42,7 @@ class CompanyController {
     try {
       const companyId = req.user?.id;
       if (!companyId) {
-        res.status(401).json({ status: 'error', message: 'Unauthorized' });
-        return;
+        throw new UnauthorizedError('Unauthorized');
       }
 
       const licenseFileUrl = req.file

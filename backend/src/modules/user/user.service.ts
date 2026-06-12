@@ -1,11 +1,11 @@
 import { User } from '@/shared/models';
-import { ApiError } from '@/shared/utils/apiError.util';
+import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
 
 class UserService {
   async getProfile(userId: string) {
     const user = await User.findById(userId).select('-password_hash');
     if (!user) {
-      throw new ApiError(404, 'Không tìm thấy người dùng');
+      throw new NotFoundError('Không tìm thấy người dùng');
     }
     return user;
   }
@@ -16,13 +16,13 @@ class UserService {
   ) {
     const user = await User.findById(userId);
     if (!user) {
-      throw new ApiError(404, 'Không tìm thấy người dùng');
+      throw new NotFoundError('Không tìm thấy người dùng');
     }
 
     if (data.email && data.email !== user.email) {
       const existingEmail = await User.findOne({ email: data.email });
       if (existingEmail) {
-        throw new ApiError(400, 'Email này đã được sử dụng');
+        throw new BadRequestError('Email này đã được sử dụng');
       }
       user.email = data.email;
     }

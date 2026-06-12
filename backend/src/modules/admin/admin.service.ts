@@ -1,4 +1,4 @@
-import { ApiError } from '@/shared/utils/apiError.util';
+import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
 import { Company } from '@/shared/models/Company.model';
 import { AdminLog } from '@/shared/models/AdminLog.model';
 import { Notification } from '@/shared/models/Notification.model';
@@ -14,8 +14,8 @@ import { Types } from 'mongoose';
 class AdminService {
   async approveCompany(companyId: string, adminId: string, reason?: string) {
     const company = await Company.findById(companyId);
-    if (!company) throw new ApiError(404, 'Công ty không tồn tại');
-    if (company.status === 'active') throw new ApiError(400, 'Công ty đã được duyệt');
+    if (!company) throw new NotFoundError('Công ty không tồn tại');
+    if (company.status === 'active') throw new BadRequestError('Công ty đã được duyệt');
 
     company.status = 'active';
     company.is_verified = true;
@@ -43,10 +43,10 @@ class AdminService {
   }
 
   async rejectCompany(companyId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do từ chối là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do từ chối là bắt buộc');
 
     const company = await Company.findById(companyId);
-    if (!company) throw new ApiError(404, 'Công ty không tồn tại');
+    if (!company) throw new NotFoundError('Công ty không tồn tại');
 
     company.status = 'rejected';
     company.is_verified = false;
@@ -74,10 +74,10 @@ class AdminService {
   }
 
   async requestDocuments(companyId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Yêu cầu chỉnh sửa là bắt buộc');
+    if (!reason) throw new BadRequestError('Yêu cầu chỉnh sửa là bắt buộc');
 
     const company = await Company.findById(companyId);
-    if (!company) throw new ApiError(404, 'Công ty không tồn tại');
+    if (!company) throw new NotFoundError('Công ty không tồn tại');
 
     // Keep status as pending_verification but notify the company
     company.document_request_reason = reason;
@@ -152,11 +152,11 @@ class AdminService {
   }
 
   async removeReview(reviewId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do gỡ bỏ là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do gỡ bỏ là bắt buộc');
 
     const review = await Review.findById(reviewId);
-    if (!review) throw new ApiError(404, 'Đánh giá không tồn tại');
-    if (!review.is_visible) throw new ApiError(400, 'Đánh giá đã bị gỡ trước đó');
+    if (!review) throw new NotFoundError('Đánh giá không tồn tại');
+    if (!review.is_visible) throw new BadRequestError('Đánh giá đã bị gỡ trước đó');
 
     review.is_visible = false;
     review.removed_by = adminId as any;
@@ -191,12 +191,12 @@ class AdminService {
   }
 
   async removeReviewReply(reviewId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do gỡ bỏ là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do gỡ bỏ là bắt buộc');
 
     const review = await Review.findById(reviewId);
-    if (!review) throw new ApiError(404, 'Đánh giá không tồn tại');
-    if (!review.reply || !review.reply.content) throw new ApiError(400, 'Không có phản hồi nào để gỡ');
-    if (review.reply.is_visible === false) throw new ApiError(400, 'Phản hồi đã bị gỡ trước đó');
+    if (!review) throw new NotFoundError('Đánh giá không tồn tại');
+    if (!review.reply || !review.reply.content) throw new BadRequestError('Không có phản hồi nào để gỡ');
+    if (review.reply.is_visible === false) throw new BadRequestError('Phản hồi đã bị gỡ trước đó');
 
     // Hide the reply instead of deleting it
     review.reply.is_visible = false;
@@ -226,8 +226,8 @@ class AdminService {
 
   async restoreReview(reviewId: string, adminId: string) {
     const review = await Review.findById(reviewId);
-    if (!review) throw new ApiError(404, 'Đánh giá không tồn tại');
-    if (review.is_visible) throw new ApiError(400, 'Đánh giá đang hiển thị, không cần khôi phục');
+    if (!review) throw new NotFoundError('Đánh giá không tồn tại');
+    if (review.is_visible) throw new BadRequestError('Đánh giá đang hiển thị, không cần khôi phục');
 
     review.is_visible = true;
     review.removed_by = undefined;
@@ -254,9 +254,9 @@ class AdminService {
 
   async restoreReviewReply(reviewId: string, adminId: string) {
     const review = await Review.findById(reviewId);
-    if (!review) throw new ApiError(404, 'Đánh giá không tồn tại');
-    if (!review.reply || !review.reply.content) throw new ApiError(400, 'Không có phản hồi nào để khôi phục');
-    if (review.reply.is_visible !== false) throw new ApiError(400, 'Phản hồi đang hiển thị, không cần khôi phục');
+    if (!review) throw new NotFoundError('Đánh giá không tồn tại');
+    if (!review.reply || !review.reply.content) throw new BadRequestError('Không có phản hồi nào để khôi phục');
+    if (review.reply.is_visible !== false) throw new BadRequestError('Phản hồi đang hiển thị, không cần khôi phục');
 
     review.reply.is_visible = true;
     review.reply.removed_by = undefined;
@@ -297,15 +297,15 @@ class AdminService {
 
   async getUserById(userId: string) {
     const user = await User.findById(userId).exec();
-    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
+    if (!user) throw new NotFoundError('Người dùng không tồn tại');
     return user;
   }
 
   async lockUser(userId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do khóa tài khoản là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do khóa tài khoản là bắt buộc');
     const user = await User.findById(userId);
-    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
-    if (user.status === 'locked') throw new ApiError(400, 'Tài khoản người dùng đã bị khóa trước đó');
+    if (!user) throw new NotFoundError('Người dùng không tồn tại');
+    if (user.status === 'locked') throw new BadRequestError('Tài khoản người dùng đã bị khóa trước đó');
 
     user.status = 'locked';
     user.lock_reason = reason;
@@ -324,10 +324,10 @@ class AdminService {
   }
 
   async unlockUser(userId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do mở khóa tài khoản là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do mở khóa tài khoản là bắt buộc');
     const user = await User.findById(userId);
-    if (!user) throw new ApiError(404, 'Người dùng không tồn tại');
-    if (user.status === 'active') throw new ApiError(400, 'Tài khoản người dùng đang hoạt động');
+    if (!user) throw new NotFoundError('Người dùng không tồn tại');
+    if (user.status === 'active') throw new BadRequestError('Tài khoản người dùng đang hoạt động');
 
     user.status = 'active';
     user.lock_reason = undefined;
@@ -372,15 +372,15 @@ class AdminService {
 
   async getCompanyById(companyId: string) {
     const company = await Company.findById(companyId).exec();
-    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
+    if (!company) throw new NotFoundError('Công ty cứu hộ không tồn tại');
     return company;
   }
 
   async lockCompany(companyId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do khóa tài khoản là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do khóa tài khoản là bắt buộc');
     const company = await Company.findById(companyId);
-    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
-    if (company.status === 'locked') throw new ApiError(400, 'Tài khoản công ty đã bị khóa trước đó');
+    if (!company) throw new NotFoundError('Công ty cứu hộ không tồn tại');
+    if (company.status === 'locked') throw new BadRequestError('Tài khoản công ty đã bị khóa trước đó');
 
     company.status = 'locked';
     company.lock_reason = reason;
@@ -399,10 +399,10 @@ class AdminService {
   }
 
   async unlockCompany(companyId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do mở khóa tài khoản là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do mở khóa tài khoản là bắt buộc');
     const company = await Company.findById(companyId);
-    if (!company) throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
-    if (company.status === 'active') throw new ApiError(400, 'Tài khoản công ty đang hoạt động');
+    if (!company) throw new NotFoundError('Công ty cứu hộ không tồn tại');
+    if (company.status === 'active') throw new BadRequestError('Tài khoản công ty đang hoạt động');
 
     company.status = 'active';
     company.lock_reason = undefined;
@@ -457,10 +457,10 @@ class AdminService {
   }
 
   async removePost(postId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do gỡ bài viết là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do gỡ bài viết là bắt buộc');
     const post = await CommunityPost.findById(postId);
-    if (!post) throw new ApiError(404, 'Bài viết không tồn tại');
-    if (!post.is_visible) throw new ApiError(400, 'Bài viết đã bị gỡ trước đó');
+    if (!post) throw new NotFoundError('Bài viết không tồn tại');
+    if (!post.is_visible) throw new BadRequestError('Bài viết đã bị gỡ trước đó');
 
     post.is_visible = false;
     post.removed_by = adminId as any;
@@ -481,8 +481,8 @@ class AdminService {
 
   async restorePost(postId: string, adminId: string) {
     const post = await CommunityPost.findById(postId);
-    if (!post) throw new ApiError(404, 'Bài viết không tồn tại');
-    if (post.is_visible) throw new ApiError(400, 'Bài viết đang hiển thị, không cần khôi phục');
+    if (!post) throw new NotFoundError('Bài viết không tồn tại');
+    if (post.is_visible) throw new BadRequestError('Bài viết đang hiển thị, không cần khôi phục');
 
     post.is_visible = true;
     post.removed_by = undefined;
@@ -501,10 +501,10 @@ class AdminService {
   }
 
   async removeComment(commentId: string, adminId: string, reason: string) {
-    if (!reason) throw new ApiError(400, 'Lý do gỡ bình luận là bắt buộc');
+    if (!reason) throw new BadRequestError('Lý do gỡ bình luận là bắt buộc');
     const comment = await CommunityPostComment.findById(commentId);
-    if (!comment) throw new ApiError(404, 'Bình luận không tồn tại');
-    if (!comment.is_visible) throw new ApiError(400, 'Bình luận đã bị gỡ trước đó');
+    if (!comment) throw new NotFoundError('Bình luận không tồn tại');
+    if (!comment.is_visible) throw new BadRequestError('Bình luận đã bị gỡ trước đó');
 
     comment.is_visible = false;
     comment.removed_by = adminId as any;
@@ -525,8 +525,8 @@ class AdminService {
 
   async restoreComment(commentId: string, adminId: string) {
     const comment = await CommunityPostComment.findById(commentId);
-    if (!comment) throw new ApiError(404, 'Bình luận không tồn tại');
-    if (comment.is_visible) throw new ApiError(400, 'Bình luận đang hiển thị, không cần khôi phục');
+    if (!comment) throw new NotFoundError('Bình luận không tồn tại');
+    if (comment.is_visible) throw new BadRequestError('Bình luận đang hiển thị, không cần khôi phục');
 
     comment.is_visible = true;
     comment.removed_by = undefined;
@@ -564,7 +564,7 @@ class AdminService {
     if (serviceCategoryId) {
       // Validate serviceCategoryId format
       if (!Types.ObjectId.isValid(serviceCategoryId)) {
-        throw new ApiError(400, 'ID danh mục dịch vụ không hợp lệ');
+        throw new BadRequestError('ID danh mục dịch vụ không hợp lệ');
       }
       matchQuery.service_types = new Types.ObjectId(serviceCategoryId);
     }
@@ -696,7 +696,7 @@ class AdminService {
 
     if (companyId) {
       if (!Types.ObjectId.isValid(companyId)) {
-        throw new ApiError(400, 'ID công ty cứu hộ không hợp lệ');
+        throw new BadRequestError('ID công ty cứu hộ không hợp lệ');
       }
       requestMatch['company.company_id'] = new Types.ObjectId(companyId);
       reviewMatch.company_id = new Types.ObjectId(companyId);
@@ -941,7 +941,7 @@ class AdminService {
     if (startDateStr) {
       const parsedStart = new Date(startDateStr);
       if (isNaN(parsedStart.getTime())) {
-        throw new ApiError(400, 'Ngày bắt đầu không đúng định dạng');
+        throw new BadRequestError('Ngày bắt đầu không đúng định dạng');
       }
       start = parsedStart;
     }
@@ -949,7 +949,7 @@ class AdminService {
     if (endDateStr) {
       const parsedEnd = new Date(endDateStr);
       if (isNaN(parsedEnd.getTime())) {
-        throw new ApiError(400, 'Ngày kết thúc không đúng định dạng');
+        throw new BadRequestError('Ngày kết thúc không đúng định dạng');
       }
       end = parsedEnd;
     }
@@ -961,12 +961,12 @@ class AdminService {
     endBoundary.setHours(23, 59, 59, 999);
 
     if (startBoundary > endBoundary) {
-      throw new ApiError(400, 'Ngày bắt đầu không được lớn hơn ngày kết thúc');
+      throw new BadRequestError('Ngày bắt đầu không được lớn hơn ngày kết thúc');
     }
 
     const maxRangeMs = 366 * 24 * 60 * 60 * 1000;
     if (endBoundary.getTime() - startBoundary.getTime() > maxRangeMs) {
-      throw new ApiError(400, 'Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
+      throw new BadRequestError('Khoảng thời gian vượt quá giới hạn cho phép (366 ngày)');
     }
 
     return { startBoundary, endBoundary };

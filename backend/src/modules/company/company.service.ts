@@ -1,4 +1,4 @@
-import { ApiError } from '@/shared/utils/apiError.util';
+import { BadRequestError, NotFoundError, InternalServerError } from '@/shared/utils/apiError.util';
 import companyRepository from './company.repository';
 import type { ICompanyService } from './interfaces/company.interface';
 import type { ICompany } from '@/shared/models/Company.model';
@@ -12,12 +12,12 @@ import type { ICompany } from '@/shared/models/Company.model';
 class CompanyService implements ICompanyService {
   async getCompanyById(companyId: string): Promise<Omit<ICompany, 'password_hash'>> {
     if (!companyId) {
-      throw new ApiError(400, 'Company ID is required');
+      throw new BadRequestError('Company ID is required');
     }
 
     const company = await companyRepository.findById(companyId);
     if (!company) {
-      throw new ApiError(404, 'Company not found');
+      throw new NotFoundError('Company not found');
     }
 
     const { password_hash: _passwordHash, ...companyData } = company.toObject();
@@ -29,12 +29,12 @@ class CompanyService implements ICompanyService {
     data: import('./interfaces/company.interface').UpdateCompanyProfileInput
   ): Promise<Omit<ICompany, 'password_hash'>> {
     if (!companyId) {
-      throw new ApiError(400, 'Company ID is required');
+      throw new BadRequestError('Company ID is required');
     }
 
     const company = await companyRepository.findById(companyId);
     if (!company) {
-      throw new ApiError(404, 'Company not found');
+      throw new NotFoundError('Company not found');
     }
 
     // Set status to pending verification as per requirements
@@ -70,7 +70,7 @@ class CompanyService implements ICompanyService {
 
     const updatedCompany = await companyRepository.updateById(companyId, updateData);
     if (!updatedCompany) {
-      throw new ApiError(500, 'Failed to update company profile');
+      throw new InternalServerError('Failed to update company profile');
     }
 
     const { password_hash: _passwordHash, ...companyData } = updatedCompany.toObject();

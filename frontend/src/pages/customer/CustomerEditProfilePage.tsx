@@ -81,7 +81,7 @@ export default function CustomerEditProfilePage() {
       toast.success('Cập nhật hồ sơ thành công');
       navigate(-1);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Không thể cập nhật hồ sơ');
+      console.error('Error updating customer profile:', error);
     } finally {
       setLoading(false);
     }

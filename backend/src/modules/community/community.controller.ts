@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { CommunityPost, CommunityPostComment, CommunityPostLike, User, Company } from '@/shared/models';
-import { ApiError } from '@/shared/utils/apiError.util';
+import { NotFoundError, ForbiddenError, UnauthorizedError } from '@/shared/utils/apiError.util';
 import { notificationService } from '../notification/notification.service';
 
 /**
@@ -12,7 +12,7 @@ const assertCompanyActive = async (userId: string, role: string): Promise<void> 
   if (role !== 'company') return;
   const company = await Company.findById(userId).select('status').exec();
   if (!company || company.status !== 'active') {
-    throw new ApiError(403, 'Chỉ công ty đã được xác thực mới có thể tham gia cộng đồng');
+    throw new ForbiddenError('Chỉ công ty đã được xác thực mới có thể tham gia cộng đồng');
   }
 };
 
@@ -103,7 +103,7 @@ export const getPostDetails = async (req: AuthRequest, res: Response) => {
     .populate('tags', 'name');
 
   if (!post) {
-    throw new ApiError(404, 'Post not found');
+    throw new NotFoundError('Post not found');
   }
 
   const comments = await CommunityPostComment.find({ post_id: id, is_visible: true })
@@ -143,7 +143,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   const user_id = req.user?.id;
   const role = req.user?.role as string;
 
-  if (!user_id) throw new ApiError(401, 'Unauthorized');
+  if (!user_id) throw new UnauthorizedError('Unauthorized');
   await assertCompanyActive(user_id, role);
 
   const images: string[] = [];
@@ -184,12 +184,12 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
   const user_id = req.user?.id;
   const role = req.user?.role as string;
 
-  if (!user_id) throw new ApiError(401, 'Unauthorized');
+  if (!user_id) throw new UnauthorizedError('Unauthorized');
   await assertCompanyActive(user_id, role);
 
   const post = await CommunityPost.findOne({ _id: id, is_visible: true });
   if (!post) {
-    throw new ApiError(404, 'Post not found');
+    throw new NotFoundError('Post not found');
   }
 
   const existingLike = await CommunityPostLike.findOne({ post_id: id, user_id });
@@ -211,12 +211,12 @@ export const addComment = async (req: AuthRequest, res: Response) => {
   const user_id = req.user?.id;
   const role = req.user?.role as string;
 
-  if (!user_id) throw new ApiError(401, 'Unauthorized');
+  if (!user_id) throw new UnauthorizedError('Unauthorized');
   await assertCompanyActive(user_id, role);
 
   const post = await CommunityPost.findOne({ _id: id, is_visible: true });
   if (!post) {
-    throw new ApiError(404, 'Post not found');
+    throw new NotFoundError('Post not found');
   }
 
   const comment = await CommunityPostComment.create({

@@ -1,13 +1,14 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import userService from './user.service';
+import { UnauthorizedError } from '@/shared/utils/apiError.util';
 
 class UserController {
   async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id;
       if (!userId) {
-        return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+        throw new UnauthorizedError('Unauthorized');
       }
 
       const profile = await userService.getProfile(userId);
@@ -21,7 +22,7 @@ class UserController {
     try {
       const userId = req.user?.id;
       if (!userId) {
-        return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+        throw new UnauthorizedError('Unauthorized');
       }
 
       const { name, phone, email } = req.body;

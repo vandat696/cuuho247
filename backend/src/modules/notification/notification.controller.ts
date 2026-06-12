@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../shared/middleware/auth.middleware';
 import { notificationService } from './notification.service';
+import { UnauthorizedError, NotFoundError } from '../../shared/utils/apiError.util';
 
 class NotificationController {
   /**
@@ -10,8 +11,7 @@ class NotificationController {
   async getMyNotifications(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        res.status(401).json({ status: 'error', message: 'Chưa xác thực' });
-        return;
+        throw new UnauthorizedError('Chưa xác thực');
       }
 
       const notifications = await notificationService.getNotificationsForUser(req.user.id, req.user.role);
@@ -36,19 +36,14 @@ class NotificationController {
   async markAsRead(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        res.status(401).json({ status: 'error', message: 'Chưa xác thực' });
-        return;
+        throw new UnauthorizedError('Chưa xác thực');
       }
 
       const { id } = req.params;
       const notification = await notificationService.markAsRead(id, req.user.id);
 
       if (!notification) {
-        res.status(404).json({
-          status: 'error',
-          message: 'Không tìm thấy thông báo hoặc bạn không có quyền cập nhật thông báo này',
-        });
-        return;
+        throw new NotFoundError('Không tìm thấy thông báo hoặc bạn không có quyền cập nhật thông báo này');
       }
 
       res.status(200).json({
@@ -68,8 +63,7 @@ class NotificationController {
   async markAllAsRead(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        res.status(401).json({ status: 'error', message: 'Chưa xác thực' });
-        return;
+        throw new UnauthorizedError('Chưa xác thực');
       }
 
       await notificationService.markAllAsRead(req.user.id, req.user.role);
