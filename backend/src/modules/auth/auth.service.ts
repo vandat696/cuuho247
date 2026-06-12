@@ -22,7 +22,8 @@ class AuthService implements IAuthService {
 
     const existingUser = await userRepository.findByEmail(email);
     const existingCompany = await companyRepository.findByEmail(email);
-    if (existingUser || existingCompany) {
+    const existingAdmin = await adminRepository.findByEmail(email);
+    if (existingUser || existingCompany || existingAdmin) {
       throw new BadRequestError('Email đã được sử dụng');
     }
 
@@ -48,7 +49,8 @@ class AuthService implements IAuthService {
 
     const existingUser = await userRepository.findByEmail(email);
     const existingCompany = await companyRepository.findByEmail(email);
-    if (existingUser || existingCompany) {
+    const existingAdmin = await adminRepository.findByEmail(email);
+    if (existingUser || existingCompany || existingAdmin) {
       throw new BadRequestError('Email đã được sử dụng');
     }
 
@@ -84,23 +86,23 @@ class AuthService implements IAuthService {
   async login(userData: LoginInput): Promise<LoginResult> {
     const { email, password } = userData;
 
-    let account: any = await userRepository.findByEmail(email);
-    let role: 'customer' | 'company' | 'admin' = 'customer';
-    let repository: any = userRepository;
+    let account: any = await adminRepository.findByEmail(email);
+    let role: 'customer' | 'company' | 'admin' = 'admin';
+    let repository: any = null;
+
+    if (!account) {
+      account = await userRepository.findByEmail(email);
+      if (account) {
+        role = 'customer';
+        repository = userRepository;
+      }
+    }
 
     if (!account) {
       account = await companyRepository.findByEmail(email);
       if (account) {
         role = 'company';
         repository = companyRepository;
-      }
-    }
-
-    if (!account) {
-      account = await adminRepository.findByEmail(email);
-      if (account) {
-        role = 'admin';
-        repository = null;
       }
     }
 

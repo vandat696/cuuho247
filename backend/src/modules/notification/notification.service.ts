@@ -1,6 +1,6 @@
-import { Types } from 'mongoose';
-import { Notification, INotification, NotificationType, RecipientType } from '../../shared/models/Notification.model';
+import { INotification, NotificationType, RecipientType } from '../../shared/models/Notification.model';
 import { getIo } from '../../socket';
+import { notificationRepository } from './notification.repository';
 
 export class NotificationService {
   /**
@@ -9,31 +9,14 @@ export class NotificationService {
   async getNotificationsForUser(userId: string, role: string): Promise<INotification[]> {
     const recipientType: RecipientType = role === 'customer' ? 'user' : (role as RecipientType);
 
-    return Notification.find({
-      recipient_id: new Types.ObjectId(userId),
-      recipient_type: recipientType,
-    })
-      .sort({ created_at: -1 })
-      .exec();
+    return notificationRepository.findByRecipient(userId, recipientType);
   }
 
   /**
    * Mark a single notification as read
    */
   async markAsRead(notificationId: string, userId: string): Promise<INotification | null> {
-    return Notification.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(notificationId),
-        recipient_id: new Types.ObjectId(userId),
-      },
-      {
-        $set: {
-          is_read: true,
-          read_at: new Date(),
-        },
-      },
-      { new: true }
-    ).exec();
+    return notificationRepository.markAsRead(notificationId, userId);
   }
 
   /**
@@ -42,19 +25,7 @@ export class NotificationService {
   async markAllAsRead(userId: string, role: string): Promise<void> {
     const recipientType: RecipientType = role === 'customer' ? 'user' : (role as RecipientType);
 
-    await Notification.updateMany(
-      {
-        recipient_id: new Types.ObjectId(userId),
-        recipient_type: recipientType,
-        is_read: { $ne: true },
-      },
-      {
-        $set: {
-          is_read: true,
-          read_at: new Date(),
-        },
-      }
-    ).exec();
+    await notificationRepository.markAllAsRead(userId, recipientType);
   }
 
   /**
@@ -68,9 +39,9 @@ export class NotificationService {
     body: string,
     payload?: Record<string, unknown>
   ): Promise<INotification> {
-    const notification = await Notification.create({
+    const notification = await notificationRepository.create({
       recipient_type: recipientType,
-      recipient_id: new Types.ObjectId(recipientId),
+      recipient_id: recipientId as any,
       type,
       title,
       body,

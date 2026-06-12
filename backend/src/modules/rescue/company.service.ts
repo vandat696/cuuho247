@@ -6,6 +6,7 @@ import { vehicleRepository } from '@/modules/vehicle/vehicle.repository';
 import { getIncidentLabel } from '@/shared/config/incidents';
 import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
 import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
+import { getDistanceFromCoordinates, estimateEtaMinutes, calcDistanceKm } from '@/shared/utils/geo.util';
 import type {
   IRescueCompanyService,
   AcceptRescueRequestData,
@@ -38,7 +39,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     const requests = await rescueRepository.findPendingRequestsByCompany(companyId);
 
     return requests.map((request: any) => {
-      const distanceKm = this.getDistanceFromCoordinates(companyCoords, request.location?.coordinates);
+      const distanceKm = getDistanceFromCoordinates(companyCoords, request.location?.coordinates);
       return this.mapBasicRequest(request, distanceKm);
     });
   }
@@ -53,7 +54,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     }
 
     const company = await companyRepository.findById(companyId);
-    const distanceKm = this.getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates);
+    const distanceKm = getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates);
 
     return {
       ...this.mapBasicRequest(request, distanceKm),
@@ -266,11 +267,11 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     const companyCoords = company?.location?.coordinates;
     const originCoords = origin ? [origin.lng, origin.lat] : companyCoords;
-    const distanceKm = this.getDistanceFromCoordinates(originCoords, (request as any).location?.coordinates);
+    const distanceKm = getDistanceFromCoordinates(originCoords, (request as any).location?.coordinates);
 
     return {
       distance_km: distanceKm,
-      eta_minutes: distanceKm === null ? null : this.estimateEtaMinutes(distanceKm),
+      eta_minutes: distanceKm === null ? null : estimateEtaMinutes(distanceKm),
       origin: originCoords
         ? {
             lng: originCoords[0],
@@ -334,7 +335,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     return resultCompanies.map((company) => {
       const companyId = (company._id as any).toString();
       const coords = company.location?.coordinates ?? [0, 0];
-      const distanceKm = this.calcDistanceKm(lat, lng, coords[1], coords[0]);
+      const distanceKm = calcDistanceKm(lat, lng, coords[1], coords[0]);
       const roundedDistanceKm = Math.round(distanceKm * 10) / 10;
       const prices = pricesByCompany.get(companyId) ?? [];
 
@@ -408,39 +409,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       full_name: userIdObj?.full_name || 'Khách hàng',
       phone: userIdObj?.phone || '',
     };
-  }
-
-  private getDistanceFromCoordinates(originCoords?: number[], destinationCoords?: number[]): number | null {
-    if (!originCoords || !destinationCoords) {
-      return null;
-    }
-
-    const distanceKm = this.calcDistanceKm(
-      originCoords[1],
-      originCoords[0],
-      destinationCoords[1],
-      destinationCoords[0]
-    );
-    return Math.round(distanceKm * 10) / 10;
-  }
-
-  private calcDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const radiusKm = 6371;
-    const dLat = this.toRad(lat2 - lat1);
-    const dLon = this.toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) ** 2 + Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return radiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  private estimateEtaMinutes(distanceKm: number): number {
-    const averageUrbanSpeedKmH = 30;
-    const dispatchBufferMinutes = 5;
-    return Math.max(5, Math.ceil((distanceKm / averageUrbanSpeedKmH) * 60 + dispatchBufferMinutes));
-  }
-
-  private toRad(deg: number): number {
-    return (deg * Math.PI) / 180;
   }
 }
 

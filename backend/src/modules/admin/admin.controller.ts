@@ -4,16 +4,16 @@ import adminService from './admin.service';
 import { BadRequestError } from '../../shared/utils/apiError.util';
 
 class AdminController {
-  async getPendingCompanies(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getPendingCompanies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const companies = await adminService.getPendingCompanies();
       res.status(200).json({ status: 'success', data: companies });
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async approveCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  approveCompany = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleCompanyStatusChange(
       req,
       res,
@@ -22,9 +22,9 @@ class AdminController {
       'Công ty đã được duyệt thành công',
       (companyId, adminId, reason) => adminService.approveCompany(companyId, adminId, reason)
     );
-  }
+  };
 
-  async rejectCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  rejectCompany = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleCompanyStatusChange(
       req,
       res,
@@ -33,9 +33,9 @@ class AdminController {
       'Hồ sơ công ty đã bị từ chối',
       (companyId, adminId, reason) => adminService.rejectCompany(companyId, adminId, reason)
     );
-  }
+  };
 
-  async requestDocuments(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  requestDocuments = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleCompanyStatusChange(
       req,
       res,
@@ -44,9 +44,9 @@ class AdminController {
       'Đã gửi yêu cầu chỉnh sửa giấy tờ',
       (companyId, adminId, reason) => adminService.requestDocuments(companyId, adminId, reason)
     );
-  }
+  };
 
-  async getAuditLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getAuditLogs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const skip = parseInt(req.query.skip as string) || 0;
@@ -55,9 +55,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getReviews = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const page = parseInt(req.query.page as string) || 1;
@@ -66,9 +66,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async removeReview(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  removeReview = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { reviewId } = req.params;
       const { reason } = req.body;
@@ -78,9 +78,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async removeReviewReply(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  removeReviewReply = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { reviewId } = req.params;
       const { reason } = req.body;
@@ -90,9 +90,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async restoreReview(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  restoreReview = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { reviewId } = req.params;
       const adminId = req.user?.id as string;
@@ -101,9 +101,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async restoreReviewReply(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  restoreReviewReply = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { reviewId } = req.params;
       const adminId = req.user?.id as string;
@@ -112,9 +112,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const search = req.query.search as string;
       const status = req.query.status as string;
@@ -125,9 +125,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getUserById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const user = await adminService.getUserById(userId);
@@ -135,9 +135,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async lockUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  lockUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -147,9 +147,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async unlockUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  unlockUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -159,9 +159,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getUserLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getUserLogs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const logs = await adminService.getUserLogs(userId);
@@ -169,9 +169,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getCompanies(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getCompanies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const search = req.query.search as string;
       const status = req.query.status as string;
@@ -182,9 +182,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getCompanyById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getCompanyById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { companyId } = req.params;
       const company = await adminService.getCompanyById(companyId);
@@ -192,9 +192,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async lockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  lockCompany = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleCompanyStatusChange(
       req,
       res,
@@ -203,9 +203,9 @@ class AdminController {
       'Khóa tài khoản công ty thành công',
       (companyId, adminId, reason) => adminService.lockCompany(companyId, adminId, reason)
     );
-  }
+  };
 
-  async unlockCompany(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  unlockCompany = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleCompanyStatusChange(
       req,
       res,
@@ -214,9 +214,9 @@ class AdminController {
       'Mở khóa tài khoản công ty thành công',
       (companyId, adminId, reason) => adminService.unlockCompany(companyId, adminId, reason)
     );
-  }
+  };
 
-  async getCompanyLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getCompanyLogs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { companyId } = req.params;
       const logs = await adminService.getCompanyLogs(companyId);
@@ -224,9 +224,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getCommunityPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getCommunityPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const search = req.query.search as string;
       const page = parseInt(req.query.page as string) || 1;
@@ -236,9 +236,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getPostComments(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getPostComments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { postId } = req.params;
       const comments = await adminService.getPostComments(postId);
@@ -246,9 +246,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async removePost(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  removePost = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { postId } = req.params;
       const { reason } = req.body;
@@ -258,9 +258,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async restorePost(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  restorePost = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { postId } = req.params;
       const adminId = req.user?.id as string;
@@ -269,9 +269,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async removeComment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  removeComment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { commentId } = req.params;
       const { reason } = req.body;
@@ -281,9 +281,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async restoreComment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  restoreComment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { commentId } = req.params;
       const adminId = req.user?.id as string;
@@ -292,9 +292,9 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getRescueActivitiesReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getRescueActivitiesReport = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const startDate = req.query.startDate as string | undefined;
       const endDate = req.query.endDate as string | undefined;
@@ -309,18 +309,18 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getAllCompanies(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getAllCompanies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const companies = await adminService.getAllCompanies();
       res.status(200).json({ status: 'success', data: companies });
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  async getServiceQualityReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+  getServiceQualityReport = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const startDate = req.query.startDate as string | undefined;
       const endDate = req.query.endDate as string | undefined;
@@ -335,16 +335,16 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  private async handleCompanyStatusChange(
+  private handleCompanyStatusChange = async (
     req: AuthRequest,
     res: Response,
     next: NextFunction,
     status: string,
     message: string,
     serviceMethod: (companyId: string, adminId: string, reason: string) => Promise<any>
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { companyId } = req.params;
       const { reason } = req.body;
@@ -363,13 +363,13 @@ class AdminController {
     } catch (err) {
       next(err);
     }
-  }
+  };
 
-  private validateGroupBy(groupBy: any): void {
+  private validateGroupBy = (groupBy: any): void => {
     if (groupBy !== 'day' && groupBy !== 'week' && groupBy !== 'month') {
       throw new BadRequestError('Tham số groupBy không hợp lệ. Chỉ chấp nhận day, week hoặc month.');
     }
-  }
+  };
 }
 
 export default new AdminController();
