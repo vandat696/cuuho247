@@ -13,16 +13,6 @@ reviewEventEmitter.on(REVIEW_EVENTS.REVIEW_SUBMITTED, async ({ companyId, userId
       `Bạn đã nhận được đánh giá ${rating} sao mới từ khách hàng cho yêu cầu #${rescueRequestId.slice(-4)}.`,
       { rescue_request_id: rescueRequestId }
     );
-
-    // Notify Customer
-    await notificationService.createAndSendNotification(
-      userId,
-      'user',
-      'review_submitted',
-      'Đánh giá đã được gửi',
-      'Cảm ơn bạn đã đánh giá dịch vụ của chúng tôi.',
-      { rescue_request_id: rescueRequestId }
-    );
   } catch (err) {
     console.error('Error creating review notifications:', err);
   }

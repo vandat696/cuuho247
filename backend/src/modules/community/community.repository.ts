@@ -32,7 +32,9 @@ class CommunityRepository implements ICommunityRepository {
   }
 
   async findCommentById(commentId: string): Promise<any> {
-    return CommunityPostComment.findById(commentId).exec();
+    return CommunityPostComment.findById(commentId)
+      .populate('user_id', 'full_name company_name avatar_url role')
+      .exec();
   }
 
   async findLike(postId: string, userId: string): Promise<any> {
