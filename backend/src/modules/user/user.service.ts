@@ -1,26 +1,29 @@
-import { User } from '@/shared/models';
+import userRepository from './user.repository';
 import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
+import { IUserService } from './interfaces/user.interface';
 
-class UserService {
+class UserService implements IUserService {
   async getProfile(userId: string) {
-    const user = await User.findById(userId).select('-password_hash');
+    const user = await userRepository.findById(userId);
     if (!user) {
       throw new NotFoundError('Không tìm thấy người dùng');
     }
-    return user;
+    const userObj = user.toObject();
+    delete (userObj as any).password_hash;
+    return userObj;
   }
 
   async updateProfile(
     userId: string,
     data: { full_name?: string; phone?: string; email?: string; avatar_url?: string }
   ) {
-    const user = await User.findById(userId);
+    const user = await userRepository.findById(userId);
     if (!user) {
       throw new NotFoundError('Không tìm thấy người dùng');
     }
 
     if (data.email && data.email !== user.email) {
-      const existingEmail = await User.findOne({ email: data.email });
+      const existingEmail = await userRepository.findByEmail(data.email);
       if (existingEmail) {
         throw new BadRequestError('Email này đã được sử dụng');
       }

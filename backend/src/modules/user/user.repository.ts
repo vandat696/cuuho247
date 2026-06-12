@@ -1,11 +1,11 @@
-import { User, IUser } from '../models/User.model';
+import { User, IUser } from '../../shared/models/User.model';
+import { IUserRepository } from './interfaces/user.interface';
 
 /**
  * UserRepository: Repository cho User model.
- * Chỉ dùng trong module Auth.
- * Nằm ở shared/ vì Auth module cần nó và không thuộc về một module nghiệp vụ cụ thể.
+ * Chỉ dùng trong module Auth và User.
  */
-class UserRepository {
+class UserRepository implements IUserRepository {
   // Check for duplicate data: email
   async findByEmail(email: string): Promise<IUser | null> {
     return User.findOne({ email }).exec();
@@ -15,6 +15,10 @@ class UserRepository {
   async create(userData: Partial<IUser>): Promise<IUser> {
     const newUser = new User(userData);
     return newUser.save();
+  }
+
+  async findById(id: string): Promise<IUser | null> {
+    return User.findById(id).exec();
   }
 
   // Update last login time

@@ -1,10 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
-import { Message } from '@/shared/models/Message.model';
-import { RescueRequest } from '@/shared/models/RescueRequest.model';
-import { hasRequestAccess } from '@/shared/utils/rescueRequestAuth';
-import { notificationService } from '../notification/notification.service';
-import { UnauthorizedError, NotFoundError, ForbiddenError, BadRequestError } from '../../shared/utils/apiError.util';
+import { messageService } from './message.service';
+import { UnauthorizedError, BadRequestError } from '@/shared/utils/apiError.util';
 
 class MessageController {
   /**
@@ -21,28 +18,13 @@ class MessageController {
         throw new UnauthorizedError('Chưa xác thực');
       }
 
-      // Verify user has access to this rescue request
-      const rescueRequest = await RescueRequest.findById(rescueRequestId).populate('user_id', 'full_name');
-      if (!rescueRequest) {
-        throw new NotFoundError('Yêu cầu cứu hộ không tồn tại');
-      }
-
-      if (!hasRequestAccess(rescueRequest, userId, userRole)) {
-        throw new ForbiddenError('Không có quyền truy cập cuộc trò chuyện này');
-      }
-
-      const messages = await Message.find({ rescue_request_id: rescueRequestId }).sort({ created_at: 1 }).lean();
+      const { messages, rescueRequest } = await messageService.getMessages(userId, userRole, rescueRequestId);
 
       res.status(200).json({
         status: 'success',
         data: {
           messages,
-          rescue_request: {
-            _id: rescueRequest._id,
-            company_name: rescueRequest.company.company_name,
-            customer_name: (rescueRequest.user_id as any)?.full_name || 'Khách hàng',
-            status: rescueRequest.status,
-          },
+          rescue_request: rescueRequest,
         },
       });
     } catch (error) {
@@ -68,76 +50,27 @@ class MessageController {
         throw new BadRequestError('Vui lòng chọn ảnh');
       }
 
-      const rescueRequest = await RescueRequest.findById(rescueRequestId);
-      if (!rescueRequest) {
-        throw new NotFoundError('Yêu cầu cứu hộ không tồn tại');
-      }
-
-      if (!hasRequestAccess(rescueRequest, userId, userRole)) {
-        throw new ForbiddenError('Không có quyền truy cập cuộc trò chuyện này');
-      }
-
-      if (
-        rescueRequest.status === 'completed' ||
-        rescueRequest.status === 'cancelled' ||
-        rescueRequest.status === 'rejected'
-      ) {
-        throw new BadRequestError('Không thể gửi tin nhắn do yêu cầu cứu hộ đã kết thúc hoặc bị hủy');
-      }
-
-      const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-      const senderType = userRole === 'company' ? 'company' : 'user';
-
-      const message = await Message.create({
-        rescue_request_id: rescueRequestId,
-        sender_type: senderType,
-        sender_id: userId,
-        content: imageUrl,
-        content_type: 'image',
-        is_read: false,
-      });
+      const io = req.app.get('io');
+      const message = await messageService.sendImage(
+        userId,
+        userRole,
+        rescueRequestId,
+        req.file.filename,
+        req.protocol,
+        req.get('host') || '',
+        io
+      );
 
       const messageData = {
         _id: message._id,
-        rescue_request_id: rescueRequestId,
-        sender_type: senderType,
-        sender_id: userId,
+        rescue_request_id: message.rescue_request_id,
+        sender_type: message.sender_type,
+        sender_id: message.sender_id,
         content: message.content,
         content_type: message.content_type,
         is_read: message.is_read,
         created_at: message.created_at,
       };
-
-      // Broadcast to socket room
-      const io = req.app.get('io');
-      if (io) {
-        const room = `chat:${rescueRequestId}`;
-        io.to(room).emit('receive_message', messageData);
-        console.log(`[Socket] Image message saved & sent to room ${room}`);
-      } else {
-        console.warn('[Socket] Socket.IO instance not found on app, fallback to DB only');
-      }
-
-      // Create real-time chat notification for counterparty
-      try {
-        const isCompanySender = senderType === 'company';
-        const recipientId = isCompanySender
-          ? rescueRequest.user_id.toString()
-          : rescueRequest.company.company_id.toString();
-        const recipientType = isCompanySender ? 'user' : 'company';
-        const senderName = isCompanySender ? rescueRequest.company.company_name : 'Khách hàng';
-
-        await notificationService.createAndSendNotification(
-          recipientId,
-          recipientType,
-          'chat_message',
-          'Tin nhắn mới',
-          `Bạn có tin nhắn ảnh mới từ ${senderName}`,
-          { rescue_request_id: rescueRequestId }
-        );
-      } catch (err) {
-        console.error('[Socket] Error creating chat message notification for image:', err);
-      }
 
       res.status(201).json({
         status: 'success',

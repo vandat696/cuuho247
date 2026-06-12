@@ -1,9 +1,9 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { Message } from '../shared/models/Message.model';
-import { RescueRequest } from '../shared/models/RescueRequest.model';
+import rescueRepository from '../modules/rescue/rescue.repository';
+import { messageRepository } from '../modules/message/message.repository';
+import { messageEventEmitter, MESSAGE_EVENTS } from '../modules/message/message.event';
 import { hasRequestAccess } from '../shared/utils/rescueRequestAuth';
-import { notificationService } from '../modules/notification/notification.service';
 
 interface SocketUser {
   id: string;
@@ -32,7 +32,7 @@ async function validateRequestAccess(
   }
 
   try {
-    const rescueRequest = await RescueRequest.findById(rescue_request_id).lean();
+    const rescueRequest = await rescueRepository.findById(rescue_request_id);
     if (!rescueRequest) {
       if (!silent) socket.emit('error', { message: 'Yêu cầu cứu hộ không tồn tại' });
       return null;
@@ -145,52 +145,20 @@ export function setupSocket(io: Server): void {
 
           const senderType = socket.user.role === 'company' ? 'company' : 'user';
 
-          const message = await Message.create({
-            rescue_request_id,
+          const message = await messageRepository.create({
+            rescue_request_id: rescue_request_id as any,
             sender_type: senderType,
-            sender_id: socket.user.id,
+            sender_id: socket.user.id as any,
             content: content.trim(),
             content_type: 'text',
             is_read: false,
           });
 
-          const messageData = {
-            _id: message._id,
-            rescue_request_id,
-            sender_type: senderType,
-            sender_id: socket.user.id,
-            content: message.content,
-            content_type: message.content_type,
-            is_read: message.is_read,
-            created_at: message.created_at,
-          };
-
-          const room = `chat:${rescue_request_id}`;
-          // Broadcast to all members in the room (including sender)
-          io.to(room).emit('receive_message', messageData);
-
-          console.log(`[Socket] Message saved & sent to room ${room}`);
-
-          // Create real-time chat notification for counterparty
-          try {
-            const isCompanySender = senderType === 'company';
-            const recipientId = isCompanySender
-              ? rescueRequest.user_id.toString()
-              : rescueRequest.company.company_id.toString();
-            const recipientType = isCompanySender ? 'user' : 'company';
-            const senderName = isCompanySender ? rescueRequest.company.company_name : 'Khách hàng';
-
-            await notificationService.createAndSendNotification(
-              recipientId,
-              recipientType,
-              'chat_message',
-              'Tin nhắn mới',
-              `Bạn có tin nhắn mới từ ${senderName}`,
-              { rescue_request_id }
-            );
-          } catch (err) {
-            console.error('[Socket] Error creating chat message notification:', err);
-          }
+          // Emit event for subscriber to handle broadcast and notification
+          messageEventEmitter.emit(MESSAGE_EVENTS.MESSAGE_SENT, {
+            message,
+            io,
+          });
         } catch (err) {
           console.error('[Socket] Error saving message:', err);
           socket.emit('error', { message: 'Failed to send message' });
@@ -208,10 +176,7 @@ export function setupSocket(io: Server): void {
 
       try {
         const senderType = socket.user!.role === 'company' ? 'user' : 'company';
-        await Message.updateMany(
-          { rescue_request_id, sender_type: senderType, is_read: false },
-          { $set: { is_read: true } }
-        );
+        await messageRepository.markAsRead(rescue_request_id, senderType);
 
         const room = `chat:${rescue_request_id}`;
         io.to(room).emit('messages_read', { rescue_request_id, reader_id: socket.user!.id });

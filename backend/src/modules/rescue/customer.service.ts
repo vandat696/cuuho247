@@ -3,7 +3,7 @@ import companyRepository from '@/modules/company/company.repository';
 import rescueRepository from './rescue.repository';
 import type { IRescueRequest, RequestStatus } from '@/shared/models/RescueRequest.model';
 import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
-import { ServiceCategory } from '@/shared/models/ServiceCategory.model';
+import { serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { IRescueCustomerService, CreateRequestData } from './interfaces/rescue.interface';
 
@@ -56,7 +56,7 @@ class RescueCustomerService implements IRescueCustomerService {
 
     if (service_types && service_types.length > 0) {
       const mappedCategorySlugs = mapIncidentTypesToCategories(service_types);
-      const categories = await ServiceCategory.find({ slug: { $in: mappedCategorySlugs } });
+      const categories = await serviceCategoryRepository.findBySlugs(mappedCategorySlugs);
       if (categories.length > 0) {
         payload.service_types = categories.map((cat) => cat._id as Types.ObjectId);
       }
