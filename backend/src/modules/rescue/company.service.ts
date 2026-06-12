@@ -1,8 +1,9 @@
 import { Types } from 'mongoose';
 import companyRepository from '@/modules/company/company.repository';
 import { serviceRepository, serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
-import { RescueRequest } from '@/shared/models/RescueRequest.model';
-import { Vehicle } from '@/shared/models/Vehicle.model';
+import rescueRepository from './rescue.repository';
+import { vehicleRepository } from '@/modules/vehicle/vehicle.repository';
+import { getIncidentLabel } from '@/shared/config/incidents';
 import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
 import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
 import type {
@@ -22,39 +23,19 @@ import type {
   SearchParams,
 } from './interfaces/rescue.interface';
 
-const INCIDENT_LABEL_MAP: Record<string, string> = {
-  'su-co-lop-xe': 'Lốp xe gặp sự cố',
-  'het-binh-ac-quy': 'Hết bình ắc quy',
-  'het-nhien-lieu': 'Hết nhiên liệu',
-  'xe-khong-khoi-dong': 'Xe không khởi động được',
-  'xe-chet-may': 'Xe bị chết máy giữa đường',
-  'xe-gap-su-co-ky-thuat': 'Xe có dấu hiệu hỏng hóc',
-  'tai-nan-giao-thong': 'Tai nạn giao thông',
-  'xe-bi-sa-lay': 'Xe bị sa lầy hoặc mắc kẹt',
-  'xe-bi-ngap-nuoc': 'Xe bị ngập nước',
-  'su-co-khoa-xe': 'Không mở được xe',
-  khac: 'Sự cố khác',
-};
-
 /**
- * RescueCompanyService: Xử lý nghiệp vụ Cứu hộ từ phía Công ty.
+ * CompanyRescueRequestService: Xử lý nghiệp vụ Cứu hộ từ phía Công ty.
  *
  * Giao tiếp với module Company thông qua companyRepository (ICompanyRepository).
  * Giao tiếp với module ServiceCatalog thông qua serviceRepository (IServiceRepository).
+ * Giao tiếp với Database thông qua rescueRepository (IRescueRepository) và vehicleRepository (IVehicleRepository).
  */
 class CompanyRescueRequestService implements IRescueCompanyService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
     const company = await companyRepository.findById(companyId);
     const companyCoords = company?.location?.coordinates;
 
-    const requests = await RescueRequest.find({
-      'company.company_id': companyId,
-      status: 'pending',
-    })
-      .populate('service_types', 'name slug')
-      .sort({ created_at: -1 })
-      .lean()
-      .exec();
+    const requests = await rescueRepository.findPendingRequestsByCompany(companyId);
 
     return requests.map((request: any) => {
       const distanceKm = this.getDistanceFromCoordinates(companyCoords, request.location?.coordinates);
@@ -66,7 +47,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<PendingRescueRequestDetailResult | null> {
-    const request = await this.getRequestDetail(companyId, requestId, 'pending');
+    const request = await rescueRepository.findDetail(companyId, requestId, 'pending');
     if (!request) {
       return null;
     }
@@ -83,15 +64,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
   }
 
   async getActiveRequestsForCompany(companyId: string): Promise<ActiveRescueRequestResult[]> {
-    const requests = await RescueRequest.find({
-      'company.company_id': companyId,
-      status: { $in: ['accepted', 'in_progress'] },
-    })
-      .populate('service_types', 'name slug')
-      .sort({ started_at: -1, accepted_at: -1, created_at: -1 })
-      .lean()
-      .exec();
-
+    const requests = await rescueRepository.findActiveRequestsByCompany(companyId);
     return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
@@ -99,7 +72,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<ActiveRescueRequestDetailResult | null> {
-    const request = await this.getRequestDetail(companyId, requestId, ['accepted', 'in_progress']);
+    const request = await rescueRepository.findDetail(companyId, requestId, ['accepted', 'in_progress', 'arrived']);
     if (!request) {
       return null;
     }
@@ -120,15 +93,9 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       return null;
     }
 
-    const vehicle = await Vehicle.findOne({
-      _id: data.vehicle_id,
-      company_id: companyId,
-    })
-      .select('vehicle_type plate_number status')
-      .lean()
-      .exec();
+    const vehicle = await vehicleRepository.findById(data.vehicle_id);
 
-    if (!vehicle) {
+    if (!vehicle || vehicle.company_id.toString() !== companyId) {
       throw new NotFoundError('Xe cứu hộ không tồn tại hoặc không thuộc công ty');
     }
 
@@ -136,44 +103,20 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       throw new BadRequestError('Xe cứu hộ đang không khả dụng');
     }
 
-    const acceptedAt = new Date();
-    const request = (await RescueRequest.findOneAndUpdate(
-      {
-        _id: requestId,
-        'company.company_id': companyId,
-        status: 'pending',
-      },
-      {
-        $set: {
-          status: 'accepted',
-          vehicle: {
-            vehicle_id: new Types.ObjectId(data.vehicle_id),
-            plate_number: vehicle.plate_number,
-          },
-          eta_minutes: data.eta_minutes,
-          accepted_at: acceptedAt,
-        },
-        $push: {
-          status_history: {
-            status: 'accepted',
-            changed_by: 'company',
-            changed_at: acceptedAt,
-            note: data.note || `Du kien den trong ${data.eta_minutes} phut`,
-          },
-        },
-      },
-      { new: true, runValidators: true }
-    )
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
+    const request = await rescueRepository.acceptPendingRequest(
+      companyId,
+      requestId,
+      data.vehicle_id,
+      vehicle.plate_number,
+      data.eta_minutes,
+      data.note || undefined
+    );
 
     if (!request) {
       return null;
     }
 
-    await Vehicle.findByIdAndUpdate(data.vehicle_id, { status: 'unavailable' }).exec();
+    await vehicleRepository.update(data.vehicle_id, { status: 'unavailable' });
 
     return {
       ...(await this.mapRequestWithVehicle(request, vehicle)),
@@ -190,33 +133,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       return null;
     }
 
-    const startedAt = new Date();
-    const request = (await RescueRequest.findOneAndUpdate(
-      {
-        _id: requestId,
-        'company.company_id': companyId,
-        status: 'accepted',
-      },
-      {
-        $set: {
-          status: 'in_progress',
-          started_at: startedAt,
-        },
-        $push: {
-          status_history: {
-            status: 'in_progress',
-            changed_by: 'company',
-            changed_at: startedAt,
-            note: 'Bắt đầu di chuyển',
-          },
-        },
-      },
-      { new: true, runValidators: true }
-    )
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
+    const request = await rescueRepository.startActiveRequest(companyId, requestId);
 
     if (!request) {
       return null;
@@ -237,33 +154,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       return null;
     }
 
-    const arrivedAt = new Date();
-    const request = (await RescueRequest.findOneAndUpdate(
-      {
-        _id: requestId,
-        'company.company_id': companyId,
-        status: 'in_progress',
-      },
-      {
-        $set: {
-          status: 'arrived',
-          arrived_at: arrivedAt,
-        },
-        $push: {
-          status_history: {
-            status: 'arrived',
-            changed_by: 'company',
-            changed_at: arrivedAt,
-            note: 'Xe đã đến nơi',
-          },
-        },
-      },
-      { new: true, runValidators: true }
-    )
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
+    const request = await rescueRepository.arriveActiveRequest(companyId, requestId);
 
     if (!request) {
       return null;
@@ -276,15 +167,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
   }
 
   async getCompletedRequestsForCompany(companyId: string): Promise<CompletedRescueRequestResult[]> {
-    const requests = await RescueRequest.find({
-      'company.company_id': companyId,
-      status: 'completed',
-    })
-      .populate('service_types', 'name slug')
-      .sort({ completed_at: -1, updated_at: -1, created_at: -1 })
-      .lean()
-      .exec();
-
+    const requests = await rescueRepository.findCompletedRequestsByCompany(companyId);
     return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
@@ -292,7 +175,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<CompletedRescueRequestDetailResult | null> {
-    const request = await this.getRequestDetail(companyId, requestId, 'completed');
+    const request = await rescueRepository.findDetail(companyId, requestId, 'completed');
     if (!request) {
       return null;
     }
@@ -313,51 +196,20 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       return null;
     }
 
-    const completedAt = new Date();
-    const request = (await RescueRequest.findOneAndUpdate(
-      {
-        _id: requestId,
-        'company.company_id': companyId,
-        status: { $in: ['accepted', 'in_progress', 'arrived'] },
-      },
-      {
-        $set: {
-          status: 'completed',
-          completed_at: completedAt,
-          payment: {
-            amount: data.amount,
-            method: data.method || 'cash',
-            paid_at: completedAt,
-          },
-        },
-        $push: {
-          status_history: {
-            status: 'completed',
-            changed_by: 'company',
-            changed_at: completedAt,
-            note: data.note || `Thanh toán thực tế: ${data.amount}`,
-          },
-        },
-      },
-      { new: true, runValidators: true }
-    )
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec()) as any;
+    const request = await rescueRepository.completeActiveRequest(
+      companyId,
+      requestId,
+      data.amount,
+      data.method,
+      data.note || undefined
+    );
 
     if (!request) {
       return null;
     }
 
     if (request.vehicle?.vehicle_id) {
-      await Vehicle.findOneAndUpdate(
-        {
-          _id: request.vehicle.vehicle_id,
-          company_id: companyId,
-        },
-        { status: 'available' }
-      ).exec();
+      await vehicleRepository.update(request.vehicle.vehicle_id.toString(), { status: 'available' });
     }
 
     return {
@@ -367,15 +219,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
   }
 
   async getCanceledRequestsForCompany(companyId: string): Promise<CanceledRescueRequestResult[]> {
-    const requests = await RescueRequest.find({
-      'company.company_id': companyId,
-      status: 'cancelled',
-    })
-      .populate('service_types', 'name slug')
-      .sort({ cancelled_at: -1, updated_at: -1, created_at: -1 })
-      .lean()
-      .exec();
-
+    const requests = await rescueRepository.findCanceledRequestsByCompany(companyId);
     return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));
   }
 
@@ -383,7 +227,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
     companyId: string,
     requestId: string
   ): Promise<CanceledRescueRequestDetailResult | null> {
-    const request = await this.getRequestDetail(companyId, requestId, 'cancelled');
+    const request = await rescueRepository.findDetail(companyId, requestId, 'cancelled');
     if (!request) {
       return null;
     }
@@ -406,13 +250,14 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
     const [company, request] = await Promise.all([
       companyRepository.findById(companyId),
-      RescueRequest.findOne({
-        _id: requestId,
-        'company.company_id': companyId,
-      })
-        .select('location')
-        .lean()
-        .exec(),
+      rescueRepository.findDetail(companyId, requestId, [
+        'pending',
+        'accepted',
+        'in_progress',
+        'arrived',
+        'completed',
+        'cancelled',
+      ]),
     ]);
 
     if (!request) {
@@ -515,9 +360,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
   private async mapRequestWithVehicle(request: any, providedVehicle?: any): Promise<ActiveRescueRequestResult> {
     const vehicle =
       providedVehicle ||
-      (request.vehicle?.vehicle_id
-        ? await Vehicle.findById(request.vehicle.vehicle_id).select('vehicle_type plate_number').lean().exec()
-        : null);
+      (request.vehicle?.vehicle_id ? await vehicleRepository.findById(request.vehicle.vehicle_id.toString()) : null);
 
     return {
       _id: request._id.toString(),
@@ -543,7 +386,7 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
   private getRequestTitle(request: any): string {
     const serviceName = request.service_types?.[0]?.name;
-    return (request.incident_type && INCIDENT_LABEL_MAP[request.incident_type]) || serviceName || 'Sự cố khác';
+    return (request.incident_type && getIncidentLabel(request.incident_type)) || serviceName || 'Sự cố khác';
   }
 
   private mapBasicRequest(request: any, distanceKm: number | null) {
@@ -598,36 +441,6 @@ class CompanyRescueRequestService implements IRescueCompanyService {
 
   private toRad(deg: number): number {
     return (deg * Math.PI) / 180;
-  }
-
-  private async getRequestDetail(
-    companyId: string,
-    requestId: string,
-    statusFilter: string | string[]
-  ): Promise<any | null> {
-    const { isValidObjectId } = await import('mongoose');
-    if (!isValidObjectId(requestId)) {
-      return null;
-    }
-
-    const query: any = {
-      _id: requestId,
-      'company.company_id': companyId,
-    };
-
-    if (Array.isArray(statusFilter)) {
-      query.status = { $in: statusFilter };
-    } else {
-      query.status = statusFilter;
-    }
-
-    const request = await RescueRequest.findOne(query)
-      .populate('user_id', 'full_name phone')
-      .populate('service_types', 'name slug')
-      .lean()
-      .exec();
-
-    return request;
   }
 }
 

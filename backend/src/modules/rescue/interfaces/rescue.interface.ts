@@ -202,4 +202,27 @@ export interface IRescueRepository {
     cancellation?: { cancelled_by?: CancelledBy; reason?: string }
   ): Promise<IRescueRequest | null>;
   cancelById(id: string, cancelledBy: CancelledBy, reason: string): Promise<IRescueRequest | null>;
+  findPendingRequestsByCompany(companyId: string): Promise<any[]>;
+  findActiveRequestsByCompany(companyId: string): Promise<any[]>;
+  findCompletedRequestsByCompany(companyId: string): Promise<any[]>;
+  findCanceledRequestsByCompany(companyId: string): Promise<any[]>;
+  findDetail(companyId: string, requestId: string, statusFilter: string | string[]): Promise<any | null>;
+  acceptPendingRequest(
+    companyId: string,
+    requestId: string,
+    vehicleId: string,
+    plateNumber: string,
+    etaMinutes: number,
+    note?: string
+  ): Promise<any | null>;
+  startActiveRequest(companyId: string, requestId: string): Promise<any | null>;
+  arriveActiveRequest(companyId: string, requestId: string): Promise<any | null>;
+  completeActiveRequest(
+    companyId: string,
+    requestId: string,
+    amount: number,
+    method?: string,
+    note?: string
+  ): Promise<any | null>;
+  findActiveRequestByVehicle(vehicleId: string): Promise<any | null>;
 }

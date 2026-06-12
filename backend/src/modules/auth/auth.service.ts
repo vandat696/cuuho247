@@ -1,10 +1,10 @@
-import userRepository from '@/shared/repositories/user.repository';
+import userRepository from '@/modules/user/user.repository';
 import companyRepository from '@/modules/company/company.repository';
+import adminRepository from '@/modules/admin/admin.repository';
 import { comparePassword, hashPassword } from '@/shared/utils/password.util';
 import { generateToken } from '@/shared/utils/jwt.util';
 import { BadRequestError, UnauthorizedError, ForbiddenError } from '@/shared/utils/apiError.util';
 import { ErrorCode } from '@/shared/constants/error.constant';
-import { Admin } from '@/shared/models/Admin.model';
 
 import type {
   IAuthService,
@@ -97,7 +97,7 @@ class AuthService implements IAuthService {
     }
 
     if (!account) {
-      account = await Admin.findOne({ email }).exec();
+      account = await adminRepository.findByEmail(email);
       if (account) {
         role = 'admin';
         repository = null;
@@ -136,7 +136,7 @@ class AuthService implements IAuthService {
     }
 
     if (role === 'admin') {
-      await Admin.findByIdAndUpdate(account._id, { last_login_at: new Date() }).exec();
+      await adminRepository.updateById(account._id.toString(), { last_login_at: new Date() });
     } else if (repository) {
       await repository.updateById(account._id.toString(), { last_login_at: new Date() });
     }

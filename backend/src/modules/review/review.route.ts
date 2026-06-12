@@ -3,6 +3,7 @@ import { reviewController } from './review.controller';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { authorize } from '@/shared/middleware/authorize.middleware';
 import { checkCompanyActive } from '@/shared/middleware/checkCompanyActive.middleware';
+import './review.subscriber';
 
 const router = Router();
 

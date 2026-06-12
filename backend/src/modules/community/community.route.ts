@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { upload } from '@/shared/utils/upload.util';
 import * as communityController from './community.controller';
+import './community.subscriber';
 
 const router = Router();
 

@@ -51,6 +51,13 @@ class ServiceCategoryRepository implements IServiceCategoryRepository {
     }).exec();
   }
 
+  async findBySlugs(slugs: string[]): Promise<IServiceCategory[]> {
+    return ServiceCategory.find({
+      slug: { $in: slugs },
+      is_active: { $ne: false },
+    }).exec();
+  }
+
   async findAllActive(): Promise<IServiceCategory[]> {
     return ServiceCategory.find({ is_active: { $ne: false } }).exec();
   }

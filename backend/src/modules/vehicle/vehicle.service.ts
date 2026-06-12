@@ -1,4 +1,4 @@
-import { RescueRequest } from '@/shared/models/RescueRequest.model';
+import rescueRepository from '@/modules/rescue/rescue.repository';
 import { IVehicle } from '@/shared/models/Vehicle.model';
 import { vehicleRepository } from './vehicle.repository';
 import type { IVehicleService, CreateVehicleInput } from './interfaces/vehicle.interface';
@@ -67,10 +67,7 @@ export class VehicleService implements IVehicleService {
       throw new ForbiddenError('Unauthorized to delete this vehicle');
     }
 
-    const activeMission = await RescueRequest.findOne({
-      'vehicle.vehicle_id': vehicleId,
-      status: { $in: ['pending', 'accepted', 'in_progress'] },
-    });
+    const activeMission = await rescueRepository.findActiveRequestByVehicle(vehicleId);
 
     if (activeMission) {
       throw new BadRequestError('Không thể xóa xe đang trong quá trình cứu hộ');

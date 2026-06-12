@@ -2,14 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import companyRescueRequestService from './company.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { acceptRequestSchema, completeRequestSchema } from './rescue.validator';
-import { notificationService } from '../notification/notification.service';
 import { validateSchema } from '../../shared/utils/validation.util';
 import { NotFoundError, BadRequestError } from '../../shared/utils/apiError.util';
-
-const getCustomerId = (request: any): string => {
-  if (!request || !request.user_id) return '';
-  return request.user_id._id ? request.user_id._id.toString() : request.user_id.toString();
-};
+import { rescueEventEmitter, RESCUE_EVENTS } from './rescue.event';
 
 class RescueCompanyController {
   async getCompanyActiveRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -171,45 +166,12 @@ class RescueCompanyController {
         throw new NotFoundError('Không tìm thấy yêu cầu đang chờ để nhận');
       }
 
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`tracking:${requestId}`).emit('status_changed', {
-          rescue_request_id: requestId,
-          status: 'accepted',
-          timestamp: new Date(),
-        });
-      }
-
-      // Notify the customer
-      try {
-        const customerId = getCustomerId(request);
-        if (customerId) {
-          await notificationService.createAndSendNotification(
-            customerId,
-            'user',
-            'request_accepted',
-            'Yêu cầu cứu hộ được tiếp nhận',
-            `Đơn vị cứu hộ đã chấp nhận yêu cầu của bạn. Dự kiến xe sẽ đến sau ${request.eta_minutes || 15} phút.`,
-            { rescue_request_id: requestId }
-          );
-        }
-      } catch (err) {
-        console.error('Error creating request_accepted notification for customer:', err);
-      }
-
-      // Notify the company (self-notification)
-      try {
-        await notificationService.createAndSendNotification(
-          companyId,
-          'company',
-          'request_accepted',
-          'Nhận yêu cầu thành công',
-          `Bạn đã chấp nhận yêu cầu cứu hộ. Dự kiến đến sau ${request.eta_minutes || 15} phút.`,
-          { rescue_request_id: requestId }
-        );
-      } catch (err) {
-        console.error('Error creating request_accepted notification for company:', err);
-      }
+      // Emit domain event for side-effects (Socket.io & Notifications)
+      rescueEventEmitter.emit(RESCUE_EVENTS.REQUEST_ACCEPTED, {
+        request,
+        companyId,
+        io: req.app.get('io'),
+      });
 
       res.status(200).json({
         status: 'success',
@@ -241,46 +203,12 @@ class RescueCompanyController {
         throw new NotFoundError('Không tìm thấy nhiệm vụ để hoàn tất');
       }
 
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`tracking:${requestId}`).emit('status_changed', {
-          rescue_request_id: requestId,
-          status: 'completed',
-          timestamp: new Date(),
-        });
-      }
-
-      // Notify the customer
-      try {
-        const customerId = getCustomerId(request);
-        if (customerId) {
-          // Standard completed notification
-          await notificationService.createAndSendNotification(
-            customerId,
-            'user',
-            'request_completed',
-            'Cứu hộ hoàn thành',
-            `Yêu cầu cứu hộ #${requestId.slice(-4)} đã hoàn thành thành công.`,
-            { rescue_request_id: requestId }
-          );
-        }
-      } catch (err) {
-        console.error('Error creating request_completed notification for customer:', err);
-      }
-
-      // Notify the company (self-notification)
-      try {
-        await notificationService.createAndSendNotification(
-          companyId,
-          'company',
-          'request_completed',
-          'Hoàn thành cứu hộ',
-          `Nhiệm vụ cứu hộ #${requestId.slice(-4)} đã được hoàn tất thành công.`,
-          { rescue_request_id: requestId }
-        );
-      } catch (err) {
-        console.error('Error creating request_completed notification for company:', err);
-      }
+      // Emit domain event for side-effects (Socket.io & Notifications)
+      rescueEventEmitter.emit(RESCUE_EVENTS.REQUEST_COMPLETED, {
+        request,
+        companyId,
+        io: req.app.get('io'),
+      });
 
       res.status(200).json({
         status: 'success',
@@ -303,45 +231,12 @@ class RescueCompanyController {
         throw new NotFoundError('Không tìm thấy nhiệm vụ để bắt đầu');
       }
 
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`tracking:${requestId}`).emit('status_changed', {
-          rescue_request_id: requestId,
-          status: 'in_progress',
-          timestamp: new Date(),
-        });
-      }
-
-      // Notify the customer
-      try {
-        const customerId = getCustomerId(request);
-        if (customerId) {
-          await notificationService.createAndSendNotification(
-            customerId,
-            'user',
-            'request_in_progress',
-            'Đội cứu hộ đang di chuyển',
-            'Nhân viên cứu hộ đang trên đường đến vị trí của bạn.',
-            { rescue_request_id: requestId }
-          );
-        }
-      } catch (err) {
-        console.error('Error creating request_in_progress notification for customer:', err);
-      }
-
-      // Notify the company (self-notification)
-      try {
-        await notificationService.createAndSendNotification(
-          companyId,
-          'company',
-          'request_in_progress',
-          'Bắt đầu di chuyển',
-          'Đã xác nhận di chuyển đến vị trí cứu hộ.',
-          { rescue_request_id: requestId }
-        );
-      } catch (err) {
-        console.error('Error creating request_in_progress notification for company:', err);
-      }
+      // Emit domain event for side-effects (Socket.io & Notifications)
+      rescueEventEmitter.emit(RESCUE_EVENTS.REQUEST_IN_PROGRESS, {
+        request,
+        companyId,
+        io: req.app.get('io'),
+      });
 
       res.status(200).json({
         status: 'success',
@@ -364,45 +259,12 @@ class RescueCompanyController {
         throw new NotFoundError('Không tìm thấy nhiệm vụ để xác nhận đến nơi');
       }
 
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`tracking:${requestId}`).emit('status_changed', {
-          rescue_request_id: requestId,
-          status: 'arrived',
-          timestamp: new Date(),
-        });
-      }
-
-      // Notify the customer
-      try {
-        const customerId = getCustomerId(request);
-        if (customerId) {
-          await notificationService.createAndSendNotification(
-            customerId,
-            'user',
-            'eta_updated',
-            'Xe cứu hộ đã đến nơi',
-            'Đội cứu hộ đã có mặt tại vị trí của bạn.',
-            { rescue_request_id: requestId }
-          );
-        }
-      } catch (err) {
-        console.error('Error creating arrived (eta_updated) notification for customer:', err);
-      }
-
-      // Notify the company (self-notification)
-      try {
-        await notificationService.createAndSendNotification(
-          companyId,
-          'company',
-          'eta_updated',
-          'Đã đến nơi',
-          'Đã xác nhận đến vị trí của khách hàng.',
-          { rescue_request_id: requestId }
-        );
-      } catch (err) {
-        console.error('Error creating arrived (eta_updated) notification for company:', err);
-      }
+      // Emit domain event for side-effects (Socket.io & Notifications)
+      rescueEventEmitter.emit(RESCUE_EVENTS.REQUEST_ARRIVED, {
+        request,
+        companyId,
+        io: req.app.get('io'),
+      });
 
       res.status(200).json({
         status: 'success',

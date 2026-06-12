@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -17,15 +16,15 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import StarIcon from '@mui/icons-material/Star';
 import CloseIcon from '@mui/icons-material/Close';
 import { formatPriceRange } from '@/utils/format';
-import { reviewService } from '@/services/review.service';
+import { useCompanyReviews } from '@/hooks/useCompanyReviews';
 
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
   const locationState = useLocation().state as { formData: RescueFormData; company: CompanyResult } | null;
 
-  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [loadingReviews, setLoadingReviews] = useState(false);
+  const companyId = locationState?.company?._id ?? '';
+
+  const { reviews, loadingReviews, isReviewsModalOpen, openReviews, closeReviews } = useCompanyReviews(companyId);
 
   if (!locationState) {
     return (
@@ -53,21 +52,6 @@ export default function CompanyDetailsPage() {
     navigate('/rescue/confirm', { state: { formData, company } });
   };
 
-  const handleOpenReviews = async () => {
-    setIsReviewsModalOpen(true);
-    if (reviews.length === 0) {
-      setLoadingReviews(true);
-      try {
-        const res = await reviewService.getCompanyReviews(company._id, 1, 20);
-        setReviews(res.data.reviews || []);
-      } catch (error) {
-        console.error('Error fetching company reviews:', error);
-      } finally {
-        setLoadingReviews(false);
-      }
-    }
-  };
-
   return (
     <MobileLayout>
       <AppHeader title="Chi tiết công ty" backFallback="/rescue/request" />
@@ -93,7 +77,7 @@ export default function CompanyDetailsPage() {
             )}
           </Box>
           <Typography
-            onClick={handleOpenReviews}
+            onClick={openReviews}
             sx={{ color: '#bfdbfe', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}
           >
             Xem tất cả đánh giá
@@ -159,14 +143,14 @@ export default function CompanyDetailsPage() {
       {/* Reviews Modal */}
       <Dialog
         open={isReviewsModalOpen}
-        onClose={() => setIsReviewsModalOpen(false)}
+        onClose={closeReviews}
         maxWidth="sm"
         fullWidth
         PaperProps={{ sx: { borderRadius: 3, maxHeight: '80vh' } }}
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Đánh giá công ty
-          <IconButton onClick={() => setIsReviewsModalOpen(false)} size="small">
+          <IconButton onClick={closeReviews} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>

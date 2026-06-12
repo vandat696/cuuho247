@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import messageController from './message.controller';
 import { upload } from '@/shared/utils/upload.util';
+import './message.subscriber';
 
 const router = Router();
 

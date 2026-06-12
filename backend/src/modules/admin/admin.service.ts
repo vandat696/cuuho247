@@ -10,8 +10,9 @@ import { CommunityPostComment } from '@/shared/models/CommunityPostComment.model
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { ServiceCategory } from '@/shared/models/ServiceCategory.model';
 import { Types } from 'mongoose';
+import { IAdminService } from './interfaces/admin.interface';
 
-class AdminService {
+class AdminService implements IAdminService {
   async approveCompany(companyId: string, adminId: string, reason?: string) {
     const company = await Company.findById(companyId);
     if (!company) throw new NotFoundError('Công ty không tồn tại');

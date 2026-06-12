@@ -31,6 +31,7 @@ export interface IServiceRepository {
 
 export interface IServiceCategoryRepository {
   findBySlug(slug: string): Promise<IServiceCategory | null>;
+  findBySlugs(slugs: string[]): Promise<IServiceCategory[]>;
   findAllActive(): Promise<IServiceCategory[]>;
 }
 
