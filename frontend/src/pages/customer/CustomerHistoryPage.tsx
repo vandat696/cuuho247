@@ -66,10 +66,10 @@ export default function CustomerHistoryPage() {
         toast.success('Đã hủy yêu cầu cứu hộ');
         setSelectedRequest(null);
       } else {
-        toast.error(response.message || 'Không thể hủy yêu cầu');
+        console.error('Cancellation failed:', response.message);
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Không thể hủy yêu cầu');
+      console.error('Error cancelling request:', error);
     } finally {
       setCancelling(false);
     }

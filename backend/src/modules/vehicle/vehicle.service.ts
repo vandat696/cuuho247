@@ -2,6 +2,7 @@ import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { IVehicle } from '@/shared/models/Vehicle.model';
 import { vehicleRepository } from './vehicle.repository';
 import type { IVehicleService, CreateVehicleInput } from './interfaces/vehicle.interface';
+import { NotFoundError, ForbiddenError, ConflictError, BadRequestError } from '@/shared/utils/apiError.util';
 
 export class VehicleService implements IVehicleService {
   async getVehicles(companyId: string): Promise<IVehicle[]> {
@@ -11,10 +12,10 @@ export class VehicleService implements IVehicleService {
   async getVehicleById(companyId: string, vehicleId: string): Promise<IVehicle> {
     const vehicle = await vehicleRepository.findById(vehicleId);
     if (!vehicle) {
-      throw new Error('Vehicle not found');
+      throw new NotFoundError('Vehicle not found');
     }
     if (vehicle.company_id.toString() !== companyId) {
-      throw new Error('Unauthorized to access this vehicle');
+      throw new ForbiddenError('Unauthorized to access this vehicle');
     }
     return vehicle;
   }
@@ -23,7 +24,7 @@ export class VehicleService implements IVehicleService {
     // Check if plate number already exists
     const existing = await vehicleRepository.findByPlateNumber(data.plate_number);
     if (existing) {
-      throw new Error('Plate number already exists');
+      throw new ConflictError('Plate number already exists');
     }
 
     return vehicleRepository.create({
@@ -37,19 +38,19 @@ export class VehicleService implements IVehicleService {
   async updateVehicle(companyId: string, vehicleId: string, data: Partial<IVehicle>): Promise<IVehicle | null> {
     const vehicle = await vehicleRepository.findById(vehicleId);
     if (!vehicle) {
-      throw new Error('Vehicle not found');
+      throw new NotFoundError('Vehicle not found');
     }
 
     // Ensure the vehicle belongs to the company
     if (vehicle.company_id.toString() !== companyId) {
-      throw new Error('Unauthorized to update this vehicle');
+      throw new ForbiddenError('Unauthorized to update this vehicle');
     }
 
     // Check plate number conflict if updating plate_number
     if (data.plate_number && data.plate_number !== vehicle.plate_number) {
       const existing = await vehicleRepository.findByPlateNumber(data.plate_number);
       if (existing) {
-        throw new Error('Plate number already exists');
+        throw new ConflictError('Plate number already exists');
       }
     }
 
@@ -59,11 +60,11 @@ export class VehicleService implements IVehicleService {
   async deleteVehicle(companyId: string, vehicleId: string): Promise<IVehicle | null> {
     const vehicle = await vehicleRepository.findById(vehicleId);
     if (!vehicle) {
-      throw new Error('Vehicle not found');
+      throw new NotFoundError('Vehicle not found');
     }
 
     if (vehicle.company_id.toString() !== companyId) {
-      throw new Error('Unauthorized to delete this vehicle');
+      throw new ForbiddenError('Unauthorized to delete this vehicle');
     }
 
     const activeMission = await RescueRequest.findOne({
@@ -72,11 +73,12 @@ export class VehicleService implements IVehicleService {
     });
 
     if (activeMission) {
-      throw new Error('Không thể xóa xe đang trong quá trình cứu hộ');
+      throw new BadRequestError('Không thể xóa xe đang trong quá trình cứu hộ');
     }
 
     return vehicleRepository.delete(vehicleId);
   }
 }
 
-export const vehicleService = new VehicleService();
+export const vehicleController = new VehicleService();
+export const vehicleService = vehicleController;

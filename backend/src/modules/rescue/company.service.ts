@@ -4,6 +4,7 @@ import { serviceRepository, serviceCategoryRepository } from '@/modules/service-
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { Vehicle } from '@/shared/models/Vehicle.model';
 import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
+import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
 import type {
   IRescueCompanyService,
   AcceptRescueRequestData,
@@ -128,11 +129,11 @@ class CompanyRescueRequestService implements IRescueCompanyService {
       .exec();
 
     if (!vehicle) {
-      throw new Error('Xe cuu ho khong ton tai hoac khong thuoc cong ty');
+      throw new NotFoundError('Xe cứu hộ không tồn tại hoặc không thuộc công ty');
     }
 
     if (vehicle.status === 'unavailable') {
-      throw new Error('Xe cuu ho dang khong kha dung');
+      throw new BadRequestError('Xe cứu hộ đang không khả dụng');
     }
 
     const acceptedAt = new Date();

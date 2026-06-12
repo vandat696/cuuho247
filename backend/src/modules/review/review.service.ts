@@ -4,27 +4,28 @@ import { Company } from '@/shared/models/Company.model';
 import { reviewRepository } from './review.repository';
 import type { IReviewService, CreateReviewInput, ReplyReviewInput } from './interfaces/review.interface';
 import { notificationService } from '../notification/notification.service';
+import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
 
 export class ReviewService implements IReviewService {
   async createReview(userId: string, data: CreateReviewInput): Promise<IReview> {
     // 1. Check if rescue request exists and is completed
     const rescueRequest = await RescueRequest.findById(data.rescue_request_id);
     if (!rescueRequest) {
-      throw new Error('Yêu cầu cứu hộ không tồn tại');
+      throw new NotFoundError('Yêu cầu cứu hộ không tồn tại');
     }
 
     if (rescueRequest.user_id.toString() !== userId) {
-      throw new Error('Bạn không có quyền đánh giá yêu cầu cứu hộ này');
+      throw new ForbiddenError('Bạn không có quyền đánh giá yêu cầu cứu hộ này');
     }
 
     if (rescueRequest.status !== 'completed') {
-      throw new Error('Chỉ có thể đánh giá yêu cầu cứu hộ đã hoàn thành');
+      throw new BadRequestError('Chỉ có thể đánh giá yêu cầu cứu hộ đã hoàn thành');
     }
 
     // 2. Check if a review already exists
     const existingReview = await reviewRepository.findByRequestId(data.rescue_request_id);
     if (existingReview) {
-      throw new Error('Yêu cầu cứu hộ này đã được đánh giá');
+      throw new BadRequestError('Yêu cầu cứu hộ này đã được đánh giá');
     }
 
     // 3. Create the review
@@ -84,11 +85,11 @@ export class ReviewService implements IReviewService {
 
     // Verify access
     if (userRole === 'customer' && review.user_id.toString() !== userId) {
-      throw new Error('Bạn không có quyền xem đánh giá này');
+      throw new ForbiddenError('Bạn không có quyền xem đánh giá này');
     }
 
     if (userRole === 'company' && review.company_id.toString() !== userId) {
-      throw new Error('Bạn không có quyền xem đánh giá này');
+      throw new ForbiddenError('Bạn không có quyền xem đánh giá này');
     }
 
     return review;
@@ -97,16 +98,16 @@ export class ReviewService implements IReviewService {
   async replyToReview(companyId: string, reviewId: string, data: ReplyReviewInput): Promise<IReview> {
     const review = await reviewRepository.findById(reviewId);
     if (!review) {
-      throw new Error('Đánh giá không tồn tại');
+      throw new NotFoundError('Đánh giá không tồn tại');
     }
 
     if (review.company_id.toString() !== companyId) {
-      throw new Error('Bạn không có quyền phản hồi đánh giá này');
+      throw new ForbiddenError('Bạn không có quyền phản hồi đánh giá này');
     }
 
     const updatedReview = await reviewRepository.updateReply(reviewId, data.content);
     if (!updatedReview) {
-      throw new Error('Lỗi khi cập nhật phản hồi');
+      throw new InternalServerError('Lỗi khi cập nhật phản hồi');
     }
 
     // Send notification to customer

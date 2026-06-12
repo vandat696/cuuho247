@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import companyRepository from '@/modules/company/company.repository';
 import rescueRepository from './rescue.repository';
 import type { IRescueRequest, RequestStatus } from '@/shared/models/RescueRequest.model';
-import { ApiError } from '@/shared/utils/apiError.util';
+import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
 import { ServiceCategory } from '@/shared/models/ServiceCategory.model';
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { IRescueCustomerService, CreateRequestData } from './interfaces/rescue.interface';
@@ -25,7 +25,7 @@ class RescueCustomerService implements IRescueCustomerService {
 
     const company = await companyRepository.findById(company_id);
     if (!company) {
-      throw new ApiError(404, 'Công ty cứu hộ không tồn tại');
+      throw new NotFoundError('Công ty cứu hộ không tồn tại');
     }
 
     const payload: Partial<IRescueRequest> = {
@@ -72,20 +72,20 @@ class RescueCustomerService implements IRescueCustomerService {
   async cancelRequest(requestId: string, userId: string, reason: string): Promise<IRescueRequest> {
     const request = await rescueRepository.findById(requestId);
     if (!request) {
-      throw new ApiError(404, 'Không tìm thấy yêu cầu cứu hộ');
+      throw new NotFoundError('Không tìm thấy yêu cầu cứu hộ');
     }
 
     if (request.user_id.toString() !== userId) {
-      throw new ApiError(403, 'Bạn không có quyền hủy yêu cầu này');
+      throw new ForbiddenError('Bạn không có quyền hủy yêu cầu này');
     }
 
     if (!request.status || !CANCELLABLE_STATUSES.includes(request.status)) {
-      throw new ApiError(400, 'Không thể hủy yêu cầu ở trạng thái hiện tại');
+      throw new BadRequestError('Không thể hủy yêu cầu ở trạng thái hiện tại');
     }
 
     const updated = await rescueRepository.cancelById(requestId, 'user', reason);
     if (!updated) {
-      throw new ApiError(500, 'Hủy yêu cầu thất bại, vui lòng thử lại');
+      throw new InternalServerError('Hủy yêu cầu thất bại, vui lòng thử lại');
     }
 
     return updated;

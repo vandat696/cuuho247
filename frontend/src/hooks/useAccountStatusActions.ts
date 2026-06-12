@@ -51,7 +51,6 @@ export function useAccountStatusActions(
       }
     } catch (error: any) {
       console.error('Error processing account action:', error);
-      toast.error(error.response?.data?.message || 'Thao tác thất bại');
     } finally {
       setActionLoading(false);
     }

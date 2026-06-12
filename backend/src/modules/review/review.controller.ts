@@ -1,25 +1,29 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import { reviewService } from './review.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
 import { createReviewSchema, replyReviewSchema } from './review.validator';
 import { validateSchema } from '../../shared/utils/validation.util';
+import { AppError, BadRequestError, NotFoundError, ForbiddenError } from '../../shared/utils/apiError.util';
 
 export class ReviewController {
-  async createReview(req: AuthRequest, res: Response) {
+  async createReview(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user.id;
 
-      const value = validateSchema<any>(createReviewSchema, req.body, res, { abortEarly: false });
-      if (!value) return;
+      const value = validateSchema<any>(createReviewSchema, req.body, { abortEarly: false });
 
       const review = await reviewService.createReview(userId, value);
       res.status(201).json({ status: 'success', data: review });
     } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+      if (error instanceof AppError) {
+        next(error);
+      } else {
+        next(new BadRequestError(error.message));
+      }
     }
   }
 
-  async getReviewByRequest(req: AuthRequest, res: Response) {
+  async getReviewByRequest(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user.id;
       const userRole = req.user.role;
@@ -28,17 +32,20 @@ export class ReviewController {
       const review = await reviewService.getReviewByRequest(userId, userRole, requestId);
 
       if (!review) {
-        res.status(404).json({ status: 'error', message: 'Không tìm thấy đánh giá cho yêu cầu này' });
-        return;
+        throw new NotFoundError('Không tìm thấy đánh giá cho yêu cầu này');
       }
 
       res.json({ status: 'success', data: review });
     } catch (error: any) {
-      res.status(403).json({ status: 'error', message: error.message });
+      if (error instanceof AppError) {
+        next(error);
+      } else {
+        next(new ForbiddenError(error.message));
+      }
     }
   }
 
-  async getCompanyReviews(req: AuthRequest, res: Response) {
+  async getCompanyReviews(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { companyId } = req.params;
       const page = parseInt(req.query.page as string) || 1;
@@ -47,22 +54,29 @@ export class ReviewController {
       const result = await reviewService.getCompanyReviews(companyId, page, limit);
       res.json({ status: 'success', data: result });
     } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+      if (error instanceof AppError) {
+        next(error);
+      } else {
+        next(new BadRequestError(error.message));
+      }
     }
   }
 
-  async replyToReview(req: AuthRequest, res: Response) {
+  async replyToReview(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const companyId = req.user.id;
       const { id } = req.params;
 
-      const value = validateSchema<any>(replyReviewSchema, req.body, res, { abortEarly: false });
-      if (!value) return;
+      const value = validateSchema<any>(replyReviewSchema, req.body, { abortEarly: false });
 
       const review = await reviewService.replyToReview(companyId, id, value);
       res.json({ status: 'success', data: review });
     } catch (error: any) {
-      res.status(400).json({ status: 'error', message: error.message });
+      if (error instanceof AppError) {
+        next(error);
+      } else {
+        next(new BadRequestError(error.message));
+      }
     }
   }
 }

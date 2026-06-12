@@ -68,7 +68,8 @@ export const customerRescueService = {
     if (max_distance_km) queryParams.append('max_distance_km', max_distance_km.toString());
 
     const response = await axiosInstance.get<ApiResponse<SearchCompaniesResult>>(
-      `/rescue/companies?${queryParams.toString()}`
+      `/rescue/companies?${queryParams.toString()}`,
+      { skipGlobalErrorToast: true }
     );
     return response.data;
   },

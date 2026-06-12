@@ -99,7 +99,6 @@ export default function CompanyProfileEditPage() {
       }
     } catch (error) {
       console.error('Error fetching profile for edit:', error);
-      toast.error('Không thể tải thông tin hồ sơ');
     } finally {
       setLoading(false);
     }
@@ -160,9 +159,7 @@ export default function CompanyProfileEditPage() {
         return;
       }
     } catch (error: any) {
-      const apiData = error.response?.data;
-      const errorMessage = apiData?.message || 'Cập nhật hồ sơ thất bại';
-      toast.error(errorMessage);
+      console.error('Error updating company profile:', error);
     } finally {
       setIsSaving(false);
     }

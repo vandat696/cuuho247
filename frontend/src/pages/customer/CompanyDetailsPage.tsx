@@ -18,7 +18,6 @@ import StarIcon from '@mui/icons-material/Star';
 import CloseIcon from '@mui/icons-material/Close';
 import { formatPriceRange } from '@/utils/format';
 import { reviewService } from '@/services/review.service';
-import { toast } from 'react-hot-toast';
 
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
@@ -62,7 +61,7 @@ export default function CompanyDetailsPage() {
         const res = await reviewService.getCompanyReviews(company._id, 1, 20);
         setReviews(res.data.reviews || []);
       } catch (error) {
-        toast.error('Lỗi khi tải danh sách đánh giá');
+        console.error('Error fetching company reviews:', error);
       } finally {
         setLoadingReviews(false);
       }

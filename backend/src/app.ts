@@ -1,8 +1,11 @@
+import 'express-async-errors';
 import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path';
 import routes from './routes';
 import { errorHandler } from './shared/middleware/error.middleware';
+
+import { NotFoundError } from './shared/utils/apiError.util';
 
 const app: Application = express();
 
@@ -41,11 +44,7 @@ app.get('/api/test', (_req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    status: 'error',
-    message: 'Route not found',
-    path: req.path,
-  });
+  throw new NotFoundError(`Route ${req.path} not found`);
 });
 
 // Error handler

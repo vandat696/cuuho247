@@ -1,5 +1,5 @@
-import { Response } from 'express';
 import { Schema, ValidationErrorItem } from 'joi';
+import { BadRequestError } from './apiError.util';
 
 interface ValidateOptions {
   abortEarly?: boolean;
@@ -8,7 +8,7 @@ interface ValidateOptions {
   formatErrors?: 'string' | 'object';
 }
 
-export function validateSchema<T>(schema: Schema, data: any, res: Response, options: ValidateOptions = {}): T | null {
+export function validateSchema<T>(schema: Schema, data: any, options: ValidateOptions = {}): T {
   const { error, value } = schema.validate(data, {
     abortEarly: options.abortEarly ?? false,
     allowUnknown: options.allowUnknown ?? false,
@@ -26,15 +26,12 @@ export function validateSchema<T>(schema: Schema, data: any, res: Response, opti
       return detail.message;
     });
 
-    res.status(400).json({
-      status: 'error',
-      message:
-        options.customMessage ||
-        (typeof errors[0] === 'string' ? errors[0] : (errors[0] as any).message) ||
-        'Dữ liệu không hợp lệ',
-      errors,
-    });
-    return null;
+    const message =
+      options.customMessage ||
+      (typeof errors[0] === 'string' ? errors[0] : (errors[0] as any).message) ||
+      'Dữ liệu không hợp lệ';
+
+    throw new BadRequestError(message, 'VALIDATION_ERROR', errors);
   }
 
   return value as T;

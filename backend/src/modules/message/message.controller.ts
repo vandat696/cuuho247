@@ -4,6 +4,7 @@ import { Message } from '@/shared/models/Message.model';
 import { RescueRequest } from '@/shared/models/RescueRequest.model';
 import { hasRequestAccess } from '@/shared/utils/rescueRequestAuth';
 import { notificationService } from '../notification/notification.service';
+import { UnauthorizedError, NotFoundError, ForbiddenError, BadRequestError } from '../../shared/utils/apiError.util';
 
 class MessageController {
   /**
@@ -17,20 +18,17 @@ class MessageController {
       const userRole = req.user?.role;
 
       if (!userId) {
-        res.status(401).json({ status: 'error', message: 'Chưa xác thực' });
-        return;
+        throw new UnauthorizedError('Chưa xác thực');
       }
 
       // Verify user has access to this rescue request
       const rescueRequest = await RescueRequest.findById(rescueRequestId).populate('user_id', 'full_name');
       if (!rescueRequest) {
-        res.status(404).json({ status: 'error', message: 'Yêu cầu cứu hộ không tồn tại' });
-        return;
+        throw new NotFoundError('Yêu cầu cứu hộ không tồn tại');
       }
 
       if (!hasRequestAccess(rescueRequest, userId, userRole)) {
-        res.status(403).json({ status: 'error', message: 'Không có quyền truy cập cuộc trò chuyện này' });
-        return;
+        throw new ForbiddenError('Không có quyền truy cập cuộc trò chuyện này');
       }
 
       const messages = await Message.find({ rescue_request_id: rescueRequestId }).sort({ created_at: 1 }).lean();
@@ -63,24 +61,20 @@ class MessageController {
       const userRole = req.user?.role;
 
       if (!userId) {
-        res.status(401).json({ status: 'error', message: 'Chưa xác thực' });
-        return;
+        throw new UnauthorizedError('Chưa xác thực');
       }
 
       if (!req.file) {
-        res.status(400).json({ status: 'error', message: 'Vui lòng chọn ảnh' });
-        return;
+        throw new BadRequestError('Vui lòng chọn ảnh');
       }
 
       const rescueRequest = await RescueRequest.findById(rescueRequestId);
       if (!rescueRequest) {
-        res.status(404).json({ status: 'error', message: 'Yêu cầu cứu hộ không tồn tại' });
-        return;
+        throw new NotFoundError('Yêu cầu cứu hộ không tồn tại');
       }
 
       if (!hasRequestAccess(rescueRequest, userId, userRole)) {
-        res.status(403).json({ status: 'error', message: 'Không có quyền truy cập cuộc trò chuyện này' });
-        return;
+        throw new ForbiddenError('Không có quyền truy cập cuộc trò chuyện này');
       }
 
       if (
@@ -88,11 +82,7 @@ class MessageController {
         rescueRequest.status === 'cancelled' ||
         rescueRequest.status === 'rejected'
       ) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Không thể gửi tin nhắn do yêu cầu cứu hộ đã kết thúc hoặc bị hủy',
-        });
-        return;
+        throw new BadRequestError('Không thể gửi tin nhắn do yêu cầu cứu hộ đã kết thúc hoặc bị hủy');
       }
 
       const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;

@@ -2,8 +2,10 @@ import userRepository from '@/shared/repositories/user.repository';
 import companyRepository from '@/modules/company/company.repository';
 import { comparePassword, hashPassword } from '@/shared/utils/password.util';
 import { generateToken } from '@/shared/utils/jwt.util';
-import { ApiError } from '@/shared/utils/apiError.util';
+import { BadRequestError, UnauthorizedError, ForbiddenError } from '@/shared/utils/apiError.util';
+import { ErrorCode } from '@/shared/constants/error.constant';
 import { Admin } from '@/shared/models/Admin.model';
+
 import type {
   IAuthService,
   CustomerRegisterInput,
@@ -21,7 +23,7 @@ class AuthService implements IAuthService {
     const existingUser = await userRepository.findByEmail(email);
     const existingCompany = await companyRepository.findByEmail(email);
     if (existingUser || existingCompany) {
-      throw new ApiError(400, 'Email đã được sử dụng');
+      throw new BadRequestError('Email đã được sử dụng');
     }
 
     const hashedPassword = await hashPassword(password);
@@ -47,7 +49,7 @@ class AuthService implements IAuthService {
     const existingUser = await userRepository.findByEmail(email);
     const existingCompany = await companyRepository.findByEmail(email);
     if (existingUser || existingCompany) {
-      throw new ApiError(400, 'Email đã được sử dụng');
+      throw new BadRequestError('Email đã được sử dụng');
     }
 
     const hashedPassword = await hashPassword(password);
@@ -103,28 +105,34 @@ class AuthService implements IAuthService {
     }
 
     if (!account || !account.password_hash) {
-      throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+      throw new UnauthorizedError('Email hoặc mật khẩu không chính xác');
     }
 
     let isPasswordValid = false;
     try {
       isPasswordValid = await comparePassword(password, account.password_hash);
     } catch {
-      throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+      throw new UnauthorizedError('Email hoặc mật khẩu không chính xác');
     }
 
     if (!isPasswordValid) {
-      throw new ApiError(401, 'Email hoặc mật khẩu không chính xác');
+      throw new UnauthorizedError('Email hoặc mật khẩu không chính xác');
     }
 
     // Company approval is temporarily disabled. Companies can log in as long
     // as the account is not locked.
     if (role === 'company' && account.status === 'locked') {
-      throw new ApiError(403, `Tài khoản công ty đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
+      throw new ForbiddenError(
+        `Tài khoản công ty đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`,
+        ErrorCode.COMPANY_LOCKED
+      );
     }
 
     if (role === 'customer' && account.status === 'locked') {
-      throw new ApiError(403, `Tài khoản của bạn đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`);
+      throw new ForbiddenError(
+        `Tài khoản của bạn đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`,
+        ErrorCode.USER_LOCKED
+      );
     }
 
     if (role === 'admin') {
