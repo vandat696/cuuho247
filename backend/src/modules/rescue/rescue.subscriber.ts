@@ -1,5 +1,5 @@
 import { rescueEventEmitter, RESCUE_EVENTS } from './rescue.event';
-import { notificationService } from '../notification/notification.service';
+import { notificationService } from '@/modules/notification/notification.service';
 
 const getCustomerId = (request: any): string => {
   if (!request || !request.user_id) return '';
