@@ -45,7 +45,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/showcase" element={<ShowcasePage />} />
+            {import.meta.env.DEV && <Route path="/showcase" element={<ShowcasePage />} />}
             <Route path="/login" element={<LoginPage />} />
 
             {/* Sub-routing Modules */}
