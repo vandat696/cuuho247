@@ -56,7 +56,7 @@ const CompanyProfilePage = () => {
   if (loading) {
     return (
       <MobileLayout>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <CircularProgress />
         </Box>
       </MobileLayout>

@@ -18,17 +18,11 @@ export default function ServiceFormPage() {
 
   if (isEditing && serviceLoading) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <MobileLayout>
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </MobileLayout>
     );
   }
 

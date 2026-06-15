@@ -21,17 +21,11 @@ export default function ServiceListPage() {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <MobileLayout>
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </MobileLayout>
     );
   }
 
@@ -39,7 +33,7 @@ export default function ServiceListPage() {
     <MobileLayout>
       <AppHeader title="Danh mục dịch vụ" backFallback="/company/home" />
 
-      <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', bgcolor: 'grey.100' }}>
+      <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Add Button */}
         <Box sx={{ mb: 3 }}>
           <Button
