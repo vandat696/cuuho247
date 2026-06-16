@@ -1,8 +1,7 @@
 import userRepository from './user.repository';
 import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
-import { IUserService } from './interfaces/user.interface';
 
-class UserService implements IUserService {
+class UserService {
   async getProfile(userId: string) {
     const user = await userRepository.findById(userId);
     if (!user) {

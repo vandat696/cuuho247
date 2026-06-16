@@ -7,7 +7,6 @@ import { BadRequestError, UnauthorizedError, ForbiddenError } from '@/shared/uti
 import { ErrorCode } from '@/shared/constants/error.constant';
 
 import type {
-  IAuthService,
   CustomerRegisterInput,
   CompanyRegisterInput,
   LoginInput,
@@ -16,7 +15,7 @@ import type {
   LoginResult,
 } from './interfaces/auth.interface';
 
-class AuthService implements IAuthService {
+class AuthService {
   async customerRegister(userData: CustomerRegisterInput): Promise<UserProfile> {
     const { email, password, full_name, phone } = userData;
 

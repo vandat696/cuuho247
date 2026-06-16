@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 import { Review, IReview } from '@/shared/models/Review.model';
-import { IReviewRepository } from './interfaces/review.interface';
 
-class ReviewRepository implements IReviewRepository {
+class ReviewRepository {
   async create(data: Partial<IReview>): Promise<IReview> {
     const review = new Review(data);
     return review.save();

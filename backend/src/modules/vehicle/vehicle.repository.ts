@@ -1,7 +1,6 @@
 import { Vehicle, IVehicle } from '@/shared/models/Vehicle.model';
-import type { IVehicleRepository } from './interfaces/vehicle.interface';
 
-class VehicleRepository implements IVehicleRepository {
+class VehicleRepository {
   async findByCompany(companyId: string): Promise<IVehicle[]> {
     return Vehicle.find({ company_id: companyId }).sort({ created_at: -1 });
   }

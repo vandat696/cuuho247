@@ -1,7 +1,6 @@
 import { Admin, IAdmin } from '../../shared/models/Admin.model';
-import { IAdminRepository } from './interfaces/admin.interface';
 
-class AdminRepository implements IAdminRepository {
+class AdminRepository {
   async findByEmail(email: string): Promise<IAdmin | null> {
     return Admin.findOne({ email }).exec();
   }

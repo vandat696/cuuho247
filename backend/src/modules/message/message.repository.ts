@@ -1,7 +1,6 @@
 import { Message, IMessage } from '@/shared/models/Message.model';
-import type { IMessageRepository } from './interfaces/message.interface';
 
-class MessageRepository implements IMessageRepository {
+class MessageRepository {
   async findByRescueRequestId(requestId: string): Promise<IMessage[]> {
     return Message.find({ rescue_request_id: requestId }).sort({ created_at: 1 }).lean().exec() as any;
   }

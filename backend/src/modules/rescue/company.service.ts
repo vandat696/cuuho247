@@ -8,7 +8,6 @@ import { mapIncidentTypeToCategory } from '@/shared/constants/incidentMapping';
 import { NotFoundError, BadRequestError } from '@/shared/utils/apiError.util';
 import { getDistanceFromCoordinates, estimateEtaMinutes, calcDistanceKm } from '@/shared/utils/geo.util';
 import type {
-  IRescueCompanyService,
   AcceptRescueRequestData,
   ActiveRescueRequestDetailResult,
   ActiveRescueRequestResult,
@@ -31,7 +30,7 @@ import type {
  * Giao tiếp với module ServiceCatalog thông qua serviceRepository (IServiceRepository).
  * Giao tiếp với Database thông qua rescueRepository (IRescueRepository) và vehicleRepository (IVehicleRepository).
  */
-class CompanyRescueRequestService implements IRescueCompanyService {
+class CompanyRescueRequestService {
   async getPendingRequestsForCompany(companyId: string): Promise<PendingRescueRequestResult[]> {
     const company = await companyRepository.findById(companyId);
     const companyCoords = company?.location?.coordinates;

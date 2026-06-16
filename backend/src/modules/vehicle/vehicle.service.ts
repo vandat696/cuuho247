@@ -1,10 +1,10 @@
 import rescueRepository from '@/modules/rescue/rescue.repository';
 import { IVehicle } from '@/shared/models/Vehicle.model';
 import { vehicleRepository } from './vehicle.repository';
-import type { IVehicleService, CreateVehicleInput } from './interfaces/vehicle.interface';
+import type { CreateVehicleInput } from './interfaces/vehicle.interface';
 import { NotFoundError, ForbiddenError, ConflictError, BadRequestError } from '@/shared/utils/apiError.util';
 
-export class VehicleService implements IVehicleService {
+export class VehicleService {
   async getVehicles(companyId: string): Promise<IVehicle[]> {
     return vehicleRepository.findByCompany(companyId);
   }

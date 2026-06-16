@@ -1,10 +1,10 @@
 import { NotFoundError, BadRequestError, ForbiddenError } from '@/shared/utils/apiError.util';
 import { serviceRepository, serviceCategoryRepository } from './service-catalog.repository';
-import type { IServiceCatalogService, CreateServiceInput } from './interfaces/service-catalog.interface';
+import type { CreateServiceInput } from './interfaces/service-catalog.interface';
 import type { IService } from '@/shared/models/Service.model';
 import type { IServiceCategory } from '@/shared/models/ServiceCategory.model';
 
-class ServiceCatalogService implements IServiceCatalogService {
+class ServiceCatalogService {
   async getCategories(): Promise<IServiceCategory[]> {
     return serviceCategoryRepository.findAllActive();
   }

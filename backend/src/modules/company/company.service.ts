@@ -1,6 +1,5 @@
 import { BadRequestError, NotFoundError, InternalServerError } from '@/shared/utils/apiError.util';
 import companyRepository from './company.repository';
-import type { ICompanyService } from './interfaces/company.interface';
 import type { ICompany } from '@/shared/models/Company.model';
 
 /**
@@ -9,7 +8,7 @@ import type { ICompany } from '@/shared/models/Company.model';
  * Trước đây controller gọi thẳng repository (vi phạm nguyên tắc).
  * Bây giờ controller → service → repository.
  */
-class CompanyService implements ICompanyService {
+class CompanyService {
   async getCompanyById(companyId: string): Promise<Omit<ICompany, 'password_hash'>> {
     if (!companyId) {
       throw new BadRequestError('Company ID is required');

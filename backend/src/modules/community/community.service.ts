@@ -1,10 +1,9 @@
 import { communityRepository } from './community.repository';
 import companyRepository from '../company/company.repository';
 import { communityEventEmitter, COMMUNITY_EVENTS } from './community.event';
-import { ICommunityService } from './interfaces/community.interface';
 import { NotFoundError, ForbiddenError, UnauthorizedError } from '@/shared/utils/apiError.util';
 
-class CommunityService implements ICommunityService {
+class CommunityService {
   private async assertCompanyActive(userId: string, role: string): Promise<void> {
     if (role !== 'company') return;
     const company = await companyRepository.findById(userId);

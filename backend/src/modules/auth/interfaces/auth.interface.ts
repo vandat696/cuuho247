@@ -1,11 +1,3 @@
-/**
- * Auth Module – Public Contracts (Interfaces)
- *
- * Các module bên ngoài KHÔNG được import trực tiếp từ auth.service.ts.
- * Thay vào đó, họ phụ thuộc vào các interface này và nhận implementation
- * thông qua Dependency Injection tại app entry point.
- */
-
 // ─── Input DTOs ────────────────────────────────────────────────────────────────
 
 export interface CustomerRegisterInput {
@@ -60,17 +52,4 @@ export interface LoginResult {
   user: UserProfile | CompanyProfile | AdminProfile;
   role: 'customer' | 'company' | 'admin';
   access_token: string;
-}
-
-// ─── Service Contract ──────────────────────────────────────────────────────────
-
-/**
- * IAuthService: Contract chính của module Auth.
- * Bất kỳ implementation nào (AuthService, MockAuthService, ...) đều phải
- * thoả mãn interface này.
- */
-export interface IAuthService {
-  customerRegister(data: CustomerRegisterInput): Promise<UserProfile>;
-  registerCompany(data: CompanyRegisterInput): Promise<CompanyProfile>;
-  login(data: LoginInput): Promise<LoginResult>;
 }

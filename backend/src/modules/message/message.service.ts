@@ -4,9 +4,8 @@ import { hasRequestAccess } from '@/shared/utils/rescueRequestAuth';
 import { UnauthorizedError, NotFoundError, ForbiddenError, BadRequestError } from '@/shared/utils/apiError.util';
 import { messageEventEmitter, MESSAGE_EVENTS } from './message.event';
 import type { IMessage } from '@/shared/models/Message.model';
-import type { IMessageService } from './interfaces/message.interface';
 
-class MessageService implements IMessageService {
+class MessageService {
   async getMessages(
     userId: string,
     userRole: string,
