@@ -70,6 +70,31 @@ const actionLabels: Record<string, { label: string; color: string; icon: React.R
     color: GREEN,
     icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
   },
+  verify_user: {
+    label: 'Xác thực người dùng',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
+  remove_review: {
+    label: 'Gỡ đánh giá',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  restore_review: {
+    label: 'Khôi phục đánh giá',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
+  remove_reply: {
+    label: 'Gỡ phản hồi',
+    color: RED,
+    icon: <RejectIcon sx={{ color: RED, fontSize: 20 }} />,
+  },
+  restore_reply: {
+    label: 'Khôi phục phản hồi',
+    color: GREEN,
+    icon: <CheckIcon sx={{ color: GREEN, fontSize: 20 }} />,
+  },
 };
 
 export const AuditLogItem = ({ log }: AuditLogItemProps) => {

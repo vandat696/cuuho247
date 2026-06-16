@@ -8,7 +8,6 @@ import { getModelsToClean } from './db-utils';
 const DEFAULT_PASSWORD = 'Password123!';
 const SALT_ROUNDS = 10;
 
-// Natural Vietnamese Names for Customers
 const CUSTOMER_NAMES = [
   { full_name: 'Nguyễn Minh An', email: 'an.nguyen@cuuho247.test', phone: '0981234567' },
   { full_name: 'Lê Thị Mai Phương', email: 'phuong.le@cuuho247.test', phone: '0972345678' },
@@ -20,10 +19,25 @@ const CUSTOMER_NAMES = [
   { full_name: 'Hoàng Gia Huy', email: 'huy.hoang@cuuho247.test', phone: '0948901234' },
   { full_name: 'Ngô Thu Trang', email: 'trang.ngo@cuuho247.test', phone: '0959012345' },
   { full_name: 'Phan Đăng Khoa', email: 'khoa.phan@cuuho247.test', phone: '0987654321' },
+  { full_name: 'Trần Cẩm Ly', email: 'ly.tran@cuuho247.test', phone: '0812345678' },
+  { full_name: 'Nguyễn Quang Hải', email: 'hai.nguyen@cuuho247.test', phone: '0823456789' },
+  { full_name: 'Lê Công Vinh', email: 'vinh.le@cuuho247.test', phone: '0834567890' },
+  { full_name: 'Phạm Đức Huy', email: 'huy.pham@cuuho247.test', phone: '0845678901' },
+  { full_name: 'Đoàn Văn Hậu', email: 'hau.doan@cuuho247.test', phone: '0856789012' },
+  { full_name: 'Bùi Tiến Dũng', email: 'dung.bui@cuuho247.test', phone: '0867890123' },
+  { full_name: 'Vũ Văn Thanh', email: 'thanh.vu@cuuho247.test', phone: '0878901234' },
+  { full_name: 'Nguyễn Công Phượng', email: 'phuong.nguyen@cuuho247.test', phone: '0889012345' },
+  { full_name: 'Nguyễn Văn Toàn', email: 'toan.nguyen@cuuho247.test', phone: '0890123456' },
+  { full_name: 'Hà Đức Chinh', email: 'chinh.ha@cuuho247.test', phone: '0701234567' },
+  { full_name: 'Đặng Văn Lâm', email: 'lam.dang@cuuho247.test', phone: '0712345678' },
+  { full_name: 'Quế Ngọc Hải', email: 'hai.que@cuuho247.test', phone: '0723456789' },
+  { full_name: 'Đỗ Hùng Dũng', email: 'dung.do@cuuho247.test', phone: '0734567890' },
+  { full_name: 'Nguyễn Tiến Linh', email: 'linh.nguyen@cuuho247.test', phone: '0745678901' },
+  { full_name: 'Lương Xuân Trường', email: 'truong.luong@cuuho247.test', phone: '0756789012' },
 ];
 
 // Hanoi Companies (with specific coordinates and service areas)
-const HANOI_COMPANIES = [
+const COMPANIES_DATA = [
   {
     company_name: 'Cứu Hộ Đông Đô',
     email: 'dongdo@cuuho247.test',
@@ -112,6 +126,63 @@ const HANOI_COMPANIES = [
     rating_avg: 0,
     rating_count: 0,
   },
+  {
+    company_name: 'Cứu Hộ Ô Tô Nam Từ Liêm',
+    email: 'namtuliem@cuuho247.test',
+    phone: '0243222333',
+    director_name: 'Lê Nam Sơn',
+    address: { province: 'TP. Hà Nội', district: 'Quận Nam Từ Liêm', ward: 'Phường Mỹ Đình 1', detail: '50 Phạm Hùng' },
+    location: { type: 'Point' as const, coordinates: [105.779, 21.025] },
+    license_file_url: 'https://example.com/licenses/namtuliem.jpg',
+    status: 'active' as const,
+    is_verified: true,
+    rating_avg: 4.8,
+    rating_count: 0,
+  },
+  {
+    company_name: 'Cứu Hộ Long Biên',
+    email: 'longbien@cuuho247.test',
+    phone: '0243666555',
+    director_name: 'Phạm Đức Bảo',
+    address: { province: 'TP. Hà Nội', district: 'Quận Long Biên', ward: 'Phường Bồ Đề', detail: '200 Nguyễn Văn Cừ' },
+    location: { type: 'Point' as const, coordinates: [105.877, 21.045] },
+    license_file_url: 'https://example.com/licenses/longbien.jpg',
+    status: 'active' as const,
+    is_verified: true,
+    rating_avg: 4.6,
+    rating_count: 0,
+  },
+  {
+    company_name: 'Cứu Hộ Ô Tô Thanh Xuân',
+    email: 'thanhxuan@cuuho247.test',
+    phone: '0243111222',
+    director_name: 'Nguyễn Thanh Bình',
+    address: {
+      province: 'TP. Hà Nội',
+      district: 'Quận Thanh Xuân',
+      ward: 'Phường Khương Trung',
+      detail: '50 Khương Trung',
+    },
+    location: { type: 'Point' as const, coordinates: [105.818, 20.992] },
+    license_file_url: 'https://example.com/licenses/thanhxuan.jpg',
+    status: 'pending_verification' as const,
+    is_verified: false,
+    rating_avg: 0,
+    rating_count: 0,
+  },
+  {
+    company_name: 'Cứu Hộ Hoàng Mai',
+    email: 'hoangmai@cuuho247.test',
+    phone: '0243444555',
+    director_name: 'Lê Hoàng',
+    address: { province: 'TP. Hà Nội', district: 'Quận Hoàng Mai', ward: 'Phường Giáp Bát', detail: '100 Giải Phóng' },
+    location: { type: 'Point' as const, coordinates: [105.842, 20.985] },
+    license_file_url: 'https://example.com/licenses/hoangmai.jpg',
+    status: 'pending_verification' as const,
+    is_verified: false,
+    rating_avg: 0,
+    rating_count: 0,
+  },
 ];
 
 // Service Category Seeds matching incidentMapping.ts
@@ -173,6 +244,11 @@ const REVIEW_CONTENTS = [
   { rating: 5, content: 'Kích bình ắc quy nhanh gọn, giá cả đúng như báo giá ban đầu không vẽ thêm lỗi.' },
   { rating: 4, content: 'Chất lượng cứu hộ ổn, kéo xe về gara an toàn.' },
   { rating: 3, content: 'Thời gian tiếp cận hơi lâu, tuy nhiên thợ kỹ thuật có tay nghề tốt.' },
+  { rating: 5, content: 'Tuyệt vời, mình gọi phát là có mặt ngay lập tức, sửa chữa tận tình!' },
+  { rating: 4, content: 'Thợ làm cẩn thận, có giải thích rõ lỗi của xe.' },
+  { rating: 5, content: 'Rất ưng ý với thái độ phục vụ của các bạn, sẽ ủng hộ dài dài nếu có sự cố.' },
+  { rating: 2, content: 'Chờ hơi lâu so với cam kết, giá cũng hơi cao một chút.' },
+  { rating: 5, content: 'Dịch vụ uy tín chất lượng, nhân viên thân thiện. 10 điểm!' },
 ];
 
 const COMMUNITY_POSTS = [
@@ -184,12 +260,22 @@ const COMMUNITY_POSTS = [
   {
     title: 'Làm thế nào để bảo quản bình ắc quy ô tô tốt nhất trong mùa hè?',
     content:
-      'Thời tiết nắng nóng gay gắt của mùa hè Hà Nội ảnh hưởng rất lớn đến tuổi thọ ắc quy. Mọi người nên lưu ý: Tránh đỗ xe trực tiếp dưới ánh nắng mặt trời quá lâu, thường xuyên kiểm tra mức dung dịch điện phân (đối với ắc quy nước), làm sạch các điện cực để đảm bảo tiếp xúc tốt và không bật thiết bị điện khi không nổ máy.',
+      'Thời tiết nắng nóng gay gắt của mùa hè ảnh hưởng rất lớn đến tuổi thọ ắc quy. Mọi người nên lưu ý: Tránh đỗ xe trực tiếp dưới ánh nắng mặt trời quá lâu, thường xuyên kiểm tra mức dung dịch điện phân (đối với ắc quy nước), làm sạch các điện cực để đảm bảo tiếp xúc tốt và không bật thiết bị điện khi không nổ máy.',
   },
   {
     title: 'Cảnh báo tình trạng đinh tặc xuất hiện khu vực cầu Vĩnh Tuy',
     content:
       'Sáng nay mình đi qua đoạn dốc lên cầu Vĩnh Tuy hướng từ Minh Khai sang Long Biên thấy có khá nhiều mảnh sắt vụn và đinh vít. Nhiều xe máy và 1 chiếc ô tô con đã phải tấp vào lề vì dính đinh. Anh em đi qua khu vực này chú ý quan sát và đi chậm nhé!',
+  },
+  {
+    title: 'Cần lưu ý gì khi gọi xe cứu hộ kéo về xưởng?',
+    content:
+      'Mọi người cho mình hỏi, khi gọi xe kéo cứu hộ về xưởng thì có cần yêu cầu họ ghi rõ biên bản bàn giao xe không? Mình sợ trong quá trình kéo xe bị trầy xước thêm mà không có bằng chứng gì để khiếu nại.',
+  },
+  {
+    title: 'Cách xử lý tạm thời khi xe ô tô bị chết máy giữa đường',
+    content:
+      'Khi xe đang đi tự nhiên chết máy, bạn hãy thử đề lại khoảng 2-3 lần (đừng đề liên tục quá lâu kẻo hỏng củ đề). Nếu không được, nhanh chóng bật đèn khẩn cấp, nhờ người đẩy gọn vào lề rồi mới gọi cứu hộ để tránh ùn tắc giao thông.',
   },
 ];
 
@@ -233,6 +319,13 @@ async function main() {
   });
   console.log(`Seeded Admin: ${admin.email}`);
 
+  const now = new Date();
+
+  // Helper to generate dates between June 1, 2026 and July 31, 2026
+  const startBoundary = new Date('2026-06-01T00:00:00Z').getTime();
+  const endBoundary = new Date('2026-07-31T23:59:59Z').getTime();
+  const getRandomDate = () => new Date(startBoundary + Math.random() * (endBoundary - startBoundary));
+
   // 3. Seed Users (Customers)
   console.log('Seeding Customer accounts...');
   const users: any[] = [];
@@ -244,6 +337,7 @@ async function main() {
       phone: cust.phone,
       status: 'active',
       avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cust.full_name)}`,
+      createdAt: getRandomDate(),
     });
     users.push(createdUser);
   }
@@ -252,10 +346,11 @@ async function main() {
   // 4. Seed Companies
   console.log('Seeding Companies...');
   const companies: any[] = [];
-  for (const comp of HANOI_COMPANIES) {
+  for (const comp of COMPANIES_DATA) {
     const createdCompany = await Models.Company.create({
       ...comp,
       password_hash: hashedPassword,
+      createdAt: getRandomDate(),
     });
     companies.push(createdCompany);
   }
@@ -331,13 +426,12 @@ async function main() {
   // 6. Seed Rescue Requests, status history, payments, and reviews
   console.log('Seeding Rescue Requests, Chat Messages, and Reviews...');
   const activeCompanies = companies.filter((c) => c.status === 'active');
-  const now = new Date();
 
-  // Create 35 requests distributed over the last 30 days
+  // Create 500 requests distributed over June and July 2026
   const requests: any[] = [];
   const reviewsToCreate: any[] = [];
 
-  for (let i = 0; i < 35; i++) {
+  for (let i = 0; i < 500; i++) {
     // Pick random user and active company
     const user = users[Math.floor(Math.random() * users.length)];
     const comp = activeCompanies[Math.floor(Math.random() * activeCompanies.length)];
@@ -353,19 +447,18 @@ async function main() {
     // Calculate total service amount
     const totalAmount = selectedServices.reduce((sum, s) => sum + s.price, 0);
 
-    // Determine request date within last 30 days
-    const daysAgo = Math.floor(Math.random() * 30);
-    const reqDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000 - Math.random() * 12 * 60 * 60 * 1000);
+    // Determine request date within June and July
+    const reqDate = getRandomDate();
 
-    // Status distribution: 24 Completed, 4 Cancelled, 3 Rejected, 2 In Progress, 2 Pending
+    // Status distribution: ~70% Completed, ~10% Cancelled, ~10% Rejected, ~5% In Progress, ~5% Pending
     let status: string = 'completed';
-    if (i >= 24 && i < 28) {
+    if (i >= 350 && i < 400) {
       status = 'cancelled';
-    } else if (i >= 28 && i < 31) {
+    } else if (i >= 400 && i < 450) {
       status = 'rejected';
-    } else if (i >= 31 && i < 33) {
+    } else if (i >= 450 && i < 475) {
       status = 'in_progress';
-    } else if (i >= 33) {
+    } else if (i >= 475) {
       status = 'pending';
     }
 
@@ -510,6 +603,8 @@ async function main() {
       cancelled_at,
       cancellation,
       payment,
+      created_at: reqDate,
+      updated_at: reqDate,
     });
     requests.push(request);
 
@@ -612,7 +707,7 @@ async function main() {
       is_visible: true,
       like_count: 0,
       comment_count: 0,
-      created_at: new Date(now.getTime() - (i + 1) * 2 * 24 * 60 * 60 * 1000), // 2, 4, 6 days ago
+      created_at: getRandomDate(),
     });
     posts.push(post);
   }
@@ -668,60 +763,68 @@ async function main() {
 
   // 9. Seed Admin Audit Logs (AdminLog)
   console.log('Seeding Admin Audit Logs...');
-  const targetCompany = companies.find((c) => c.company_name === 'Tổng Đội Cứu Hộ Thủ Đô');
-  const activeCompany = companies.find((c) => c.company_name === 'Cứu Hộ Đông Đô');
-  const sampleUser = users[0];
-  const sampleReview = reviewsToCreate[0];
-
-  const adminLogsData: any[] = [
-    {
-      admin_id: admin._id,
-      action: 'verify_company',
-      target_type: 'company',
-      target_id: activeCompany._id,
-      reason: 'Hồ sơ pháp lý hợp lệ, đầy đủ giấy phép hoạt động cứu hộ giao thông.',
-      details: { company_name: activeCompany.company_name },
-      created_at: new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000),
-    },
-    {
-      admin_id: admin._id,
-      action: 'request_more_docs',
-      target_type: 'company',
-      target_id: targetCompany._id,
-      reason: 'Ảnh chụp đăng ký kinh doanh bị mờ, không nhìn rõ mã số thuế.',
-      details: { company_name: targetCompany.company_name, requested_fields: ['business_license'] },
-      created_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
-    },
-    {
-      admin_id: admin._id,
-      action: 'lock_user',
-      target_type: 'user',
-      target_id: sampleUser._id,
-      reason: 'Khách hàng tạo nhiều yêu cầu khống liên tục làm phiền đối tác.',
-      details: { user_email: sampleUser.email, duration_days: 7 },
-      created_at: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
-    },
-    {
-      admin_id: admin._id,
-      action: 'unlock_user',
-      target_type: 'user',
-      target_id: sampleUser._id,
-      reason: 'Hết hạn khóa tài khoản, người dùng cam kết không tái phạm.',
-      details: { user_email: sampleUser.email },
-      created_at: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000),
-    },
+  const adminLogsData: any[] = [];
+  const adminActions = [
+    { action: 'verify_company', target_type: 'company' },
+    { action: 'reject_company', target_type: 'company' },
+    { action: 'request_more_docs', target_type: 'company' },
+    { action: 'lock_user', target_type: 'user' },
+    { action: 'unlock_user', target_type: 'user' },
+    { action: 'remove_review', target_type: 'review' },
+    { action: 'remove_post', target_type: 'community_post' },
   ];
 
-  // Also log the removal of a review for testing
-  if (sampleReview) {
+  for (let i = 0; i < 50; i++) {
+    const actionObj = adminActions[Math.floor(Math.random() * adminActions.length)];
+    let target_id;
+    let reason = '';
+    let details: any = {};
+
+    if (actionObj.target_type === 'company') {
+      const comp = companies[Math.floor(Math.random() * companies.length)];
+      target_id = comp._id;
+      details = { company_name: comp.company_name };
+      if (actionObj.action === 'verify_company') reason = 'Hồ sơ pháp lý hợp lệ, đầy đủ giấy phép hoạt động.';
+      if (actionObj.action === 'reject_company') reason = 'Công ty cung cấp giấy tờ không đúng chuẩn hoặc hết hạn.';
+      if (actionObj.action === 'request_more_docs') {
+        reason = 'Ảnh chụp đăng ký kinh doanh bị mờ, không rõ thông tin.';
+        details.requested_fields = ['business_license'];
+      }
+    } else if (actionObj.target_type === 'user') {
+      const u = users[Math.floor(Math.random() * users.length)];
+      target_id = u._id;
+      details = { user_email: u.email };
+      if (actionObj.action === 'lock_user') {
+        reason = 'Khách hàng tạo nhiều yêu cầu khống liên tục làm phiền đối tác.';
+        details.duration_days = 7;
+      }
+      if (actionObj.action === 'unlock_user') reason = 'Hết hạn khóa tài khoản, người dùng cam kết không tái phạm.';
+    } else if (actionObj.target_type === 'review') {
+      const rev = reviewsToCreate[Math.floor(Math.random() * reviewsToCreate.length)];
+      if (rev) {
+        target_id = rev._id;
+        details = { reviewer_id: rev.user_id };
+        reason = 'Đánh giá chứa ngôn từ không phù hợp, vi phạm tiêu chuẩn cộng đồng.';
+      } else {
+        continue;
+      }
+    } else if (actionObj.target_type === 'community_post') {
+      const post = posts[Math.floor(Math.random() * posts.length)];
+      target_id = post._id;
+      details = { post_title: post.title };
+      reason = 'Bài viết chứa nội dung quảng cáo sai sự thật hoặc spam.';
+    }
+
+    const logDate = getRandomDate();
+
     adminLogsData.push({
       admin_id: admin._id,
-      action: 'remove_review',
-      target_type: 'review',
-      target_id: sampleReview._id,
-      reason: 'Đánh giá chứa ngôn từ không phù hợp, xúc phạm cá nhân thợ cứu hộ.',
-      details: { reviewer_id: sampleReview.user_id },
-      created_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+      action: actionObj.action,
+      target_type: actionObj.target_type,
+      target_id,
+      reason,
+      details,
+      created_at: logDate,
     });
   }
 
@@ -737,7 +840,7 @@ async function main() {
   console.log(`- Admins:              1 (admin@cuuho247.test)`);
   console.log(`- Users (Customers):   ${users.length}`);
   console.log(`- Companies (Hanoi):   ${companies.length}`);
-  console.log(`- Active Requests:     ${requests.length}`);
+  console.log(`- Active Requests:     500`);
   console.log(`- Reviews & Replies:   ${reviewsToCreate.length}`);
   console.log(`- Forum Posts:         ${posts.length}`);
   console.log(`- Admin Logs:          ${adminLogsData.length}`);
