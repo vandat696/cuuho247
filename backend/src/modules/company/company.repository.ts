@@ -1,5 +1,4 @@
 import { Company, ICompany } from '@/shared/models/Company.model';
-import type { ICompanyRepository } from './interfaces/company.interface';
 
 /**
  * CompanyRepository: Implementation of ICompanyRepository.
@@ -8,7 +7,7 @@ import type { ICompanyRepository } from './interfaces/company.interface';
  * Các module khác (auth, rescue) giao tiếp với module này
  * thông qua ICompanyRepository interface.
  */
-class CompanyRepository implements ICompanyRepository {
+class CompanyRepository {
   // Find company by email
   async findByEmail(email: string): Promise<ICompany | null> {
     return Company.findOne({ email }).exec();

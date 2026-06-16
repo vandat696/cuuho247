@@ -1,8 +1,7 @@
 import { CommunityPost, CommunityPostComment, CommunityPostLike, Company } from '@/shared/models';
-import { ICommunityRepository } from './interfaces/community.interface';
 import { Types } from 'mongoose';
 
-class CommunityRepository implements ICommunityRepository {
+class CommunityRepository {
   async findPosts(filter: any, skip: number, limit: number): Promise<any[]> {
     return CommunityPost.find(filter)
       .sort({ created_at: -1 })

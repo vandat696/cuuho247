@@ -1,8 +1,7 @@
 import { Service, IService } from '@/shared/models/Service.model';
 import { ServiceCategory, IServiceCategory } from '@/shared/models/ServiceCategory.model';
-import type { IServiceRepository, IServiceCategoryRepository } from './interfaces/service-catalog.interface';
 
-class ServiceRepository implements IServiceRepository {
+class ServiceRepository {
   async findByCompanyIdsAndCategory(companyIds: string[], categoryId?: string): Promise<IService[]> {
     const query: Record<string, unknown> = {
       company_id: { $in: companyIds },
@@ -43,7 +42,7 @@ class ServiceRepository implements IServiceRepository {
   }
 }
 
-class ServiceCategoryRepository implements IServiceCategoryRepository {
+class ServiceCategoryRepository {
   async findBySlug(slug: string): Promise<IServiceCategory | null> {
     return ServiceCategory.findOne({
       slug,

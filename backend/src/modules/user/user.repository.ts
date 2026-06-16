@@ -1,11 +1,10 @@
 import { User, IUser } from '../../shared/models/User.model';
-import { IUserRepository } from './interfaces/user.interface';
 
 /**
  * UserRepository: Repository cho User model.
  * Chỉ dùng trong module Auth và User.
  */
-class UserRepository implements IUserRepository {
+class UserRepository {
   // Check for duplicate data: email
   async findByEmail(email: string): Promise<IUser | null> {
     return User.findOne({ email }).exec();

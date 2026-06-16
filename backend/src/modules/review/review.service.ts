@@ -2,11 +2,11 @@ import { IReview } from '@/shared/models/Review.model';
 import rescueRepository from '../rescue/rescue.repository';
 import companyRepository from '../company/company.repository';
 import { reviewRepository } from './review.repository';
-import type { IReviewService, CreateReviewInput, ReplyReviewInput } from './interfaces/review.interface';
+import type { CreateReviewInput, ReplyReviewInput } from './interfaces/review.interface';
 import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
 import { reviewEventEmitter, REVIEW_EVENTS } from './review.event';
 
-export class ReviewService implements IReviewService {
+export class ReviewService {
   async createReview(userId: string, data: CreateReviewInput): Promise<IReview> {
     // 1. Check if rescue request exists and is completed
     const rescueRequest = await rescueRepository.findById(data.rescue_request_id);

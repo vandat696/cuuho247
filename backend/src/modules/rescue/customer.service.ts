@@ -5,7 +5,7 @@ import type { IRescueRequest, RequestStatus } from '@/shared/models/RescueReques
 import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
 import { serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
-import type { IRescueCustomerService, CreateRequestData } from './interfaces/rescue.interface';
+import type { CreateRequestData } from './interfaces/rescue.interface';
 
 const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
 
@@ -15,7 +15,7 @@ const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
  * Giao tiếp với module Company thông qua companyRepository (ICompanyRepository).
  * Giao tiếp với Database thông qua rescueRepository (IRescueRepository).
  */
-class RescueCustomerService implements IRescueCustomerService {
+class RescueCustomerService {
   async getRequestsForUser(userId: string): Promise<IRescueRequest[]> {
     return rescueRepository.findByUserId(userId);
   }

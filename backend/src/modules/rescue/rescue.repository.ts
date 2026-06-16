@@ -1,13 +1,12 @@
 import { RescueRequest, IRescueRequest } from '@/shared/models/RescueRequest.model';
 import type { CancelledBy, ChangedBy, ICancellation, RequestStatus } from '@/shared/models/RescueRequest.model';
-import type { IRescueRepository } from './interfaces/rescue.interface';
 import { Types } from 'mongoose';
 
 /**
  * RescueRepository: Implementation of IRescueRepository.
  * Đây là nơi DUY NHẤT chứa câu lệnh Mongoose cho RescueRequest.
  */
-class RescueRepository implements IRescueRepository {
+class RescueRepository {
   async create(data: Partial<IRescueRequest>): Promise<IRescueRequest> {
     return RescueRequest.create(data);
   }
