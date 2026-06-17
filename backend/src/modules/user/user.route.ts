@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '@/shared/middleware/auth.middleware';
-import { upload } from '@/shared/utils/upload.util';
+import { createUploader } from '@/shared/utils/upload.util';
 import userController from './user.controller';
 
 const router = Router();
@@ -8,6 +8,6 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/me', userController.getProfile);
-router.put('/me', upload.single('avatar'), userController.updateProfile);
+router.put('/me', createUploader('user_avatar').single('avatar'), userController.updateProfile);
 
 export default router;

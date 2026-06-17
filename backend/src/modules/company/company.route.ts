@@ -2,7 +2,7 @@ import { Router } from 'express';
 import companyController from './company.controller';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { authorize } from '@/shared/middleware/authorize.middleware';
-import { upload } from '@/shared/utils/upload.util';
+import { createUploader } from '@/shared/utils/upload.util';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ router.put(
   '/profile',
   authenticate,
   authorize(['company']),
-  upload.single('license_file'),
+  createUploader('company_license', true).single('license_file'),
   companyController.updateProfile
 );
 

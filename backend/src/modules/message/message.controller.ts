@@ -51,15 +51,7 @@ class MessageController {
       }
 
       const io = req.app.get('io');
-      const message = await messageService.sendImage(
-        userId,
-        userRole,
-        rescueRequestId,
-        req.file.filename,
-        req.protocol,
-        req.get('host') || '',
-        io
-      );
+      const message = await messageService.sendImage(userId, userRole, rescueRequestId, req.file.path, io);
 
       const messageData = {
         _id: message._id,

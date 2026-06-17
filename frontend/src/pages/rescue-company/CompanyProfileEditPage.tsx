@@ -319,13 +319,13 @@ export default function CompanyProfileEditPage() {
                         (formData.license_file
                           ? `Tập tin mới chọn - ${formatFileSize(formData.license_file.size)}`
                           : formData.existing_license_url
-                            ? 'Chọn ảnh mới để thay đổi tập tin hiện có'
-                            : 'Chọn 1 ảnh JPG, PNG hoặc WEBP, tối đa 5MB')}
+                            ? 'Chọn ảnh/tệp mới để thay đổi hồ sơ hiện có'
+                            : 'Chọn ảnh (JPG, PNG, WEBP) hoặc tệp PDF, tối đa 5MB')}
                     </Typography>
                   </Box>
 
                   {formData.license_file ? (
-                    <IconButton aria-label="Bỏ ảnh đã chọn" onClick={handleRemoveLicenseFile} size="small">
+                    <IconButton aria-label="Bỏ tệp đã chọn" onClick={handleRemoveLicenseFile} size="small">
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   ) : null}
@@ -346,7 +346,7 @@ export default function CompanyProfileEditPage() {
                     hidden
                     name="license_file"
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
                     onChange={handleLicenseFileChange}
                   />
                 </MuiButton>

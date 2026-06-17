@@ -4,6 +4,7 @@ import rescueCustomerController from './customer.controller';
 import { authenticate } from '@/shared/middleware/auth.middleware';
 import { authorize } from '@/shared/middleware/authorize.middleware';
 import { checkCompanyActive } from '@/shared/middleware/checkCompanyActive.middleware';
+import { createUploader } from '@/shared/utils/upload.util';
 import './rescue.subscriber';
 
 const router = Router();
@@ -36,7 +37,11 @@ router.get('/companies', rescueCompanyController.searchCompanies);
 // ─── Customer-side routes (/api/rescue/requests/...) ─────────────────────────
 router.use('/requests', authenticate, authorize(['customer']));
 router.get('/requests/my-requests', rescueCustomerController.getMyRequests);
-router.post('/requests', rescueCustomerController.createRequest);
+router.post(
+  '/requests',
+  createUploader('rescue_requests').array('incident_photos', 5),
+  rescueCustomerController.createRequest
+);
 router.patch('/requests/:id/cancel', rescueCustomerController.cancelRequest);
 
 export default router;

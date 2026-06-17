@@ -199,12 +199,20 @@ const CommunityCreatePage: React.FC = () => {
                   sx={{
                     position: 'relative',
                     width: '100%',
-                    aspectRatio: '16/9',
+                    maxHeight: 400,
                     borderRadius: BUTTON_RADIUS,
                     overflow: 'hidden',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    bgcolor: '#f8fafc',
                   }}
                 >
-                  <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain' }}
+                  />
                   <Box
                     sx={{
                       position: 'absolute',

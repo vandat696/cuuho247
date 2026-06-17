@@ -35,9 +35,6 @@ RUN npm ci --only=production
 # Copy built code from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Create uploads directory for license files/incident photos
-RUN mkdir -p dist/uploads uploads
-
 # Expose backend API and Socket.IO port
 EXPOSE 3000
 

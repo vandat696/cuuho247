@@ -318,7 +318,7 @@ const CompanyRegisterForm = () => {
 
               <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>
-                  {formData.license_file ? formData.license_file.name : 'Ảnh giấy phép kinh doanh'}
+                  {formData.license_file ? formData.license_file.name : 'Giấy phép kinh doanh (Ảnh/PDF)'}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -326,13 +326,13 @@ const CompanyRegisterForm = () => {
                 >
                   {errors.license_file ||
                     (formData.license_file
-                      ? `Đã chọn 1 ảnh - ${formatFileSize(formData.license_file.size)}`
-                      : 'Chọn 1 ảnh JPG, PNG hoặc WEBP, tối đa 5MB')}
+                      ? `Đã chọn 1 tệp - ${formatFileSize(formData.license_file.size)}`
+                      : 'Chọn 1 ảnh (JPG, PNG, WEBP) hoặc tệp PDF, tối đa 5MB')}
                 </Typography>
               </Box>
 
               {formData.license_file ? (
-                <IconButton aria-label="Bỏ ảnh đã chọn" onClick={handleRemoveLicenseFile} size="small">
+                <IconButton aria-label="Bỏ tệp đã chọn" onClick={handleRemoveLicenseFile} size="small">
                   <CloseIcon fontSize="small" />
                 </IconButton>
               ) : null}
@@ -346,12 +346,12 @@ const CompanyRegisterForm = () => {
               startIcon={<UploadFileIcon />}
               sx={{ mt: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 700 }}
             >
-              {formData.license_file ? 'Đổi ảnh' : 'Chọn ảnh'}
+              {formData.license_file ? 'Đổi tệp' : 'Chọn ảnh/PDF'}
               <input
                 hidden
                 name="license_file"
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
                 onChange={handleLicenseFileChange}
               />
             </MuiButton>

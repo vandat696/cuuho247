@@ -32,6 +32,14 @@ class RescueCustomerController {
         formatErrors: 'object',
       });
 
+      const imageUrls: string[] = value.incident_photos || [];
+      if (req.files && Array.isArray(req.files)) {
+        req.files.forEach((file: any) => {
+          imageUrls.push(file.path);
+        });
+      }
+      value.incident_photos = imageUrls;
+
       const newRequest = await rescueRequestService.createRescueRequest({
         ...value,
         user_id: req.user.id,

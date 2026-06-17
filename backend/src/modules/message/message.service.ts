@@ -42,9 +42,7 @@ class MessageService {
     userId: string,
     userRole: string,
     rescueRequestId: string,
-    filename: string,
-    protocol: string,
-    host: string,
+    imageUrl: string,
     io?: any
   ): Promise<IMessage> {
     if (!userId) {
@@ -68,7 +66,6 @@ class MessageService {
       throw new BadRequestError('Không thể gửi tin nhắn do yêu cầu cứu hộ đã kết thúc hoặc bị hủy');
     }
 
-    const imageUrl = `${protocol}://${host}/uploads/${filename}`;
     const senderType = userRole === 'company' ? 'company' : 'user';
 
     const message = await messageRepository.create({

@@ -55,9 +55,9 @@ export function validateCompanyFormFields(formData: BaseCompanyFormData) {
   }
 
   if (formData.license_file) {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
     if (!allowedTypes.includes(formData.license_file.type)) {
-      newErrors.license_file = 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP';
+      newErrors.license_file = 'Chỉ hỗ trợ ảnh (JPG, PNG, WEBP) hoặc tệp PDF';
     } else if (formData.license_file.size > 5 * 1024 * 1024) {
       newErrors.license_file = 'Ảnh không được vượt quá 5MB';
     }

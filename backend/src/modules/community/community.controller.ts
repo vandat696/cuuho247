@@ -51,14 +51,14 @@ export const createPost = async (req: AuthRequest, res: Response, next: NextFunc
 
     if (!user_id) throw new UnauthorizedError('Unauthorized');
 
-    const filenames: string[] = [];
+    const imageUrls: string[] = [];
     if (req.files && Array.isArray(req.files)) {
       req.files.forEach((file: any) => {
-        filenames.push(file.filename);
+        imageUrls.push(file.path);
       });
     }
 
-    const newPost = await communityService.createPost(user_id, role, { title, content, tags }, filenames);
+    const newPost = await communityService.createPost(user_id, role, { title, content, tags }, imageUrls);
 
     res.status(201).json({
       message: 'Post created successfully',
