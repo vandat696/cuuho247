@@ -9,9 +9,17 @@ let socket: Socket | null = null;
  * Pass the auth token so the server can authenticate the connection.
  */
 export function getSocket(): Socket {
-  if (!socket || !socket.connected) {
-    const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken');
 
+  if (socket) {
+    const currentToken = (socket.auth as { token?: string | null })?.token;
+    if (currentToken !== token) {
+      socket.disconnect();
+      socket = null;
+    }
+  }
+
+  if (!socket) {
     socket = io(SOCKET_URL, {
       auth: { token },
       autoConnect: true,
