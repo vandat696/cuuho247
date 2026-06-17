@@ -15,6 +15,9 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { LocationPickerDialog } from '@/components/location/LocationPickerDialog';
+import { AddressAutocomplete } from '@/components/location/AddressAutocomplete';
+import { CurrentLocationButton } from '@/components/location/CurrentLocationButton';
+import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { companyService } from '@/services/company.service';
 import { toast } from 'react-hot-toast';
 import { RescueLocation } from '@/types/rescue.type';
@@ -53,10 +56,23 @@ export default function CompanyProfileEditPage() {
   const {
     isLocationPickerOpen,
     setIsLocationPickerOpen,
+    handleCompanyLocationChange,
     handleConfirmCompanyLocation,
     handleLicenseFileChange,
     handleRemoveLicenseFile,
   } = useCompanyFormHandlers(setFormData, setErrors);
+
+  const geo = useCurrentLocation();
+
+  const handleGetCurrentLocation = async () => {
+    const loc = await geo.getCurrentLocation();
+    if (loc) {
+      handleCompanyLocationChange(loc);
+      toast.success('Đã cập nhật vị trí hiện tại');
+    } else if (geo.status === 'denied' || geo.status === 'error') {
+      toast.error('Không thể lấy được vị trí hiện tại. Vui lòng kiểm tra quyền truy cập vị trí.');
+    }
+  };
 
   useEffect(() => {
     fetchProfileData();
@@ -221,15 +237,18 @@ export default function CompanyProfileEditPage() {
                 Địa chỉ hoạt động
               </Typography>
 
-              <Input
-                label="Địa chỉ chi tiết"
-                name="address"
-                type="text"
-                placeholder="Nhập địa chỉ của công ty"
-                value={formData.address}
-                onChange={handleChange}
-                error={errors.address}
-              />
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <Box sx={{ flex: 1 }}>
+                  <AddressAutocomplete
+                    label="Địa chỉ chi tiết"
+                    placeholder="Nhập địa chỉ của công ty"
+                    value={formData.company_location}
+                    onChange={handleCompanyLocationChange}
+                    error={errors.address || errors.company_location}
+                  />
+                </Box>
+                <CurrentLocationButton onClick={handleGetCurrentLocation} loading={geo.status === 'loading'} />
+              </Box>
 
               <Box
                 sx={{
@@ -253,7 +272,7 @@ export default function CompanyProfileEditPage() {
                     >
                       {errors.company_location ||
                         (formData.company_location
-                          ? `${formData.company_location.lat.toFixed(6)}, ${formData.company_location.lng.toFixed(6)}`
+                          ? 'Vị trí đã được đánh dấu trên bản đồ'
                           : 'Chọn vị trí công ty trên bản đồ để định vị cứu hộ')}
                     </Typography>
                   </Box>

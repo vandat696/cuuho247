@@ -76,26 +76,18 @@ export function useCompanyFormHandlers<T extends BaseCompanyFormData>(
     setFormData((prev) => ({
       ...prev,
       company_location: location,
+      ...(location?.address ? { address: location.address } : {}),
     }));
 
     setErrors((prev) => ({
       ...prev,
       company_location: '',
+      ...(location?.address ? { address: '' } : {}),
     }));
   };
 
   const handleConfirmCompanyLocation = (location: RescueLocation) => {
     handleCompanyLocationChange(location);
-    if (location.address) {
-      setFormData((prev) => ({
-        ...prev,
-        address: location.address,
-      }));
-      setErrors((prev) => ({
-        ...prev,
-        address: '',
-      }));
-    }
     setIsLocationPickerOpen(false);
   };
 
