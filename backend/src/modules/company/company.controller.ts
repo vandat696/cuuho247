@@ -45,9 +45,7 @@ class CompanyController {
         throw new UnauthorizedError('Unauthorized');
       }
 
-      const licenseFileUrl = req.file
-        ? `${req.protocol}://${req.get('host')}/uploads/${encodeURIComponent(req.file.filename)}`
-        : undefined;
+      const licenseFileUrl = req.file ? req.file.path : undefined;
 
       const updateData = {
         ...req.body,

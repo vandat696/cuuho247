@@ -32,7 +32,7 @@ class UserController {
       if (email) dataToUpdate.email = email;
 
       if (req.file) {
-        dataToUpdate.avatar_url = `${req.protocol}://${req.get('host')}/uploads/${encodeURIComponent(req.file.filename)}`;
+        dataToUpdate.avatar_url = req.file.path;
       }
 
       const updatedProfile = await userService.updateProfile(userId, dataToUpdate);

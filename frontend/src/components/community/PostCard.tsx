@@ -58,12 +58,24 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       </Typography>
 
       {post.images && post.images.length > 0 && (
-        <Box sx={{ mb: 2, width: '100%', height: 180, borderRadius: '8px', overflow: 'hidden', bgcolor: '#f8fafc' }}>
+        <Box
+          sx={{
+            mb: 2,
+            width: '100%',
+            maxHeight: 400,
+            borderRadius: '8px',
+            overflow: 'hidden',
+            bgcolor: '#f8fafc',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Box
             component="img"
             src={getUploadImageUrl(post.images[0])}
             alt="Post image"
-            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            sx={{ width: '100%', height: 'auto', maxHeight: 400, objectFit: 'contain' }}
           />
         </Box>
       )}

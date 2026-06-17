@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '@/shared/middleware/auth.middleware';
-import { upload } from '@/shared/utils/upload.util';
+import { createUploader } from '@/shared/utils/upload.util';
 import * as communityController from './community.controller';
 import './community.subscriber';
 
@@ -20,7 +20,7 @@ router.get('/', optionalAuth, communityController.getPosts);
 
 router.get('/:id', optionalAuth, communityController.getPostDetails);
 
-router.post('/', authenticate, upload.array('images', 5), communityController.createPost);
+router.post('/', authenticate, createUploader('community_posts').array('images', 5), communityController.createPost);
 
 router.post('/:id/like', authenticate, communityController.toggleLike);
 
