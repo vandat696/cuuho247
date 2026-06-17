@@ -96,7 +96,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
             border: 'none',
             p: 0,
             cursor: 'pointer',
-            '&:hover': { color: ORANGE },
           }}
         >
           <ThumbUpOutlined sx={{ fontSize: 18 }} />
@@ -117,7 +116,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
             border: 'none',
             p: 0,
             cursor: 'pointer',
-            '&:hover': { color: '#f97316' },
           }}
         >
           <ChatBubbleOutline sx={{ fontSize: 18 }} />

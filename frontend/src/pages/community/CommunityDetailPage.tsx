@@ -185,7 +185,6 @@ const CommunityDetailPage: React.FC = () => {
                   bgcolor: 'transparent',
                   border: 'none',
                   p: 0,
-                  '&:hover': { color: ORANGE },
                   transition: 'color 0.2s',
                 }}
               >

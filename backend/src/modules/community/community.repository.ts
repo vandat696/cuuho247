@@ -43,7 +43,7 @@ class CommunityRepository {
   async findLikesForPosts(userId: string, postIds: string[]): Promise<any[]> {
     return CommunityPostLike.find({
       user_id: userId,
-      post_id: { $in: postIds.map((id) => new Types.ObjectId(id)) },
+      post_id: { $in: postIds },
     }).exec();
   }
 
