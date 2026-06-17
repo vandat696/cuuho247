@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { rescueEventEmitter, RESCUE_EVENTS } from './rescue.event';
 import companyRepository from '@/modules/company/company.repository';
 import { serviceRepository, serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
 import rescueRepository from './rescue.repository';
@@ -121,6 +122,33 @@ class CompanyRescueRequestService {
     return {
       ...(await this.mapRequestWithVehicle(request, vehicle)),
       customer: this.mapCustomer(request.user_id),
+    };
+  }
+
+  async rejectPendingRequestForCompany(
+    companyId: string,
+    requestId: string,
+    reason: string
+  ): Promise<PendingRescueRequestDetailResult | null> {
+    const { isValidObjectId } = await import('mongoose');
+    if (!isValidObjectId(requestId)) {
+      return null;
+    }
+
+    const request = await rescueRepository.rejectPendingRequest(companyId, requestId, reason);
+
+    if (!request) {
+      return null;
+    }
+
+    const company = await companyRepository.findById(companyId);
+    const distanceKm = getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates);
+
+    return {
+      ...this.mapBasicRequest(request, distanceKm),
+      customer: this.mapCustomer(request.user_id),
+      incident_photos: request.incident_photos || [],
+      location: request.location,
     };
   }
 

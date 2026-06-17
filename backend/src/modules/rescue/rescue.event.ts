@@ -9,4 +9,5 @@ export const RESCUE_EVENTS = {
   REQUEST_ARRIVED: 'request:arrived',
   REQUEST_COMPLETED: 'request:completed',
   REQUEST_CANCELLED: 'request:cancelled',
+  REQUEST_REJECTED: 'request:rejected',
 };

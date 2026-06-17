@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, MenuItem, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  MenuItem,
+  TextField,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import {
   AccessTimeOutlined as ClockIcon,
   DescriptionOutlined as FileIcon,
@@ -59,6 +69,9 @@ export default function RescueRequestDetailPage() {
   const [vehicleId, setVehicleId] = useState('');
   const [etaMinutes, setEtaMinutes] = useState('');
   const [accepting, setAccepting] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [openRejectDialog, setOpenRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   // States for active
   const [finalAmount, setFinalAmount] = useState('');
@@ -147,6 +160,28 @@ export default function RescueRequestDetailPage() {
       toast.error('Không thể nhận yêu cầu');
     } finally {
       setAccepting(false);
+    }
+  };
+
+  const handleRejectRequest = async () => {
+    if (!requestId) return;
+
+    if (!rejectReason.trim()) {
+      toast.error('Vui lòng nhập lý do từ chối');
+      return;
+    }
+
+    try {
+      setRejecting(true);
+      await companyRescueService.rejectCompanyPendingRequest(requestId, { reason: rejectReason.trim() });
+      toast.success('Đã từ chối yêu cầu cứu hộ');
+      setOpenRejectDialog(false);
+      navigate('/company/rescue/canceled');
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast.error('Không thể từ chối yêu cầu');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -344,7 +379,7 @@ export default function RescueRequestDetailPage() {
                     <PrimaryActionButton onClick={handleAcceptRequest} disabled={accepting} variant="orange">
                       {accepting ? 'Đang nhận...' : 'Chấp nhận yêu cầu'}
                     </PrimaryActionButton>
-                    <PrimaryActionButton onClick={() => toast('Đã nhận thao tác từ chối')} variant="outline">
+                    <PrimaryActionButton onClick={() => setOpenRejectDialog(true)} variant="outline">
                       Từ chối
                     </PrimaryActionButton>
                   </Box>
@@ -424,6 +459,32 @@ export default function RescueRequestDetailPage() {
           )}
         </DetailContentState>
       </Box>
+
+      {/* Reject Dialog */}
+      <Dialog open={openRejectDialog} onClose={() => setOpenRejectDialog(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Từ chối yêu cầu</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2, fontSize: 14, color: '#6b7280' }}>
+            Vui lòng cho khách hàng biết lý do bạn không thể nhận yêu cầu này.
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            placeholder="Ví dụ: Công ty hiện đang hết xe, hoặc ngoài giờ làm việc..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setOpenRejectDialog(false)} color="inherit" disabled={rejecting}>
+            Hủy
+          </Button>
+          <Button onClick={handleRejectRequest} color="error" variant="contained" disabled={rejecting} disableElevation>
+            {rejecting ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MobileLayout>
   );
 }

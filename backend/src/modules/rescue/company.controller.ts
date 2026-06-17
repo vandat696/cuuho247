@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import companyRescueRequestService from './company.service';
 import { AuthRequest } from '@/shared/middleware/auth.middleware';
-import { acceptRequestSchema, completeRequestSchema } from './rescue.validator';
+import { acceptRequestSchema, completeRequestSchema, cancelRequestSchema } from './rescue.validator';
 import { validateSchema } from '../../shared/utils/validation.util';
 import { NotFoundError, BadRequestError } from '../../shared/utils/apiError.util';
 import { rescueEventEmitter, RESCUE_EVENTS } from './rescue.event';
@@ -183,6 +183,44 @@ class RescueCompanyController {
         next(new BadRequestError(error.message));
         return;
       }
+      next(error);
+    }
+  }
+
+  async rejectCompanyPendingRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const value = validateSchema<any>(cancelRequestSchema, req.body, {
+        abortEarly: false,
+        customMessage: 'Dữ liệu không hợp lệ',
+        formatErrors: 'object',
+      });
+
+      const request = await companyRescueRequestService.rejectPendingRequestForCompany(
+        companyId,
+        requestId,
+        value.reason
+      );
+
+      if (!request) {
+        throw new NotFoundError('Không tìm thấy yêu cầu đang chờ để từ chối');
+      }
+
+      // Emit domain event for side-effects (Socket.io & Notifications)
+      rescueEventEmitter.emit(RESCUE_EVENTS.REQUEST_REJECTED, {
+        request,
+        companyId,
+        reason: value.reason,
+        io: req.app.get('io'),
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Đã từ chối yêu cầu cứu hộ',
+        data: { request },
+      });
+    } catch (error) {
       next(error);
     }
   }

@@ -77,6 +77,17 @@ export const companyRescueService = {
     return response.data;
   },
 
+  rejectCompanyPendingRequest: async (
+    requestId: string,
+    payload: { reason: string }
+  ): Promise<ApiResponse<PendingRescueRequestDetailResult>> => {
+    const response = await http.patch<ApiResponse<PendingRescueRequestDetailResult>>(
+      `/rescue/company/pending/${requestId}/reject`,
+      payload
+    );
+    return response.data;
+  },
+
   completeCompanyActiveRequest: async (
     requestId: string,
     payload: CompleteActiveRescueRequestPayload

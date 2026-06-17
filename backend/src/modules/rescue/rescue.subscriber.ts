@@ -186,3 +186,34 @@ rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_CANCELLED, async ({ request, userId,
     console.error('Error creating request_cancelled notification for company:', err);
   }
 });
+
+// ─── 7. Event: REQUEST_REJECTED ───────────────────────────────────────────────
+rescueEventEmitter.on(RESCUE_EVENTS.REQUEST_REJECTED, async ({ request, companyId, reason, io }) => {
+  const requestId = request._id.toString();
+
+  // Socket emit
+  if (io) {
+    io.to(`tracking:${requestId}`).emit('status_changed', {
+      rescue_request_id: requestId,
+      status: 'rejected',
+      timestamp: new Date(),
+    });
+  }
+
+  // Notify customer
+  try {
+    const customerId = getCustomerId(request);
+    if (customerId) {
+      await notificationService.createAndSendNotification(
+        customerId,
+        'user',
+        'request_cancelled', // Reuse icon/type for cancellation
+        'Yêu cầu bị từ chối',
+        `Đơn vị cứu hộ đã từ chối yêu cầu của bạn. Lý do: ${reason || 'Không có lý do'}`,
+        { rescue_request_id: requestId }
+      );
+    }
+  } catch (err) {
+    console.error('Error creating request_rejected notification for customer:', err);
+  }
+});
