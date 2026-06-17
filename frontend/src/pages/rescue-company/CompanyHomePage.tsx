@@ -24,7 +24,6 @@ import { notificationService } from '@/services/notification.service';
 import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 import { getSocket } from '@/utils/socket';
-import { authService } from '@/services/auth.service';
 import { useLogout } from '@/hooks/useLogout';
 
 export default function CompanyHomePage() {
@@ -52,10 +51,6 @@ export default function CompanyHomePage() {
   useEffect(() => {
     const socket = getSocket();
 
-    const handleNewRescueRequest = () => {
-      fetchPendingRequests({ notifyNew: true });
-    };
-
     const handleCompanyStatusChanged = async () => {
       const isActiveNow = await fetchCompanyProfile();
       if (isActiveNow) {
@@ -63,7 +58,7 @@ export default function CompanyHomePage() {
           fetchActiveRequestsCount(),
           fetchCompletedRequestsCount(),
           fetchCanceledRequestsCount(),
-          fetchPendingRequests({ notifyNew: false }),
+          fetchPendingRequests(),
         ]);
       }
     };
@@ -73,17 +68,16 @@ export default function CompanyHomePage() {
       fetchUnreadCount();
       if (notification) {
         if (notification.type === 'request_created') {
-          fetchPendingRequests({ notifyNew: false });
+          fetchPendingRequests();
         } else if (notification.type === 'request_cancelled') {
           fetchActiveRequestsCount();
           fetchCanceledRequestsCount();
-          fetchPendingRequests({ notifyNew: false });
+          fetchPendingRequests();
         }
       }
     };
 
     // Register listeners synchronously to ensure they are captured by the cleanup function
-    socket.on('new_rescue_request', handleNewRescueRequest);
     socket.on('company_status_changed', handleCompanyStatusChanged);
     window.addEventListener('notification_received', handleNotificationReceived);
 
@@ -96,7 +90,7 @@ export default function CompanyHomePage() {
           fetchActiveRequestsCount(),
           fetchCompletedRequestsCount(),
           fetchCanceledRequestsCount(),
-          fetchPendingRequests({ notifyNew: false }),
+          fetchPendingRequests(),
           fetchUnreadCount(),
         ]);
       }
@@ -107,7 +101,6 @@ export default function CompanyHomePage() {
     initialize();
 
     return () => {
-      socket.off('new_rescue_request', handleNewRescueRequest);
       socket.off('company_status_changed', handleCompanyStatusChanged);
       window.removeEventListener('notification_received', handleNotificationReceived);
     };
@@ -129,7 +122,7 @@ export default function CompanyHomePage() {
     }
   };
 
-  const fetchPendingRequests = async ({ notifyNew }: { notifyNew: boolean }) => {
+  const fetchPendingRequests = async () => {
     try {
       const response = await companyRescueService.getCompanyPendingRequests();
       if (response.status !== 'success') return;
@@ -145,18 +138,7 @@ export default function CompanyHomePage() {
         return;
       }
 
-      const newRequests = requests.filter((request) => !knownPendingIdsRef.current.has(request._id));
       knownPendingIdsRef.current = nextIds;
-
-      if (notifyNew && newRequests.length > 0) {
-        const firstRequest = newRequests[0];
-        toast.success(
-          newRequests.length === 1
-            ? `Có yêu cầu cứu hộ mới: ${firstRequest.title}`
-            : `Có ${newRequests.length} yêu cầu cứu hộ mới`,
-          { duration: 5000 }
-        );
-      }
     } catch (error) {
       console.error('Error fetching pending rescue notifications:', error);
     }

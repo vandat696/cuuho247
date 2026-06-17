@@ -150,19 +150,7 @@ http.interceptors.response.use(
 
     // 2. Handle global toast for other errors (status >= 400 or network issues)
     if (!skipGlobalToast) {
-      if (error.response) {
-        // Auto-toast server response errors only for mutations (POST, PUT, PATCH, DELETE)
-        // to prevent duplicate toasts with page-level GET fetch error handlers.
-        const isGetRequest = error.config?.method?.toLowerCase() === 'get';
-        if (error.response.status >= 400 && !isGetRequest) {
-          const apiData = error.response.data;
-          const errorMsg =
-            (Array.isArray(apiData?.errors) && apiData.errors.length > 0 ? apiData.errors.join('\n') : undefined) ||
-            apiData?.message ||
-            'Đã xảy ra lỗi. Vui lòng thử lại!';
-          toast.error(errorMsg);
-        }
-      } else {
+      if (!error.response) {
         // Network error (server offline, no internet, CORS, etc.) - always toast
         toast.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!');
       }
