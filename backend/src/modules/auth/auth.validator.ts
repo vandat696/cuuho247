@@ -108,6 +108,19 @@ export const registerCompanySchema = Joi.object({
 });
 
 export const loginSchema = Joi.object({
-  email: emailSchema,
-  password: passwordSchema,
+  email: Joi.string().required().messages({
+    'any.required': 'Email là bắt buộc',
+    'string.empty': 'Email không được để trống',
+  }),
+  password: Joi.string().required().messages({
+    'any.required': 'Mật khẩu là bắt buộc',
+    'string.empty': 'Mật khẩu không được để trống',
+  }),
+});
+
+export const refreshTokenSchema = Joi.object({
+  refresh_token: Joi.string().required().messages({
+    'any.required': 'Refresh token là bắt buộc',
+    'string.empty': 'Refresh token không được để trống',
+  }),
 });

@@ -20,21 +20,10 @@ export const useLogin = () => {
     if (!email) {
       newErrors.email = 'Vui lòng nhập email';
       isValid = false;
-    } else if (!email.includes('@')) {
-      newErrors.email = 'Email không hợp lệ (phải chứa ký tự @)';
-      isValid = false;
     }
 
     if (!password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
-      isValid = false;
-    } else if (password.length < 8) {
-      newErrors.password = 'Mật khẩu phải dài ít nhất 8 ký tự';
-      isValid = false;
-    }
-    // Only accept alphabets, number and special characters
-    else if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]*$/.test(password)) {
-      newErrors.password = 'Mật khẩu chỉ được chứa chữ cái a-z, A-Z, số và ký tự đặc biệt không bao gồm khoảng cách';
       isValid = false;
     }
     setErrors(newErrors);
@@ -46,6 +35,7 @@ export const useLogin = () => {
         const response = await authService.login(email, password);
         if (response.status === 'success') {
           localStorage.setItem('accessToken', response.data.access_token);
+          localStorage.setItem('refreshToken', response.data.refresh_token);
           localStorage.setItem('role', response.data.role);
           localStorage.setItem('accountId', response.data.user._id);
           localStorage.setItem('accountPhone', response.data.user.phone || '');

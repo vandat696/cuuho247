@@ -89,8 +89,16 @@ export const useCustomerRegister = () => {
         });
 
         if (response.status === 'success') {
-          toast.success('Đăng ký tài khoản Khách hàng thành công!');
-          navigate('/login'); // Login after success
+          const loginResponse = await authService.login(formData.email.trim(), formData.password);
+          localStorage.setItem('accessToken', loginResponse.data.access_token);
+          localStorage.setItem('refreshToken', loginResponse.data.refresh_token);
+          localStorage.setItem('role', loginResponse.data.role);
+          localStorage.setItem('accountId', loginResponse.data.user._id);
+          localStorage.setItem('accountPhone', loginResponse.data.user.phone || '');
+          localStorage.setItem('accountAvatar', loginResponse.data.user.avatar_url || '');
+          localStorage.setItem('accountName', loginResponse.data.user.full_name || '');
+          toast.success('Đăng ký tài khoản thành công!');
+          navigate('/customer/home', { replace: true });
         }
       } catch (error: any) {
         const apiData = error.response?.data;

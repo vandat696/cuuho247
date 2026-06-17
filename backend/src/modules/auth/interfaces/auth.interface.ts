@@ -52,4 +52,5 @@ export interface LoginResult {
   user: UserProfile | CompanyProfile | AdminProfile;
   role: 'customer' | 'company' | 'admin';
   access_token: string;
+  refresh_token: string;
 }

@@ -2,9 +2,10 @@ import userRepository from '@/modules/user/user.repository';
 import companyRepository from '@/modules/company/company.repository';
 import adminRepository from '@/modules/admin/admin.repository';
 import { comparePassword, hashPassword } from '@/shared/utils/password.util';
-import { generateToken } from '@/shared/utils/jwt.util';
+import { generateToken, generateRefreshToken, REFRESH_TOKEN_EXPIRES_IN_DAYS } from '@/shared/utils/jwt.util';
 import { BadRequestError, UnauthorizedError, ForbiddenError } from '@/shared/utils/apiError.util';
 import { ErrorCode } from '@/shared/constants/error.constant';
+import { RefreshToken } from '@/shared/models/RefreshToken.model';
 
 import type {
   CustomerRegisterInput,
@@ -26,13 +27,23 @@ class AuthService {
       throw new BadRequestError('Email đã được sử dụng');
     }
 
+    const finalPhone = phone === '' ? undefined : phone;
+
+    if (finalPhone) {
+      const existingUserPhone = await userRepository.findByPhone(finalPhone);
+      const existingCompanyPhone = await companyRepository.findByPhone(finalPhone);
+      if (existingUserPhone || existingCompanyPhone) {
+        throw new BadRequestError('Số điện thoại đã được sử dụng');
+      }
+    }
+
     const hashedPassword = await hashPassword(password);
 
     const newUser = await userRepository.create({
       email,
       password_hash: hashedPassword,
       full_name,
-      phone,
+      phone: finalPhone,
       status: 'active',
     });
 
@@ -51,6 +62,14 @@ class AuthService {
     const existingAdmin = await adminRepository.findByEmail(email);
     if (existingUser || existingCompany || existingAdmin) {
       throw new BadRequestError('Email đã được sử dụng');
+    }
+
+    if (phone) {
+      const existingUserPhone = await userRepository.findByPhone(phone);
+      const existingCompanyPhone = await companyRepository.findByPhone(phone);
+      if (existingUserPhone || existingCompanyPhone) {
+        throw new BadRequestError('Số điện thoại đã được sử dụng');
+      }
     }
 
     const hashedPassword = await hashPassword(password);
@@ -143,6 +162,15 @@ class AuthService {
     }
 
     const accessToken = generateToken(account._id.toString(), account.email, role);
+    const refreshToken = generateRefreshToken();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_IN_DAYS);
+
+    await RefreshToken.create({
+      user_id: account._id.toString(),
+      token: refreshToken,
+      expires_at: expiresAt,
+    });
 
     const accountResponse = account.toObject();
     delete accountResponse.password_hash;
@@ -151,7 +179,60 @@ class AuthService {
       user: accountResponse,
       role,
       access_token: accessToken,
+      refresh_token: refreshToken,
     };
+  }
+
+  async refreshToken(token: string): Promise<{ access_token: string }> {
+    const existingToken = await RefreshToken.findOne({ token }).exec();
+    if (!existingToken) {
+      throw new UnauthorizedError('Refresh token không hợp lệ hoặc đã bị thu hồi');
+    }
+
+    if (existingToken.expires_at < new Date()) {
+      await RefreshToken.deleteOne({ _id: existingToken._id }).exec();
+      throw new UnauthorizedError('Refresh token đã hết hạn, vui lòng đăng nhập lại');
+    }
+
+    const userId = existingToken.user_id;
+    let account: any = await adminRepository.findById(userId);
+    let role = 'admin';
+
+    if (!account) {
+      account = await userRepository.findById(userId);
+      if (account) role = 'customer';
+    }
+
+    if (!account) {
+      account = await companyRepository.findById(userId);
+      if (account) role = 'company';
+    }
+
+    if (!account) {
+      throw new UnauthorizedError('Tài khoản không tồn tại');
+    }
+
+    if (role === 'company' && account.status === 'locked') {
+      throw new ForbiddenError(
+        `Tài khoản công ty đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`,
+        ErrorCode.COMPANY_LOCKED
+      );
+    }
+
+    if (role === 'customer' && account.status === 'locked') {
+      throw new ForbiddenError(
+        `Tài khoản của bạn đã bị khóa. Lý do: ${account.lock_reason || 'Không rõ lý do'}`,
+        ErrorCode.USER_LOCKED
+      );
+    }
+
+    const accessToken = generateToken(account._id.toString(), account.email, role);
+
+    return { access_token: accessToken };
+  }
+
+  async logout(token: string): Promise<void> {
+    await RefreshToken.deleteOne({ token }).exec();
   }
 }
 

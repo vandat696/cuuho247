@@ -8,5 +8,7 @@ const router = Router();
 router.post('/customer-register', authController.customerRegister);
 router.post('/company-register', upload.single('license_file'), authController.registerCompany);
 router.post('/login', authController.login);
+router.post('/refresh-token', authController.refreshToken);
+router.post('/logout', authController.logout);
 
 export default router;

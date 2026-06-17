@@ -10,6 +10,11 @@ class UserRepository {
     return User.findOne({ email }).exec();
   }
 
+  // Check for duplicate data: phone
+  async findByPhone(phone: string): Promise<IUser | null> {
+    return User.findOne({ phone }).exec();
+  }
+
   // Create new user
   async create(userData: Partial<IUser>): Promise<IUser> {
     const newUser = new User(userData);

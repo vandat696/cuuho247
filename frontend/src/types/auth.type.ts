@@ -7,6 +7,7 @@ export interface LoginData {
   user: User | Company;
   role: AuthRole;
   access_token: string;
+  refresh_token: string;
 }
 
 // Register Data Type

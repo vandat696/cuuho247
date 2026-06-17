@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import 'dotenv/config';
 
 const EXPIRES_IN = '7d'; // 7 days
+export const REFRESH_TOKEN_EXPIRES_IN_DAYS = 30; // 30 days
 
 const getJwtSecret = (): string => {
   if (process.env.JWT_SECRET) {
@@ -19,6 +21,10 @@ export const generateToken = (userId: string, email: string, role: string): stri
   const payload = { id: userId, email, role };
 
   return jwt.sign(payload, getJwtSecret(), { expiresIn: EXPIRES_IN });
+};
+
+export const generateRefreshToken = (): string => {
+  return crypto.randomBytes(40).toString('hex');
 };
 
 // Check token (valid or not)

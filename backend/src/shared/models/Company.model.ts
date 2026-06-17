@@ -30,7 +30,7 @@ const CompanySchema = new Schema<ICompany>(
     password_hash: { type: String, required: true },
     company_name: { type: String, required: true },
     director_name: { type: String, required: true },
-    phone: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     address: { type: AddressSchema, required: true },
     location: { type: GeoPointSchema, required: true },
     license_file_url: { type: String },

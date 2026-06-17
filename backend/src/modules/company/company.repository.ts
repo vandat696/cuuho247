@@ -13,6 +13,11 @@ class CompanyRepository {
     return Company.findOne({ email }).exec();
   }
 
+  // Find company by phone
+  async findByPhone(phone: string): Promise<ICompany | null> {
+    return Company.findOne({ phone }).exec();
+  }
+
   // Create new company
   async create(companyData: Partial<ICompany>): Promise<ICompany> {
     return Company.create(companyData);

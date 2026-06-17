@@ -24,7 +24,9 @@ import { Button } from '@/components/common/Button';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { userService, UserProfile } from '@/services/user.service';
+import { authService } from '@/services/auth.service';
 import { CircularProgress } from '@mui/material';
+import { useLogout } from '@/hooks/useLogout';
 
 export default function CustomerProfilePage() {
   const navigate = useNavigate();
@@ -32,10 +34,7 @@ export default function CustomerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [openLogout, setOpenLogout] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
-  };
+  const { handleLogout } = useLogout();
 
   useEffect(() => {
     const fetchProfile = async () => {

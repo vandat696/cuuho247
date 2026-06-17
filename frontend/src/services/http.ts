@@ -37,6 +37,20 @@ http.interceptors.request.use(
   }
 );
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Add a response interceptor to handle common errors (e.g., 401)
 http.interceptors.response.use(
   (response) => response,
@@ -45,6 +59,7 @@ http.interceptors.response.use(
 
     // 1. Handle Auth errors (401, 403)
     if (error.response?.status === 401 || error.response?.status === 403) {
+      const originalRequest = error.config;
       const apiData = error.response?.data;
       const msg = apiData?.message || '';
 
@@ -54,8 +69,8 @@ http.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // Do not auto-redirect if it is a login request
-      if (error.config?.url?.includes('login')) {
+      // Do not auto-redirect if it is a login request or refresh token request
+      if (originalRequest?.url?.includes('login') || originalRequest?.url?.includes('refresh-token')) {
         return Promise.reject(error);
       }
 
@@ -65,7 +80,60 @@ http.interceptors.response.use(
         apiData?.code === 'USER_LOCKED' ||
         apiData?.code === 'COMPANY_LOCKED';
 
+      if (!originalRequest._retry && error.response.status === 401 && !isLocked) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return http(originalRequest);
+            })
+            .catch((err) => Promise.reject(err));
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          return new Promise(function (resolve, reject) {
+            axios
+              .post(`${API_URL}/auth/refresh-token`, { refresh_token: refreshToken })
+              .then(({ data }) => {
+                const newAccessToken = data.data.access_token;
+                localStorage.setItem('accessToken', newAccessToken);
+                if (data.data.refresh_token) {
+                  localStorage.setItem('refreshToken', data.data.refresh_token);
+                }
+                http.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                processQueue(null, newAccessToken);
+                resolve(http(originalRequest));
+              })
+              .catch((err) => {
+                processQueue(err, null);
+                // Clear tokens and redirect
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('role');
+                localStorage.removeItem('accountId');
+                localStorage.removeItem('accountPhone');
+                localStorage.removeItem('accountName');
+                localStorage.removeItem('companyId');
+                window.location.href = '/login';
+                reject(err);
+              })
+              .finally(() => {
+                isRefreshing = false;
+              });
+          });
+        }
+      }
+
+      // Fallback for locked or missing refresh token
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('role');
       localStorage.removeItem('accountId');
       localStorage.removeItem('accountPhone');
