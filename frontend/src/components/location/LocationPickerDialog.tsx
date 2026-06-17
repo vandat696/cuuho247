@@ -53,9 +53,8 @@ export function LocationPickerDialog({ open, value, onClose, onConfirm }: Locati
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [isDetectingDeviceLocation, setIsDetectingDeviceLocation] = useState(false);
 
+  // Sync viewport and selected location immediately when value changes
   useEffect(() => {
-    if (!open) return;
-
     const nextLat = value?.lat && value.lat !== 0 ? value.lat : DEFAULT_LOCATION.lat;
     const nextLng = value?.lng && value.lng !== 0 ? value.lng : DEFAULT_LOCATION.lng;
     const hasExistingLocation = Boolean(value?.lat && value.lat !== 0 && value?.lng && value.lng !== 0);
@@ -72,7 +71,12 @@ export function LocationPickerDialog({ open, value, onClose, onConfirm }: Locati
       longitude: nextLng,
       zoom: hasExistingLocation ? 15 : 12,
     }));
+  }, [value]);
 
+  // Fetch device location only when dialog is opened and no location is selected
+  useEffect(() => {
+    if (!open) return;
+    const hasExistingLocation = Boolean(value?.lat && value.lat !== 0 && value?.lng && value.lng !== 0);
     if (hasExistingLocation || !navigator.geolocation) return;
 
     setIsDetectingDeviceLocation(true);
