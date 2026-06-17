@@ -167,6 +167,35 @@ class RescueRepository {
       .exec();
   }
 
+  async rejectPendingRequest(companyId: string, requestId: string, reason: string): Promise<any | null> {
+    const rejectedAt = new Date();
+    return RescueRequest.findOneAndUpdate(
+      {
+        _id: requestId,
+        'company.company_id': companyId,
+        status: 'pending',
+      },
+      {
+        $set: {
+          status: 'rejected',
+        },
+        $push: {
+          status_history: {
+            status: 'rejected',
+            changed_by: 'company',
+            changed_at: rejectedAt,
+            note: reason,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    )
+      .populate('user_id', 'full_name phone')
+      .populate('service_types', 'name slug')
+      .lean()
+      .exec();
+  }
+
   async startActiveRequest(companyId: string, requestId: string): Promise<any | null> {
     const startedAt = new Date();
     return RescueRequest.findOneAndUpdate(

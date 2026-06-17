@@ -27,6 +27,7 @@ router.get('/company/canceled/:requestId', rescueCompanyController.getCompanyCan
 
 router.get('/company/pending', rescueCompanyController.getCompanyPendingRequests);
 router.patch('/company/pending/:requestId/accept', rescueCompanyController.acceptCompanyPendingRequest);
+router.patch('/company/pending/:requestId/reject', rescueCompanyController.rejectCompanyPendingRequest);
 router.get('/company/pending/:requestId', rescueCompanyController.getCompanyPendingRequestDetail);
 
 router.get('/company/requests/:requestId/route', rescueCompanyController.getCompanyRequestRouteEstimate);
