@@ -24,7 +24,6 @@ import { Button } from '@/components/common/Button';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { userService, UserProfile } from '@/services/user.service';
-import { authService } from '@/services/auth.service';
 import { CircularProgress } from '@mui/material';
 import { useLogout } from '@/hooks/useLogout';
 
