@@ -24,6 +24,8 @@ import { notificationService } from '@/services/notification.service';
 import { toast } from 'react-hot-toast';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 import { getSocket } from '@/utils/socket';
+import { authService } from '@/services/auth.service';
+import { useLogout } from '@/hooks/useLogout';
 
 export default function CompanyHomePage() {
   const navigate = useNavigate();
@@ -193,17 +195,7 @@ export default function CompanyHomePage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('accountId');
-    localStorage.removeItem('accountPhone');
-    localStorage.removeItem('accountName');
-    localStorage.removeItem('companyId');
-    localStorage.removeItem('companyReadNotificationIds');
-    toast.success('Đăng xuất thành công');
-    navigate('/login', { replace: true });
-  };
+  const { handleLogout } = useLogout();
 
   const companyName = company?.company_name || 'Cứu hộ Minh Anh';
   const isCompanyActive = company?.status === 'active';

@@ -15,8 +15,10 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 import { adminService } from '@/services/admin.service';
+import { authService } from '@/services/auth.service';
 import { NAVY, ORANGE, CARD_RADIUS } from '@/constants/colors';
 import { DesktopLayout } from './DesktopLayout';
+import { useLogout } from '@/hooks/useLogout';
 
 interface AdminLayoutProps {
   children?: ReactNode;
@@ -101,16 +103,7 @@ export function AdminLayout({
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('accountId');
-    localStorage.removeItem('accountPhone');
-    localStorage.removeItem('accountName');
-    localStorage.removeItem('companyId');
-    toast.success('Đăng xuất thành công');
-    navigate('/login', { replace: true });
-  };
+  const { handleLogout } = useLogout();
 
   const handleBack = () => {
     if (onBack) {

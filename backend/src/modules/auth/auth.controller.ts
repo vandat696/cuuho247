@@ -78,6 +78,42 @@ class AuthController {
       next(err);
     }
   }
+
+  async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { refresh_token } = req.body;
+      if (!refresh_token) {
+        res.status(400).json({ status: 'error', message: 'Refresh token là bắt buộc' });
+        return;
+      }
+
+      const result = await authService.refreshToken(refresh_token);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Làm mới token thành công',
+        data: result,
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { refresh_token } = req.body;
+      if (refresh_token) {
+        await authService.logout(refresh_token);
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Đăng xuất thành công',
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }
 
 export default new AuthController();

@@ -20,7 +20,7 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     password_hash: { type: String, required: true },
     full_name: { type: String, required: true },
-    phone: { type: String },
+    phone: { type: String, unique: true, sparse: true },
     avatar_url: { type: String },
     status: {
       type: String,

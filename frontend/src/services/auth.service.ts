@@ -53,4 +53,12 @@ export const authService = {
     });
     return response.data;
   },
+  logout: async (refreshToken: string): Promise<void> => {
+    try {
+      await http.post(`/auth/logout`, { refresh_token: refreshToken }, { skipGlobalErrorToast: true });
+    } catch (error) {
+      // Ignore errors on logout (e.g. token already expired)
+      console.warn('Logout API failed, ignoring', error);
+    }
+  },
 };
