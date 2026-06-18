@@ -7,7 +7,7 @@ import { serviceCategoryRepository } from '@/modules/service-catalog/service-cat
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { CreateRequestData } from './interfaces/rescue.interface';
 
-const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted'];
+const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted', 'in_progress'];
 
 /**
  * RescueCustomerService: Xử lý nghiệp vụ Cứu hộ từ phía Khách hàng.

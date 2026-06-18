@@ -80,6 +80,14 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
                 <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
                   {formatTimeOnly(request.cancelled_at || request.updated_at)}
                 </Typography>
+                {request.cancellation?.reason && (
+                  <Box sx={{ mt: 1, p: 1.5, bgcolor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                    <Typography sx={{ fontSize: 13, color: '#991b1b', fontWeight: 600 }}>Lý do:</Typography>
+                    <Typography sx={{ fontSize: 13, color: '#7f1d1d', mt: 0.5 }}>
+                      {request.cancellation.reason}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             </Box>
           </>

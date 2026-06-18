@@ -133,6 +133,21 @@ export default function RescueRequestDetailPage() {
     }
   }, [status]);
 
+  useEffect(() => {
+    const handleNotification = (event: any) => {
+      const notification = event.detail;
+      if (
+        notification.type === 'request_cancelled' &&
+        notification.payload?.rescue_request_id === requestId &&
+        status !== 'canceled'
+      ) {
+        navigate(`/company/rescue/canceled/${requestId}`, { replace: true });
+      }
+    };
+    window.addEventListener('notification_received', handleNotification);
+    return () => window.removeEventListener('notification_received', handleNotification);
+  }, [requestId, status, navigate]);
+
   const handleAcceptRequest = async () => {
     if (!requestId) return;
 
@@ -154,7 +169,7 @@ export default function RescueRequestDetailPage() {
         eta_minutes: eta,
       });
       toast.success('Đã nhận yêu cầu cứu hộ');
-      navigate('/company/rescue/active');
+      navigate(`/company/rescue/active/${requestId}`, { replace: true });
     } catch (error) {
       console.error('Error accepting request:', error);
       toast.error('Không thể nhận yêu cầu');
@@ -290,6 +305,18 @@ export default function RescueRequestDetailPage() {
             <>
               {renderStatusBanner()}
 
+              {status === 'canceled' && request.cancellation?.reason && (
+                <InfoCard title="Lý do hủy/từ chối">
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <Box sx={{ mt: 0.25, color: NAVY, display: 'flex', '& svg': { fontSize: 20 } }}>
+                      <AlertIcon />
+                    </Box>
+                    <Typography sx={{ fontSize: 16, fontWeight: 500, lineHeight: 1.35, color: '#111827' }}>
+                      {request.cancellation.reason}
+                    </Typography>
+                  </Box>
+                </InfoCard>
+              )}
               <InfoCard title="Thông tin khách hàng">
                 <InfoRow
                   icon={<UserIcon />}
