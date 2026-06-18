@@ -79,38 +79,14 @@ export const TrackingActionButtons = ({
 
       {(status === 'cancelled' || status === 'rejected' || status === 'completed') && (
         <>
-          {(status === 'cancelled' || status === 'completed') && (
-            <Box
-              component="button"
-              onClick={() => navigate(`/chat/${requestId}`)}
-              sx={{
-                width: '100%',
-                bgcolor: '#fff',
-                color: NAVY,
-                border: `2px solid ${NAVY}`,
-                borderRadius: '12px',
-                py: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-                fontSize: 16,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              <ChatBubbleOutline sx={{ fontSize: 22 }} />
-              Xem tin nhắn
-            </Box>
-          )}
           <Box
             component="button"
-            onClick={() => navigate('/customer/home')}
+            onClick={() => navigate(`/chat/${requestId}`)}
             sx={{
               width: '100%',
-              bgcolor: NAVY,
-              color: '#fff',
-              border: 'none',
+              bgcolor: '#fff',
+              color: NAVY,
+              border: `2px solid ${NAVY}`,
               borderRadius: '12px',
               py: 2,
               display: 'flex',
@@ -122,7 +98,8 @@ export const TrackingActionButtons = ({
               cursor: 'pointer',
             }}
           >
-            Quay về trang chủ
+            <ChatBubbleOutline sx={{ fontSize: 22 }} />
+            Xem tin nhắn
           </Box>
         </>
       )}

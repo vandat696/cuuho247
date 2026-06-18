@@ -32,6 +32,8 @@ router.get('/company/pending/:requestId', rescueCompanyController.getCompanyPend
 
 router.get('/company/requests/:requestId/route', rescueCompanyController.getCompanyRequestRouteEstimate);
 
+router.get('/company/requests/:requestId', rescueCompanyController.getCompanyRequestDetailGeneric);
+
 // Public search route
 router.get('/companies', rescueCompanyController.searchCompanies);
 

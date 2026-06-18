@@ -64,6 +64,34 @@ class CompanyRescueRequestService {
     };
   }
 
+  async getGenericRequestDetailForCompany(companyId: string, requestId: string): Promise<any | null> {
+    const request = await rescueRepository.findDetail(companyId, requestId, [
+      'pending',
+      'accepted',
+      'in_progress',
+      'arrived',
+      'completed',
+      'cancelled',
+      'rejected',
+      'timeout',
+    ]);
+
+    if (!request) {
+      return null;
+    }
+
+    const company = await companyRepository.findById(companyId);
+    const distanceKm = getDistanceFromCoordinates(company?.location?.coordinates, request.location?.coordinates);
+
+    return {
+      ...(await this.mapRequestWithVehicle(request)),
+      customer: this.mapCustomer(request.user_id),
+      incident_photos: request.incident_photos || [],
+      location: request.location,
+      distance_km: distanceKm,
+    };
+  }
+
   async getActiveRequestsForCompany(companyId: string): Promise<ActiveRescueRequestResult[]> {
     const requests = await rescueRepository.findActiveRequestsByCompany(companyId);
     return Promise.all(requests.map((request: any) => this.mapRequestWithVehicle(request)));

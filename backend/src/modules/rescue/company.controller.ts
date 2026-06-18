@@ -45,6 +45,26 @@ class RescueCompanyController {
     }
   }
 
+  async getCompanyRequestDetailGeneric(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user.id;
+      const { requestId } = req.params;
+      const request = await companyRescueRequestService.getGenericRequestDetailForCompany(companyId, requestId);
+
+      if (!request) {
+        throw new NotFoundError('Không tìm thấy yêu cầu cứu hộ');
+      }
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Lấy chi tiết yêu cầu cứu hộ thành công',
+        data: { request },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getCompanyCompletedRequests(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user.id;
