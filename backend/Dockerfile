@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Copy configuration files
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 
 # Copy source code
 COPY src ./src
