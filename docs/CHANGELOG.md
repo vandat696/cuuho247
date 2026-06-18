@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
+## [2.2.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v2.1.0...cuuho247-v2.2.0) (2026-06-18)
+
+
+### Features
+
+* add cancel rescue request option for company ([e7f237e](https://github.com/vandat696/cuuho247/commit/e7f237e1bc3bf7f0332274df5062202bd575b838))
+* add cancel rescue request option for company ([c2e85a8](https://github.com/vandat696/cuuho247/commit/c2e85a8bb910befedbd9e66bfe99d7be0965539c))
+
+
+### Bug Fixes
+
+* add button for customer ([526635f](https://github.com/vandat696/cuuho247/commit/526635fdb5b75585fbbef36d183113e2843a803c))
+* add name to chat title and add chat button for request details ([6091381](https://github.com/vandat696/cuuho247/commit/6091381a4728a2f295cd38747900b99db13c4c7d))
+* add name to chat title and add chat button for request details ([a1b2394](https://github.com/vandat696/cuuho247/commit/a1b2394249bab108dca3c16bbb3209a73a5a69d3))
+* add url util to resolve uploaded img url ([9733192](https://github.com/vandat696/cuuho247/commit/9733192224c2c06758d41c7b6c752c9abaf8ac8b))
+* **api:** enable trust proxy ([c6ead7c](https://github.com/vandat696/cuuho247/commit/c6ead7c68dedf04ab6e948f6475111bc4f755b12))
+* **community:** fix like button ([25bbaa8](https://github.com/vandat696/cuuho247/commit/25bbaa8db63743ac33db4d53af13ae6503be03d2))
+* **community:** fix like button ([72e0242](https://github.com/vandat696/cuuho247/commit/72e0242938be47a9533f878cb8c8691cb8397a85))
+* fix address autocomplete for company register form ([f67b6af](https://github.com/vandat696/cuuho247/commit/f67b6af099aa1d90e3f832fe939411d7a7da7185))
+* fix address autocomplete for company register form ([b0f854a](https://github.com/vandat696/cuuho247/commit/b0f854a8ebfaf7d348e9dda680d69b0ca9880f6a))
+* fix auth validation & add refresh token ([f9721e6](https://github.com/vandat696/cuuho247/commit/f9721e69ff254425f270b7a2c9453270c0637fea))
+* fix auth validation & add refresh token ([675fccc](https://github.com/vandat696/cuuho247/commit/675fcccff4c1545a97b44e1bcd2127757bc99276))
+* fix cancel rescue request flow ([7cdd232](https://github.com/vandat696/cuuho247/commit/7cdd232484e940a6210ea9355bb7bbb1a1a1b77f))
+* fix cancel rescue request flow ([52e12d5](https://github.com/vandat696/cuuho247/commit/52e12d5164301901a190b7f0130bd707e003e330))
+* fix loading layout for service page ([70a0b88](https://github.com/vandat696/cuuho247/commit/70a0b88b1fede8ec9ba0e4e79c440023a680f74e))
+* fix notification ([795139d](https://github.com/vandat696/cuuho247/commit/795139dfdafd15a4ca0ae296e942db7f16b81a61))
+* fix notification ([43a5485](https://github.com/vandat696/cuuho247/commit/43a5485d9a5ddb1ae1e4da5803cdbc97c1a00abe))
+* fix reject request flow ([8c0fe70](https://github.com/vandat696/cuuho247/commit/8c0fe70f548c660ca9f59534fca3f8723b0c67a9))
+* fix reject request flow ([f427d70](https://github.com/vandat696/cuuho247/commit/f427d70758cc569442801ffb30a3c0abfe9d7ed6))
+* fix request detail page UI for cancelled case ([252c4ac](https://github.com/vandat696/cuuho247/commit/252c4ac24f4e422861aa866591924da5fb0bbf6a))
+* fix request detail page UI for cancelled case ([f3f8492](https://github.com/vandat696/cuuho247/commit/f3f8492c5ae0f8502e0891a424fef8ead2de12d8))
+* fix route for old noti ([b50633d](https://github.com/vandat696/cuuho247/commit/b50633d705d04d79db7872bd919e9a91f344d4c2))
+* fix socket ([b852d41](https://github.com/vandat696/cuuho247/commit/b852d41cca9cd9ce95fe86ccc278ec0900f90e50))
+* fix socket ([7268436](https://github.com/vandat696/cuuho247/commit/726843613a6432089f4952409b2622820d316b8a))
+* remove duplicate toast notification ([e2e76f4](https://github.com/vandat696/cuuho247/commit/e2e76f470b3c00b367cd977ae2580764a70e916d))
+* remove duplicate toast notification ([d0f95b1](https://github.com/vandat696/cuuho247/commit/d0f95b1570a629dbe41837879e0485718f889750))
+
 ## [2.1.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v2.0.0...cuuho247-v2.1.0) (2026-06-12)
 
 ### Features
