@@ -168,6 +168,7 @@ export default function RescueTrackingPage() {
               requestId={requestId!}
               status={request.status}
               onCancelClick={() => setShowCancelSheet(true)}
+              onResendClick={() => navigate('/rescue/request', { state: { prefill: request } })}
             />
           </Box>
         </Box>

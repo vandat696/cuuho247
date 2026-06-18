@@ -35,6 +35,10 @@ export interface CustomerRescueRequest {
   location?: {
     coordinates: [number, number]; // [lng, lat]
   };
+  incident_type?: string;
+  address?: {
+    detail?: string;
+  };
   status?: CustomerRescueRequestStatus;
   eta_minutes?: number;
   created_at?: string;

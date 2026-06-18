@@ -11,9 +11,15 @@ interface TrackingActionButtonsProps {
   requestId: string;
   status?: CustomerRescueRequestStatus;
   onCancelClick: () => void;
+  onResendClick?: () => void;
 }
 
-export const TrackingActionButtons = ({ requestId, status, onCancelClick }: TrackingActionButtonsProps) => {
+export const TrackingActionButtons = ({
+  requestId,
+  status,
+  onCancelClick,
+  onResendClick,
+}: TrackingActionButtonsProps) => {
   const navigate = useNavigate();
 
   const handleReview = () => {
@@ -44,6 +50,30 @@ export const TrackingActionButtons = ({ requestId, status, onCancelClick }: Trac
         >
           <ChatBubbleOutline sx={{ fontSize: 22 }} />
           Nhắn tin
+        </Box>
+      )}
+
+      {status === 'rejected' && onResendClick && (
+        <Box
+          component="button"
+          onClick={onResendClick}
+          sx={{
+            width: '100%',
+            bgcolor: ORANGE,
+            color: '#fff',
+            border: 'none',
+            borderRadius: '12px',
+            py: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+            fontSize: 16,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          Gửi lại yêu cầu
         </Box>
       )}
 
