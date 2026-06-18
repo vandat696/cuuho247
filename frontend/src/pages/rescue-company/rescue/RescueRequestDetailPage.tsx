@@ -406,6 +406,10 @@ export default function RescueRequestDetailPage() {
                     <PrimaryActionButton onClick={handleAcceptRequest} disabled={accepting} variant="orange">
                       {accepting ? 'Đang nhận...' : 'Chấp nhận yêu cầu'}
                     </PrimaryActionButton>
+                    <PrimaryActionButton onClick={() => navigate(`/chat/${requestId}`)} variant="outline">
+                      <ChatBubbleOutline sx={{ fontSize: 20, mr: 1 }} />
+                      Nhắn tin với khách hàng
+                    </PrimaryActionButton>
                     <PrimaryActionButton onClick={() => setOpenRejectDialog(true)} variant="outline">
                       Từ chối
                     </PrimaryActionButton>
@@ -477,6 +481,10 @@ export default function RescueRequestDetailPage() {
                       Xem đánh giá khách hàng
                     </PrimaryActionButton>
                   )}
+                  <PrimaryActionButton onClick={() => navigate(`/chat/${requestId}`)} variant="outline">
+                    <ChatBubbleOutline sx={{ fontSize: 20, mr: 1 }} />
+                    Xem tin nhắn khách hàng
+                  </PrimaryActionButton>
                   <PrimaryActionButton onClick={() => navigate('/company/home')} variant="navy">
                     Quay về trang chủ
                   </PrimaryActionButton>

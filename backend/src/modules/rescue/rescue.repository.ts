@@ -12,7 +12,7 @@ class RescueRepository {
   }
 
   async findById(id: string): Promise<IRescueRequest | null> {
-    return RescueRequest.findById(id);
+    return RescueRequest.findById(id).populate('user_id', 'full_name phone');
   }
 
   async findByUserId(userId: string): Promise<IRescueRequest[]> {
