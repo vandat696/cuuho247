@@ -180,7 +180,11 @@ export default function ChatPage() {
 
   const chatTitle = myRole === 'company' ? `Nhắn tin với ${customerName}` : `Nhắn tin với ${companyName}`;
 
-  const isEnded = requestStatus === 'completed' || requestStatus === 'cancelled' || requestStatus === 'rejected';
+  const isEnded =
+    requestStatus === 'completed' ||
+    requestStatus === 'cancelled' ||
+    requestStatus === 'canceled' ||
+    requestStatus === 'rejected';
 
   return (
     <MobileLayout>

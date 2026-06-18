@@ -66,6 +66,11 @@ export const companyRescueService = {
     return response.data;
   },
 
+  getGenericRequestDetail: async (requestId: string): Promise<ApiResponse<any>> => {
+    const response = await http.get<ApiResponse<any>>(`/rescue/company/requests/${requestId}`);
+    return response.data;
+  },
+
   acceptCompanyPendingRequest: async (
     requestId: string,
     payload: AcceptPendingRescueRequestPayload

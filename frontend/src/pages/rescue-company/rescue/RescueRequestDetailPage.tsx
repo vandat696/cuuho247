@@ -87,26 +87,23 @@ export default function RescueRequestDetailPage() {
 
       try {
         setLoading(true);
-        let response;
-        switch (status) {
-          case 'pending':
-            response = await companyRescueService.getCompanyPendingRequestDetail(requestId);
-            break;
-          case 'active':
-            response = await companyRescueService.getCompanyActiveRequestDetail(requestId);
-            break;
-          case 'completed':
-            response = await companyRescueService.getCompanyCompletedRequestDetail(requestId);
-            break;
-          case 'canceled':
-            response = await companyRescueService.getCompanyCanceledRequestDetail(requestId);
-            break;
-          default:
-            throw new Error('Invalid status');
-        }
+        const response = await companyRescueService.getGenericRequestDetail(requestId);
 
         if (response.status === 'success') {
-          setRequest(response.data.request);
+          const fetchedRequest = response.data.request;
+
+          let expectedUrlStatus: RequestStatus = 'pending';
+          if (fetchedRequest.status === 'pending') expectedUrlStatus = 'pending';
+          else if (['accepted', 'in_progress', 'arrived'].includes(fetchedRequest.status)) expectedUrlStatus = 'active';
+          else if (fetchedRequest.status === 'completed') expectedUrlStatus = 'completed';
+          else if (['cancelled', 'rejected', 'timeout'].includes(fetchedRequest.status)) expectedUrlStatus = 'canceled';
+
+          if (expectedUrlStatus !== status) {
+            navigate(`/company/rescue/${expectedUrlStatus}/${requestId}`, { replace: true });
+            return;
+          }
+
+          setRequest(fetchedRequest);
         }
       } catch (error) {
         console.error('Error fetching rescue request detail:', error);
@@ -406,6 +403,10 @@ export default function RescueRequestDetailPage() {
                     <PrimaryActionButton onClick={handleAcceptRequest} disabled={accepting} variant="orange">
                       {accepting ? 'Đang nhận...' : 'Chấp nhận yêu cầu'}
                     </PrimaryActionButton>
+                    <PrimaryActionButton onClick={() => navigate(`/chat/${requestId}`)} variant="outline">
+                      <ChatBubbleOutline sx={{ fontSize: 20, mr: 1 }} />
+                      Nhắn tin với khách hàng
+                    </PrimaryActionButton>
                     <PrimaryActionButton onClick={() => setOpenRejectDialog(true)} variant="outline">
                       Từ chối
                     </PrimaryActionButton>
@@ -477,8 +478,9 @@ export default function RescueRequestDetailPage() {
                       Xem đánh giá khách hàng
                     </PrimaryActionButton>
                   )}
-                  <PrimaryActionButton onClick={() => navigate('/company/home')} variant="navy">
-                    Quay về trang chủ
+                  <PrimaryActionButton onClick={() => navigate(`/chat/${requestId}`)} variant="outline">
+                    <ChatBubbleOutline sx={{ fontSize: 20, mr: 1 }} />
+                    Xem tin nhắn khách hàng
                   </PrimaryActionButton>
                 </Box>
               )}

@@ -1,5 +1,6 @@
 import { messageRepository } from './message.repository';
 import rescueRepository from '../rescue/rescue.repository';
+import userRepository from '../user/user.repository';
 import { hasRequestAccess } from '@/shared/utils/rescueRequestAuth';
 import { UnauthorizedError, NotFoundError, ForbiddenError, BadRequestError } from '@/shared/utils/apiError.util';
 import { messageEventEmitter, MESSAGE_EVENTS } from './message.event';
@@ -27,12 +28,22 @@ class MessageService {
 
     const messages = await messageRepository.findByRescueRequestId(rescueRequestId);
 
+    let customerName = 'Khách hàng';
+    if (rescueRequest.user_id) {
+      if ((rescueRequest.user_id as any).full_name) {
+        customerName = (rescueRequest.user_id as any).full_name;
+      } else {
+        const user = await userRepository.findById(rescueRequest.user_id as any);
+        if (user) customerName = user.full_name;
+      }
+    }
+
     return {
       messages,
       rescueRequest: {
         _id: rescueRequest._id,
         company_name: rescueRequest.company.company_name,
-        customer_name: (rescueRequest.user_id as any)?.full_name || 'Khách hàng',
+        customer_name: customerName,
         status: rescueRequest.status,
       },
     };
