@@ -44,102 +44,116 @@ export const TrackingStatusStepper = ({ request }: TrackingStatusStepperProps) =
       <Typography sx={{ fontSize: 16, fontWeight: 800, color: NAVY, mb: 2 }}>Trạng thái</Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        {request.status === 'cancelled' || request.status === 'rejected' ? (
-          <>
-            <Box sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: 11,
-                  top: 24,
-                  bottom: -8,
-                  width: 2,
-                  bgcolor: GREEN,
-                  zIndex: 0,
-                }}
-              />
-              <Box sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}>
-                <CheckCircle sx={{ color: GREEN, fontSize: 24 }} />
-              </Box>
-              <Box sx={{ flex: 1, pb: 3 }}>
-                <Typography sx={{ fontSize: 15, fontWeight: 700, color: NAVY }}>Yêu cầu đã gửi</Typography>
-                <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
-                  {formatTimeOnly(request.created_at)}
-                </Typography>
-              </Box>
-            </Box>
+        {request.status === 'cancelled' || request.status === 'rejected'
+          ? (() => {
+              let lastSuccessfulStepIndex = 0;
+              if (request.accepted_at) lastSuccessfulStepIndex = 1;
+              if (request.started_at) lastSuccessfulStepIndex = 2;
+              if (request.arrived_at) lastSuccessfulStepIndex = 3;
 
-            <Box sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
-              <Box sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}>
-                <CheckCircle sx={{ color: '#ef4444', fontSize: 24 }} />
-              </Box>
-              <Box sx={{ flex: 1, pb: 3 }}>
-                <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#ef4444' }}>
-                  {request.status === 'cancelled' ? 'Yêu cầu đã bị huỷ' : 'Yêu cầu bị từ chối'}
-                </Typography>
-                <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
-                  {formatTimeOnly(request.cancelled_at || request.updated_at)}
-                </Typography>
-                {request.cancellation?.reason && (
-                  <Box sx={{ mt: 1, p: 1.5, bgcolor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
-                    <Typography sx={{ fontSize: 13, color: '#991b1b', fontWeight: 600 }}>Lý do:</Typography>
-                    <Typography sx={{ fontSize: 13, color: '#7f1d1d', mt: 0.5 }}>
-                      {request.cancellation.reason}
-                    </Typography>
+              return (
+                <>
+                  {STATUS_STEPS.slice(0, lastSuccessfulStepIndex + 1).map((step) => {
+                    const time = formatTimeOnly(getStepTime(step.id));
+                    return (
+                      <Box key={step.id} sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            left: 11,
+                            top: 24,
+                            bottom: -8,
+                            width: 2,
+                            bgcolor: GREEN,
+                            zIndex: 0,
+                          }}
+                        />
+                        <Box
+                          sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}
+                        >
+                          <CheckCircle sx={{ color: GREEN, fontSize: 24 }} />
+                        </Box>
+                        <Box sx={{ flex: 1, pb: 3 }}>
+                          <Typography sx={{ fontSize: 15, fontWeight: 700, color: NAVY }}>{step.label}</Typography>
+                          <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>{time}</Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+
+                  <Box sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
+                    <Box sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}>
+                      <CheckCircle sx={{ color: '#ef4444', fontSize: 24 }} />
+                    </Box>
+                    <Box sx={{ flex: 1, pb: 3 }}>
+                      <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#ef4444' }}>
+                        {request.status === 'cancelled' ? 'Yêu cầu đã bị huỷ' : 'Yêu cầu bị từ chối'}
+                      </Typography>
+                      <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>
+                        {formatTimeOnly(request.cancelled_at || request.updated_at)}
+                      </Typography>
+                      {request.cancellation?.reason && (
+                        <Box
+                          sx={{ mt: 1, p: 1.5, bgcolor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}
+                        >
+                          <Typography sx={{ fontSize: 13, color: '#991b1b', fontWeight: 600 }}>Lý do:</Typography>
+                          <Typography sx={{ fontSize: 13, color: '#7f1d1d', mt: 0.5 }}>
+                            {request.cancellation.reason}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
-                )}
-              </Box>
-            </Box>
-          </>
-        ) : (
-          STATUS_STEPS.map((step, index) => {
-            const isCompleted = currentStatusIndex >= index;
-            const time = formatTimeOnly(getStepTime(step.id));
-            const isLast = index === STATUS_STEPS.length - 1;
+                </>
+              );
+            })()
+          : STATUS_STEPS.map((step, index) => {
+              const isCompleted = currentStatusIndex >= index;
+              const time = formatTimeOnly(getStepTime(step.id));
+              const isLast = index === STATUS_STEPS.length - 1;
 
-            return (
-              <Box key={step.id} sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
-                {/* Line connector */}
-                {!isLast && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      left: 11,
-                      top: 24,
-                      bottom: -8,
-                      width: 2,
-                      bgcolor: currentStatusIndex > index ? GREEN : '#e5e7eb',
-                      zIndex: 0,
-                    }}
-                  />
-                )}
-
-                {/* Icon */}
-                <Box sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}>
-                  {isCompleted ? (
-                    <CheckCircle sx={{ color: GREEN, fontSize: 24 }} />
-                  ) : (
-                    <RadioButtonUnchecked sx={{ color: '#d1d5db', fontSize: 24 }} />
+              return (
+                <Box key={step.id} sx={{ display: 'flex', position: 'relative', minHeight: 60 }}>
+                  {/* Line connector */}
+                  {!isLast && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        left: 11,
+                        top: 24,
+                        bottom: -8,
+                        width: 2,
+                        bgcolor: currentStatusIndex > index ? GREEN : '#e5e7eb',
+                        zIndex: 0,
+                      }}
+                    />
                   )}
-                </Box>
 
-                {/* Content */}
-                <Box sx={{ flex: 1, pb: 3 }}>
-                  <Typography
-                    sx={{ fontSize: 15, fontWeight: isCompleted ? 700 : 500, color: isCompleted ? NAVY : '#9ca3af' }}
-                  >
-                    {step.label}
-                  </Typography>
-                  {time ? (
-                    <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>{time}</Typography>
-                  ) : (
-                    <Typography sx={{ fontSize: 13, color: '#9ca3af', mt: 0.25 }}>Chờ xác nhận</Typography>
-                  )}
+                  {/* Icon */}
+                  <Box sx={{ width: 24, height: 24, position: 'relative', zIndex: 1, mr: 2, flexShrink: 0, mt: 0.5 }}>
+                    {isCompleted ? (
+                      <CheckCircle sx={{ color: GREEN, fontSize: 24 }} />
+                    ) : (
+                      <RadioButtonUnchecked sx={{ color: '#d1d5db', fontSize: 24 }} />
+                    )}
+                  </Box>
+
+                  {/* Content */}
+                  <Box sx={{ flex: 1, pb: 3 }}>
+                    <Typography
+                      sx={{ fontSize: 15, fontWeight: isCompleted ? 700 : 500, color: isCompleted ? NAVY : '#9ca3af' }}
+                    >
+                      {step.label}
+                    </Typography>
+                    {time ? (
+                      <Typography sx={{ fontSize: 13, color: '#6b7280', mt: 0.25 }}>{time}</Typography>
+                    ) : (
+                      <Typography sx={{ fontSize: 13, color: '#9ca3af', mt: 0.25 }}>Chờ xác nhận</Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })
-        )}
+              );
+            })}
       </Box>
     </Box>
   );
