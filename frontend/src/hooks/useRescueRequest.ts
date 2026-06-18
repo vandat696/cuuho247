@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { IncidentType, RescueFormData, RescueFormErrors, RescueLocation } from '../types/rescue.type';
 import { customerRescueService } from '../services/customer-rescue.service';
@@ -7,13 +7,28 @@ import { useCurrentLocation } from './useCurrentLocation';
 
 export function useRescueRequest() {
   const navigate = useNavigate();
+  const locationState = useLocation().state as any;
+  const prefill = locationState?.prefill;
+
   const geo = useCurrentLocation();
 
-  const [form, setForm] = useState<RescueFormData>({
-    incident_type: null,
-    description: '',
-    images: [],
-    location: null,
+  const [form, setForm] = useState<RescueFormData>(() => {
+    let initialLocation = null;
+    if (prefill?.location?.coordinates) {
+      initialLocation = {
+        lat: prefill.location.coordinates[1],
+        lng: prefill.location.coordinates[0],
+        address: prefill.address?.detail || 'Vị trí đã chọn trước đó',
+      };
+    }
+    return {
+      incident_type: prefill?.incident_type
+        ? { slug: prefill.incident_type, label: prefill.title || 'Sự cố xe', icon: '', description: '' }
+        : null,
+      description: prefill?.description || '',
+      images: [],
+      location: initialLocation,
+    };
   });
 
   const [errors, setErrors] = useState<RescueFormErrors>({});
