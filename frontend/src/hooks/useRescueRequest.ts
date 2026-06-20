@@ -123,6 +123,7 @@ export function useRescueRequest() {
               incident_type_label: form.incident_type?.label ?? '',
               description: form.description,
               location: loc,
+              images: form.images,
             },
             results: res.data,
           },

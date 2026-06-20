@@ -4,6 +4,7 @@ import rescueRepository from './rescue.repository';
 import type { IRescueRequest, RequestStatus } from '@/shared/models/RescueRequest.model';
 import { NotFoundError, ForbiddenError, BadRequestError, InternalServerError } from '@/shared/utils/apiError.util';
 import { serviceCategoryRepository } from '@/modules/service-catalog/service-catalog.repository';
+import { vehicleRepository } from '@/modules/vehicle/vehicle.repository';
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { CreateRequestData } from './interfaces/rescue.interface';
 
@@ -86,6 +87,10 @@ class RescueCustomerService {
     const updated = await rescueRepository.cancelById(requestId, 'user', reason);
     if (!updated) {
       throw new InternalServerError('Hủy yêu cầu thất bại, vui lòng thử lại');
+    }
+
+    if (updated.vehicle?.vehicle_id) {
+      await vehicleRepository.update(updated.vehicle.vehicle_id.toString(), { status: 'available' });
     }
 
     return updated;

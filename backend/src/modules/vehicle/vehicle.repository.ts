@@ -5,6 +5,19 @@ class VehicleRepository {
     return Vehicle.find({ company_id: companyId }).sort({ created_at: -1 });
   }
 
+  async getCompanyIdsWithAvailableVehicles(companyIds: string[]): Promise<string[]> {
+    const availableVehicles = await Vehicle.find({
+      company_id: { $in: companyIds },
+      status: 'available',
+    })
+      .select('company_id')
+      .lean()
+      .exec();
+
+    const ids = availableVehicles.map((v) => v.company_id.toString());
+    return [...new Set(ids)];
+  }
+
   async findById(vehicleId: string): Promise<IVehicle | null> {
     return Vehicle.findById(vehicleId);
   }

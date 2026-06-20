@@ -23,6 +23,7 @@ export interface IRequestCompany {
 export interface IRequestVehicle {
   vehicle_id: Types.ObjectId;
   plate_number?: string;
+  vehicle_type?: string;
 }
 
 export interface ICancellation {
@@ -87,6 +88,7 @@ const RequestVehicleSchema = new Schema<IRequestVehicle>(
   {
     vehicle_id: { type: Schema.Types.ObjectId, required: true },
     plate_number: { type: String },
+    vehicle_type: { type: String },
   },
   { _id: false }
 );

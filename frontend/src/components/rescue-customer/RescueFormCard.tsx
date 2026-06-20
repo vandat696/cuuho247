@@ -106,7 +106,7 @@ export function RescueFormCard({
       </Box>
 
       {/* Image Uploader */}
-      <ImageUploader images={images} onChange={onImagesChange} maxCount={5} />
+      <ImageUploader images={images} onChange={onImagesChange} maxCount={6} />
 
       {/* Submit button */}
       <Box sx={{ pt: 1 }}>

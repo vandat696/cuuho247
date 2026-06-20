@@ -290,6 +290,7 @@ export interface RescueSearchState {
     description: string;
     location: RescueLocation | null;
     locationManual: string;
+    images?: File[];
   };
   results: SearchCompaniesResult;
 }

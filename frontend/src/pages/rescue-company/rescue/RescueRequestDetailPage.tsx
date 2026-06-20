@@ -22,6 +22,7 @@ import {
   StarOutline,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
+import { ImagePreviewDialog } from '@/components/common/ImagePreviewDialog';
 
 import {
   CARD_RADIUS,
@@ -77,6 +78,7 @@ export default function RescueRequestDetailPage() {
   const [finalAmount, setFinalAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'e_wallet'>('cash');
   const [completeLoading, setCompleteLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRequestDetail = async () => {
@@ -343,6 +345,33 @@ export default function RescueRequestDetailPage() {
                   }
                 />
                 <InfoRow icon={<ClockIcon />} label="Thời gian yêu cầu" value={formatDateTime(request.created_at)} />
+                {request.incident_photos && request.incident_photos.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography sx={{ mb: 1, fontSize: 14, color: '#6b7280', lineHeight: 1.25, fontWeight: 500 }}>
+                      Ảnh sự cố
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+                      {request.incident_photos.map((photo: string, index: number) => (
+                        <Box
+                          key={index}
+                          component="img"
+                          src={photo}
+                          alt={`Incident ${index}`}
+                          onClick={() => setPreviewImage(photo)}
+                          sx={{
+                            width: 100,
+                            height: 100,
+                            objectFit: 'cover',
+                            borderRadius: 1,
+                            flexShrink: 0,
+                            border: '1px solid #e5e7eb',
+                            cursor: 'pointer',
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                )}
               </InfoCard>
 
               {status !== 'pending' && <VehiclePanel vehicle={request.vehicle} />}
@@ -514,6 +543,9 @@ export default function RescueRequestDetailPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog open={!!previewImage} imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </MobileLayout>
   );
 }
