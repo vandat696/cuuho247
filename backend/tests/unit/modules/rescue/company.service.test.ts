@@ -192,9 +192,11 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       const result = await companyRescueRequestService.getActiveRequestDetailForCompany(companyId, requestId);
 
       expect(result).toBeNull();
-      expect(rescueRepository.findDetail).toHaveBeenCalledWith(
-        companyId, requestId, ['accepted', 'in_progress', 'arrived']
-      );
+      expect(rescueRepository.findDetail).toHaveBeenCalledWith(companyId, requestId, [
+        'accepted',
+        'in_progress',
+        'arrived',
+      ]);
     });
 
     it('TC-4.2 | should return detail with customer info', async () => {
@@ -217,15 +219,18 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
 
     it('TC-5.1 | should return null if requestId is not a valid ObjectId', async () => {
       const result = await companyRescueRequestService.acceptPendingRequestForCompany(
-        companyId, 'invalid-id', acceptData
+        companyId,
+        'invalid-id',
+        acceptData
       );
       expect(result).toBeNull();
     });
 
     it('TC-5.2 | should return null if vehicleId is not a valid ObjectId', async () => {
-      const result = await companyRescueRequestService.acceptPendingRequestForCompany(
-        companyId, requestId, { ...acceptData, vehicle_id: 'bad-id' }
-      );
+      const result = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, {
+        ...acceptData,
+        vehicle_id: 'bad-id',
+      });
       expect(result).toBeNull();
     });
 
@@ -250,7 +255,8 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
 
     it('TC-5.5 | should throw BadRequestError if vehicle is unavailable', async () => {
       (vehicleRepository.findById as jest.Mock).mockResolvedValue({
-        ...mockVehicleAvailable, status: 'unavailable',
+        ...mockVehicleAvailable,
+        status: 'unavailable',
       });
 
       await expect(
@@ -262,9 +268,7 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       (vehicleRepository.findById as jest.Mock).mockResolvedValue(mockVehicleAvailable);
       (rescueRepository.acceptPendingRequest as jest.Mock).mockResolvedValue(null); // đơn đã bị nhận bởi công ty khác
 
-      const result = await companyRescueRequestService.acceptPendingRequestForCompany(
-        companyId, requestId, acceptData
-      );
+      const result = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, acceptData);
 
       expect(result).toBeNull();
       expect(vehicleRepository.update).not.toHaveBeenCalled(); // xe không bị đổi trạng thái
@@ -276,12 +280,16 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       (rescueRepository.acceptPendingRequest as jest.Mock).mockResolvedValue(mockAcceptedRequest);
       (vehicleRepository.update as jest.Mock).mockResolvedValue(true);
 
-      const result = await companyRescueRequestService.acceptPendingRequestForCompany(
-        companyId, requestId, acceptData
-      );
+      const result = await companyRescueRequestService.acceptPendingRequestForCompany(companyId, requestId, acceptData);
 
       expect(rescueRepository.acceptPendingRequest).toHaveBeenCalledWith(
-        companyId, requestId, vehicleId, '29A-12345', 15, 'On the way'
+        companyId,
+        requestId,
+        vehicleId,
+        '29A-12345',
+        'Xe cẩu',
+        15,
+        'On the way'
       );
       expect(vehicleRepository.update).toHaveBeenCalledWith(vehicleId, { status: 'unavailable' });
       expect(result).not.toBeNull();
@@ -404,7 +412,9 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
 
     it('TC-10.1 | should return null for invalid requestId', async () => {
       const result = await companyRescueRequestService.completeActiveRequestForCompany(
-        companyId, 'invalid-id', completeData
+        companyId,
+        'invalid-id',
+        completeData
       );
       expect(result).toBeNull();
     });
@@ -413,7 +423,9 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       (rescueRepository.completeActiveRequest as jest.Mock).mockResolvedValue(null);
 
       const result = await companyRescueRequestService.completeActiveRequestForCompany(
-        companyId, requestId, completeData
+        companyId,
+        requestId,
+        completeData
       );
 
       expect(result).toBeNull();
@@ -429,11 +441,17 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       (vehicleRepository.findById as jest.Mock).mockResolvedValue(mockVehicleAvailable);
 
       const result = await companyRescueRequestService.completeActiveRequestForCompany(
-        companyId, requestId, completeData
+        companyId,
+        requestId,
+        completeData
       );
 
       expect(rescueRepository.completeActiveRequest).toHaveBeenCalledWith(
-        companyId, requestId, 500000, 'cash', 'Job done'
+        companyId,
+        requestId,
+        500000,
+        'cash',
+        'Job done'
       );
       expect(vehicleRepository.update).toHaveBeenCalledWith(vehicleId, { status: 'available' });
       expect(result!.status).toBe('completed');
@@ -455,9 +473,9 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
   // ───────────────────────────────────────────────────────────────────────────
   describe('getCanceledRequestsForCompany', () => {
     it('TC-11.1 | should return list of cancelled requests', async () => {
-      (rescueRepository.findCanceledRequestsByCompany as jest.Mock).mockResolvedValue(
-        [makeRequest({ status: 'cancelled' })]
-      );
+      (rescueRepository.findCanceledRequestsByCompany as jest.Mock).mockResolvedValue([
+        makeRequest({ status: 'cancelled' }),
+      ]);
       (vehicleRepository.findById as jest.Mock).mockResolvedValue(mockVehicleAvailable);
 
       const result = await companyRescueRequestService.getCanceledRequestsForCompany(companyId);
@@ -541,7 +559,9 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
 
       const customOrigin = { lat: 21.01, lng: 105.83 };
       const result = await companyRescueRequestService.estimateRequestRouteForCompany(
-        companyId, requestId, customOrigin
+        companyId,
+        requestId,
+        customOrigin
       );
 
       expect(result!.origin).toEqual({ lng: 105.83, lat: 21.01 });
@@ -579,6 +599,10 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       status: 'active',
     });
 
+    beforeEach(() => {
+      (vehicleRepository.getCompanyIdsWithAvailableVehicles as jest.Mock).mockResolvedValue([companyId]);
+    });
+
     it('TC-14.1 | should return empty list when findNearby and findSearchable both empty', async () => {
       (companyRepository.findNearby as jest.Mock).mockResolvedValue([]);
       (companyRepository.findSearchable as jest.Mock).mockResolvedValue([]);
@@ -605,7 +629,7 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       const mockCo = makeMockCompany();
       const mockServices = [
         { company_id: new Types.ObjectId(companyId), name: 'Sửa động cơ', price: 300000 },
-        { company_id: new Types.ObjectId(companyId), name: 'Kéo xe',      price: 500000 },
+        { company_id: new Types.ObjectId(companyId), name: 'Kéo xe', price: 500000 },
       ];
       (companyRepository.findNearby as jest.Mock).mockResolvedValue([mockCo]);
       (serviceRepository.findByCompanyIdsAndCategory as jest.Mock).mockResolvedValue(mockServices);
@@ -637,7 +661,8 @@ describe('CompanyRescueRequestService - Unit Tests', () => {
       (calcDistanceKm as jest.Mock).mockReturnValue(3.0);
 
       const result = await companyRescueRequestService.searchNearbyCompanies({
-        ...baseParams, incident_type: 'engine_breakdown',
+        ...baseParams,
+        incident_type: 'engine_breakdown',
       });
 
       // Chỉ trả về company1 (có matching service), loại bỏ company2

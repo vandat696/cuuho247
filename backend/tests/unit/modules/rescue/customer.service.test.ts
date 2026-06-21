@@ -15,9 +15,9 @@ jest.mock('@/shared/constants/incidentMapping');
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('RescueCustomerService - Unit Tests', () => {
-  const userId      = new Types.ObjectId().toString();
-  const companyId   = new Types.ObjectId().toString();
-  const requestId   = new Types.ObjectId().toString();
+  const userId = new Types.ObjectId().toString();
+  const companyId = new Types.ObjectId().toString();
+  const requestId = new Types.ObjectId().toString();
 
   const mockCompany = {
     _id: companyId,
@@ -56,10 +56,10 @@ describe('RescueCustomerService - Unit Tests', () => {
   // ───────────────────────────────────────────────────────────────────────────
   describe('createRescueRequest', () => {
     const baseRequestData = {
-      user_id:         userId,
-      company_id:      companyId,
-      description:     'Flat tire',
-      location:        { lat: 10.762622, lng: 106.660172 },
+      user_id: userId,
+      company_id: companyId,
+      description: 'Flat tire',
+      location: { lat: 10.762622, lng: 106.660172 },
     };
 
     it('TC-2.1 | should throw NotFoundError if company does not exist', async () => {
@@ -96,7 +96,7 @@ describe('RescueCustomerService - Unit Tests', () => {
           status: 'pending',
           status_history: expect.arrayContaining([
             expect.objectContaining({
-              status:     'pending',
+              status: 'pending',
               changed_by: 'user',
             }),
           ]),
@@ -113,7 +113,7 @@ describe('RescueCustomerService - Unit Tests', () => {
       expect(rescueRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           company: {
-            company_id:   expect.any(Types.ObjectId),
+            company_id: expect.any(Types.ObjectId),
             company_name: 'Rescue Company Ltd',
           },
         })
@@ -226,7 +226,9 @@ describe('RescueCustomerService - Unit Tests', () => {
 
     it('TC-3.3 | should throw BadRequestError when status is "in_progress"', async () => {
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'in_progress',
+        _id: requestId,
+        user_id: userId,
+        status: 'in_progress',
       });
 
       await expect(customerService.cancelRequest(requestId, userId, reason)).rejects.toThrow(BadRequestError);
@@ -234,7 +236,9 @@ describe('RescueCustomerService - Unit Tests', () => {
 
     it('TC-3.4 | should throw BadRequestError when status is "completed"', async () => {
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'completed',
+        _id: requestId,
+        user_id: userId,
+        status: 'completed',
       });
 
       await expect(customerService.cancelRequest(requestId, userId, reason)).rejects.toThrow(BadRequestError);
@@ -242,7 +246,9 @@ describe('RescueCustomerService - Unit Tests', () => {
 
     it('TC-3.5 | should throw BadRequestError when status is "cancelled"', async () => {
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'cancelled',
+        _id: requestId,
+        user_id: userId,
+        status: 'cancelled',
       });
 
       await expect(customerService.cancelRequest(requestId, userId, reason)).rejects.toThrow(BadRequestError);
@@ -250,7 +256,9 @@ describe('RescueCustomerService - Unit Tests', () => {
 
     it('TC-3.6 | should throw InternalServerError if DB update fails', async () => {
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'pending',
+        _id: requestId,
+        user_id: userId,
+        status: 'pending',
       });
       (rescueRepository.cancelById as jest.Mock).mockResolvedValue(null);
 
@@ -261,7 +269,9 @@ describe('RescueCustomerService - Unit Tests', () => {
     it('TC-3.7 | should successfully cancel a "pending" request', async () => {
       const mockCancelled = { _id: requestId, user_id: userId, status: 'cancelled' };
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'pending',
+        _id: requestId,
+        user_id: userId,
+        status: 'pending',
       });
       (rescueRepository.cancelById as jest.Mock).mockResolvedValue(mockCancelled);
 
@@ -271,16 +281,14 @@ describe('RescueCustomerService - Unit Tests', () => {
       expect(result).toEqual(mockCancelled);
     });
 
-    it('TC-3.8 | should successfully cancel an "accepted" request', async () => {
-      const mockCancelled = { _id: requestId, user_id: userId, status: 'cancelled' };
+    it('TC-3.8 | should throw BadRequestError when status is "accepted"', async () => {
       (rescueRepository.findById as jest.Mock).mockResolvedValue({
-        _id: requestId, user_id: userId, status: 'accepted',
+        _id: requestId,
+        user_id: userId,
+        status: 'accepted',
       });
-      (rescueRepository.cancelById as jest.Mock).mockResolvedValue(mockCancelled);
 
-      const result = await customerService.cancelRequest(requestId, userId, reason);
-
-      expect(result.status).toBe('cancelled');
+      await expect(customerService.cancelRequest(requestId, userId, reason)).rejects.toThrow(BadRequestError);
     });
   });
 });
