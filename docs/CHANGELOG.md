@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog.
 
+## [2.2.1](https://github.com/vandat696/cuuho247/compare/cuuho247-v2.2.0...cuuho247-v2.2.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* adjust test for new backend logic ([45f181f](https://github.com/vandat696/cuuho247/commit/45f181ffdab0f2da7226fcc057ee579358cc2f92))
+* fix rescue flow ([2723a1f](https://github.com/vandat696/cuuho247/commit/2723a1f75613e341f13e5d7bf96b2020e2fbb3b8))
+* fix rescue UI ([c45e92a](https://github.com/vandat696/cuuho247/commit/c45e92abbf0480b277775008809cf61752146d96))
+* fix rescue UI ([ddee397](https://github.com/vandat696/cuuho247/commit/ddee397863a0d42b6b30431cf997bfd0e93d5dfe))
+
 ## [2.2.0](https://github.com/vandat696/cuuho247/compare/cuuho247-v2.1.0...cuuho247-v2.2.0) (2026-06-18)
 
 
