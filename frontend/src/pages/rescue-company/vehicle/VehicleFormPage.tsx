@@ -150,7 +150,7 @@ export default function VehicleFormPage() {
           <FormControl fullWidth size="small">
             <Select name="status" value={formData.status} onChange={handleChange}>
               <MenuItem value="available">Hoạt động</MenuItem>
-              <MenuItem value="unavailable">Bảo trì</MenuItem>
+              <MenuItem value="unavailable">Đang bận</MenuItem>
             </Select>
           </FormControl>
         </Box>

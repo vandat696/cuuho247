@@ -9,6 +9,7 @@ import { ConfirmRequestCard } from '@/components/rescue-customer/ConfirmRequestC
 import { customerRescueService, CreateRequestPayload } from '@/services/customer-rescue.service';
 import { CompanyResult } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
+import { clearRescueSearchCache } from '@/utils/rescueSearchCache';
 
 export default function ConfirmRequestPage() {
   const navigate = useNavigate();
@@ -92,6 +93,7 @@ export default function ConfirmRequestPage() {
       const res = await customerRescueService.createRequest(payload);
 
       toast.success('Gửi yêu cầu thành công!');
+      clearRescueSearchCache();
       navigate(`/customer/tracking/${res.data._id}`, { replace: true });
     } catch (error: any) {
       console.error('Error confirming rescue request:', error);

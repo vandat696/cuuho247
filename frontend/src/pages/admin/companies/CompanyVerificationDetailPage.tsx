@@ -36,27 +36,32 @@ export default function CompanyVerificationDetailPage() {
   });
 
   useEffect(() => {
-    if (!company && companyId) {
+    if (companyId) {
       fetchCompanyFromPending();
     }
   }, [companyId]);
 
   const fetchCompanyFromPending = async () => {
     try {
-      setLoading(true);
+      // Don't show full loading spinner if we already have initial data
+      if (!company) setLoading(true);
+
       const response = await adminService.getPendingCompanies();
       if (response.status === 'success') {
         const found = response.data.find((c) => c._id === companyId);
         if (found) {
           setCompany(found);
-        } else {
+        } else if (!company) {
+          // Only show error if we didn't have cached data either
           toast.error('Không tìm thấy thông tin công ty cứu hộ hoặc hồ sơ đã được xử lý');
           navigate('/admin/companies/pending', { replace: true });
         }
       }
     } catch (error) {
       console.error('Error fetching company detail:', error);
-      toast.error('Không thể tải thông tin chi tiết công ty cứu hộ');
+      if (!company) {
+        toast.error('Không thể tải thông tin chi tiết công ty cứu hộ');
+      }
     } finally {
       setLoading(false);
     }

@@ -111,7 +111,7 @@ export default function VehicleListPage() {
                     </Box>
                   </Box>
                   <Chip
-                    label={vehicle.status === 'available' ? 'Sẵn sàng' : 'Bảo trì'}
+                    label={vehicle.status === 'available' ? 'Sẵn sàng' : 'Đang bận'}
                     size="small"
                     sx={{
                       bgcolor: vehicle.status === 'available' ? '#e8f5e9' : '#fff8e1',

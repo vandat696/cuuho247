@@ -286,10 +286,11 @@ export interface CanceledRescueRequestDetailResult {
 
 export interface RescueSearchState {
   formData: {
+    incident_type?: string;
     incident_type_label: string;
     description: string;
     location: RescueLocation | null;
-    locationManual: string;
+    locationManual?: string;
     images?: File[];
   };
   results: SearchCompaniesResult;

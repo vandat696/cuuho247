@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { IncidentType, RescueFormData, RescueFormErrors, RescueLocation } from '../types/rescue.type';
 import { customerRescueService } from '../services/customer-rescue.service';
 import { useCurrentLocation } from './useCurrentLocation';
+import { getRescueSearchCache, setRescueSearchCache } from '../utils/rescueSearchCache';
 
 export function useRescueRequest() {
   const navigate = useNavigate();
@@ -13,21 +14,50 @@ export function useRescueRequest() {
   const geo = useCurrentLocation();
 
   const [form, setForm] = useState<RescueFormData>(() => {
-    let initialLocation = null;
-    if (prefill?.location?.coordinates) {
-      initialLocation = {
-        lat: prefill.location.coordinates[1],
-        lng: prefill.location.coordinates[0],
-        address: prefill.address?.detail || 'Vị trí đã chọn trước đó',
+    // 1. Try to recover from location state prefill (e.g. from history page)
+    if (prefill) {
+      let initialLocation = null;
+      if (prefill.location?.coordinates) {
+        initialLocation = {
+          lat: prefill.location.coordinates[1],
+          lng: prefill.location.coordinates[0],
+          address: prefill.address?.detail || 'Vị trí đã chọn trước đó',
+        };
+      }
+      return {
+        incident_type: prefill.incident_type
+          ? { slug: prefill.incident_type, label: prefill.title || 'Sự cố xe', icon: '', description: '' }
+          : null,
+        description: prefill.description || '',
+        images: [],
+        location: initialLocation,
       };
     }
+
+    // 2. Try to recover from memory cache (e.g. navigating Back from search results)
+    const cachedState = getRescueSearchCache();
+    if (cachedState?.formData) {
+      return {
+        incident_type: cachedState.formData.incident_type
+          ? {
+              slug: cachedState.formData.incident_type,
+              label: cachedState.formData.incident_type_label,
+              icon: '',
+              description: '',
+            }
+          : null,
+        description: cachedState.formData.description || '',
+        images: cachedState.formData.images || [],
+        location: cachedState.formData.location || null,
+      };
+    }
+
+    // 3. Default empty form
     return {
-      incident_type: prefill?.incident_type
-        ? { slug: prefill.incident_type, label: prefill.title || 'Sự cố xe', icon: '', description: '' }
-        : null,
-      description: prefill?.description || '',
+      incident_type: null,
+      description: '',
       images: [],
-      location: initialLocation,
+      location: null,
     };
   });
 
@@ -116,17 +146,22 @@ export function useRescueRequest() {
 
       if (res.status === 'success') {
         toast.success(`Tìm thấy ${res.data.total} đơn vị cứu hộ`, { id: searchToast });
-        navigate('/rescue/search', {
-          state: {
-            formData: {
-              incident_type: form.incident_type?.slug,
-              incident_type_label: form.incident_type?.label ?? '',
-              description: form.description,
-              location: loc,
-              images: form.images,
-            },
-            results: res.data,
+
+        const nextState = {
+          formData: {
+            incident_type: form.incident_type?.slug,
+            incident_type_label: form.incident_type?.label ?? '',
+            description: form.description,
+            location: loc,
+            images: form.images,
           },
+          results: res.data,
+        };
+
+        setRescueSearchCache(nextState);
+
+        navigate('/rescue/search', {
+          state: nextState,
         });
       } else {
         toast.error('Dữ liệu không hợp lệ từ server', { id: searchToast });

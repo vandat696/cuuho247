@@ -8,7 +8,7 @@ import { vehicleRepository } from '@/modules/vehicle/vehicle.repository';
 import { mapIncidentTypesToCategories } from '@/shared/constants/incidentMapping';
 import type { CreateRequestData } from './interfaces/rescue.interface';
 
-const CANCELLABLE_STATUSES: RequestStatus[] = ['pending', 'accepted', 'in_progress'];
+const CANCELLABLE_STATUSES: RequestStatus[] = ['pending'];
 
 /**
  * RescueCustomerService: Xử lý nghiệp vụ Cứu hộ từ phía Khách hàng.

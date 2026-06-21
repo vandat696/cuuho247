@@ -374,7 +374,7 @@ export default function RescueRequestDetailPage() {
                 )}
               </InfoCard>
 
-              {status !== 'pending' && <VehiclePanel vehicle={request.vehicle} />}
+              {status !== 'pending' && request.vehicle && <VehiclePanel vehicle={request.vehicle} />}
 
               {status === 'pending' && (
                 <>

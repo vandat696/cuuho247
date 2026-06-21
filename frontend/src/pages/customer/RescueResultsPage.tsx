@@ -5,12 +5,13 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { SearchResultHeader } from '@/components/rescue-customer/SearchResultHeader';
 import { CompanyList } from '@/components/rescue-customer/CompanyList';
 import { RescueSearchState, CompanyResult } from '@/types/rescue.type';
+import { getRescueSearchCache } from '@/utils/rescueSearchCache';
 
 export default function RescueResultsPage() {
   const navigate = useNavigate();
-  const locationState = useLocation().state as RescueSearchState | null;
+  const locationState = (useLocation().state as RescueSearchState | null) || getRescueSearchCache();
 
-  // Guard: if user navigates here directly without state, redirect back
+  // Guard: if user navigates here directly without state and cache is empty, redirect back
   if (!locationState) {
     return (
       <MobileLayout>

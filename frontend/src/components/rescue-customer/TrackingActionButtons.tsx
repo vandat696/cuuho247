@@ -129,7 +129,7 @@ export const TrackingActionButtons = ({
         </Box>
       )}
 
-      {(status === 'pending' || status === 'accepted' || status === 'in_progress') && (
+      {status === 'pending' && (
         <Box>
           <CancelButton status={status} onCancel={onCancelClick} />
         </Box>
