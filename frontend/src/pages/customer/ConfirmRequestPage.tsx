@@ -6,7 +6,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Button } from '@/components/common/Button';
 import { ConfirmRequestCard } from '@/components/rescue-customer/ConfirmRequestCard';
-import { customerRescueService } from '@/services/customer-rescue.service';
+import { customerRescueService, CreateRequestPayload } from '@/services/customer-rescue.service';
 import { CompanyResult } from '@/types/rescue.type';
 import toast from 'react-hot-toast';
 
@@ -19,6 +19,7 @@ export default function ConfirmRequestPage() {
       incident_type_label?: string;
       description: string;
       location: { lat: number; lng: number; address: string } | null;
+      images?: File[];
     };
     company: CompanyResult;
   } | null;
@@ -48,21 +49,45 @@ export default function ConfirmRequestPage() {
   }
 
   const { formData, company } = locationState;
-  const customerPhone = localStorage.getItem('accountPhone') || 'Chưa có số điện thoại';
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      const payload = {
-        company_id: company._id,
-        description: formData.description,
-        location: {
-          lat: formData.location?.lat || 0,
-          lng: formData.location?.lng || 0,
-        },
-        address: formData.location?.address,
-        service_types: formData.incident_type ? [formData.incident_type] : undefined,
-      };
+      let payload: CreateRequestPayload | FormData;
+
+      if (formData.images && formData.images.length > 0) {
+        const formDataObj = new FormData();
+        formDataObj.append('company_id', company._id);
+        formDataObj.append('description', formData.description);
+        formDataObj.append(
+          'location',
+          JSON.stringify({
+            lat: formData.location?.lat || 0,
+            lng: formData.location?.lng || 0,
+          })
+        );
+        if (formData.location?.address) {
+          formDataObj.append('address', formData.location.address);
+        }
+        if (formData.incident_type) {
+          formDataObj.append('service_types', JSON.stringify([formData.incident_type]));
+        }
+        formData.images.forEach((image: File) => {
+          formDataObj.append('incident_photos', image);
+        });
+        payload = formDataObj;
+      } else {
+        payload = {
+          company_id: company._id,
+          description: formData.description,
+          location: {
+            lat: formData.location?.lat || 0,
+            lng: formData.location?.lng || 0,
+          },
+          address: formData.location?.address,
+          service_types: formData.incident_type ? [formData.incident_type] : undefined,
+        };
+      }
 
       const res = await customerRescueService.createRequest(payload);
 
@@ -85,7 +110,7 @@ export default function ConfirmRequestPage() {
           description={formData.description}
           locationText={formData.location?.address || 'Tọa độ GPS'}
           location={formData.location}
-          phone={customerPhone}
+          images={formData.images}
           company={{
             id: company._id,
             name: company.company_name,

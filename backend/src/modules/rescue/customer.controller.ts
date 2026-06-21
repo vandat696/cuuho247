@@ -26,6 +26,21 @@ class RescueCustomerController {
 
   async createRequest(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      if (typeof req.body.location === 'string') {
+        try {
+          req.body.location = JSON.parse(req.body.location);
+        } catch (e) {
+          // ignore
+        }
+      }
+      if (typeof req.body.service_types === 'string') {
+        try {
+          req.body.service_types = JSON.parse(req.body.service_types);
+        } catch (e) {
+          // ignore
+        }
+      }
+
       const value = validateSchema<any>(createRequestSchema, req.body, {
         abortEarly: false,
         customMessage: 'Dữ liệu không hợp lệ',

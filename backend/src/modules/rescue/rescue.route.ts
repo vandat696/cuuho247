@@ -42,7 +42,7 @@ router.use('/requests', authenticate, authorize(['customer']));
 router.get('/requests/my-requests', rescueCustomerController.getMyRequests);
 router.post(
   '/requests',
-  createUploader('rescue_requests').array('incident_photos', 5),
+  createUploader('rescue_requests').array('incident_photos', 6),
   rescueCustomerController.createRequest
 );
 router.patch('/requests/:id/cancel', rescueCustomerController.cancelRequest);

@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { ImagePreviewDialog } from '@/components/common/ImagePreviewDialog';
 import { Button } from '@/components/common/Button';
 import { MiniMap } from '@/components/location/MiniMap';
 import { formatPriceRange } from '@/utils/format';
@@ -22,7 +24,7 @@ interface ConfirmRequestCardProps {
     lat: number;
     lng: number;
   } | null;
-  phone: string;
+  images?: File[];
   company: CompanyData;
   onConfirm: () => void;
   onBack: () => void;
@@ -34,13 +36,14 @@ export function ConfirmRequestCard({
   description,
   locationText,
   location,
-  phone,
+  images,
   company,
   onConfirm,
   onBack,
   loading = false,
 }: ConfirmRequestCardProps) {
   const priceText = formatPriceRange(company.minPrice, company.maxPrice);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -125,10 +128,31 @@ export function ConfirmRequestCard({
           </Box>
         </Box>
 
-        <Box>
-          <Typography sx={{ fontSize: 13, color: '#64748b', mb: 0.5 }}>Số điện thoại</Typography>
-          <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{phone}</Typography>
-        </Box>
+        {images && images.length > 0 && (
+          <Box>
+            <Typography sx={{ fontSize: 13, color: '#64748b', mb: 0.5 }}>Ảnh sự cố</Typography>
+            <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+              {images.map((img, idx) => (
+                <Box
+                  key={idx}
+                  component="img"
+                  src={URL.createObjectURL(img)}
+                  alt={`Incident ${idx}`}
+                  onClick={() => setPreviewImage(URL.createObjectURL(img))}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    objectFit: 'cover',
+                    borderRadius: 1,
+                    flexShrink: 0,
+                    border: '1px solid #e2e8f0',
+                    cursor: 'pointer',
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
       </Box>
 
       {/* Company Info */}
@@ -202,6 +226,9 @@ export function ConfirmRequestCard({
           Quay lại
         </Button>
       </Box>
+
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog open={!!previewImage} imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </Box>
   );
 }

@@ -130,6 +130,7 @@ class RescueRepository {
     requestId: string,
     vehicleId: string,
     plateNumber: string,
+    vehicleType: string,
     etaMinutes: number,
     note?: string
   ): Promise<any | null> {
@@ -146,6 +147,7 @@ class RescueRepository {
           vehicle: {
             vehicle_id: new Types.ObjectId(vehicleId),
             plate_number: plateNumber,
+            vehicle_type: vehicleType,
           },
           eta_minutes: etaMinutes,
           accepted_at: acceptedAt,

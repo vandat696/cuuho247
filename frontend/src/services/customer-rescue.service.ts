@@ -31,6 +31,7 @@ export interface CustomerRescueRequest {
   vehicle?: {
     vehicle_id: string;
     plate_number?: string;
+    vehicle_type?: string;
   };
   location?: {
     coordinates: [number, number]; // [lng, lat]
@@ -39,6 +40,7 @@ export interface CustomerRescueRequest {
   address?: {
     detail?: string;
   };
+  incident_photos?: string[];
   status?: CustomerRescueRequestStatus;
   eta_minutes?: number;
   created_at?: string;
@@ -78,7 +80,7 @@ export const customerRescueService = {
     return response.data;
   },
 
-  createRequest: async (payload: CreateRequestPayload) => {
+  createRequest: async (payload: CreateRequestPayload | FormData) => {
     const response = await axiosInstance.post('/rescue/requests', payload);
     return response.data;
   },

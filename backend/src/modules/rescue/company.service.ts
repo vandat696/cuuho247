@@ -137,6 +137,7 @@ class CompanyRescueRequestService {
       requestId,
       data.vehicle_id,
       vehicle.plate_number,
+      vehicle.vehicle_type,
       data.eta_minutes,
       data.note || undefined
     );
@@ -358,9 +359,10 @@ class CompanyRescueRequestService {
     }
 
     const companyIds = companies.map((company) => (company._id as any).toString());
-    const [displayServices, matchingServices] = await Promise.all([
+    const [displayServices, matchingServices, companiesWithVehicles] = await Promise.all([
       serviceRepository.findByCompanyIdsAndCategory(companyIds),
       categoryId ? serviceRepository.findByCompanyIdsAndCategory(companyIds, categoryId) : Promise.resolve([]),
+      vehicleRepository.getCompanyIdsWithAvailableVehicles(companyIds),
     ]);
     const servicesByCompany = new Map<string, string[]>();
     const pricesByCompany = new Map<string, number[]>();
@@ -383,9 +385,14 @@ class CompanyRescueRequestService {
       pricesByCompany.get(companyId)!.push(service.price);
     }
 
-    const resultCompanies = categoryId
-      ? companies.filter((company) => matchingCompanyIds.has((company._id as any).toString()))
-      : companies;
+    const companiesWithAvailableVehiclesSet = new Set(companiesWithVehicles);
+
+    const resultCompanies = companies.filter((company) => {
+      const id = (company._id as any).toString();
+      if (!companiesWithAvailableVehiclesSet.has(id)) return false;
+      if (categoryId && !matchingCompanyIds.has(id)) return false;
+      return true;
+    });
 
     return resultCompanies.map((company) => {
       const companyId = (company._id as any).toString();
@@ -433,10 +440,12 @@ class CompanyRescueRequestService {
       status: request.status,
       payment: request.payment,
       user_id: request.user_id?._id ? request.user_id._id.toString() : request.user_id?.toString(),
-      vehicle: {
-        vehicle_type: vehicle?.vehicle_type || 'Xe cứu hộ',
-        plate_number: request.vehicle?.plate_number || vehicle?.plate_number || 'Chưa có biển số',
-      },
+      vehicle: vehicle
+        ? {
+            vehicle_type: vehicle.vehicle_type || request.vehicle?.vehicle_type || 'Xe cứu hộ',
+            plate_number: vehicle.plate_number || request.vehicle?.plate_number || 'Chưa có biển số',
+          }
+        : null,
     } as ActiveRescueRequestResult;
   }
 
